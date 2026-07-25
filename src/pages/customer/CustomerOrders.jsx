@@ -273,9 +273,15 @@ export default function CustomerOrders({ onOpenAuth }) {
 
             const pin = getOrderPin(order);
             const orderIdStr = getOrderId(order);
-            const canCustomerCancel = (order.status === 'pending' || order.status === 'preparing') && order.status !== 'cancelled';
+            const isPaidOnline = order.payment_status === 'paid' || (order.payment_method || '').toLowerCase().includes('upi') || (order.payment_method || '').toLowerCase().includes('razorpay');
+            const isCashOrder = (order.payment_method || '').toLowerCase().includes('cash') || order.payment_status !== 'paid';
+
+            // Customers can ONLY cancel CASH orders when status is strictly 'pending' (before cooking starts)
+            const canCustomerCancel = isCashOrder && !isPaidOnline && order.status === 'pending';
+
             const cancellationReasonText = getCancellationReason(order);
             const cleanUserNotes = getUserSpecialInstructions(order.special_instructions);
+
 
             return (
               <div
@@ -411,13 +417,23 @@ export default function CustomerOrders({ onOpenAuth }) {
                         className="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer active:scale-95"
                       >
                         <XCircle className="w-4 h-4 text-red-600" />
-                        <span>Cancel My Order</span>
+                        <span>Cancel Cash Order</span>
                       </button>
                     ) : order.status !== 'cancelled' ? (
-                      <p className="text-[10px] text-slate-400 font-bold text-center italic">
-                        🔒 Food preparation started or completed. Order cannot be cancelled.
-                      </p>
+                      isPaidOnline ? (
+                        <div className="p-3 bg-slate-100/90 border border-slate-200 rounded-xl text-center text-[11px] text-slate-600 font-bold space-y-0.5">
+                          <p>🔒 Online / UPI paid orders cannot be self-cancelled.</p>
+                          <p className="text-[10px] text-slate-500 font-medium">
+                            Contact Canteen Counter (<a href="tel:+919244217287" className="text-indigo-600 font-extrabold hover:underline">+91 9244217287</a>) for assistance.
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-slate-400 font-bold text-center italic">
+                          🔒 Food preparation started or completed. Order cannot be cancelled.
+                        </p>
+                      )
                     ) : null}
+
 
                     {/* Progress Bar Timeline */}
                     {['pending', 'preparing', 'ready', 'completed'].includes(order.status) && (
