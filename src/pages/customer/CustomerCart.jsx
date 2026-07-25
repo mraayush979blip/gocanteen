@@ -88,7 +88,10 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     discountPercent = Number(appliedPromo.discount_percent || appliedPromo.discount || 0);
   }
   const discountAmt = Math.round((subtotal * discountPercent) / 100);
-  const finalPayableAmount = Math.max(0, subtotal - discountAmt);
+  const amountAfterDiscount = Math.max(0, subtotal - discountAmt);
+  const isOnlinePayment = paymentMethod === 'razorpay';
+  const paymentFee = isOnlinePayment ? Math.round(amountAfterDiscount * 0.02) : 0;
+  const finalPayableAmount = amountAfterDiscount + paymentFee;
 
   const handleApplyPromo = async (e) => {
     if (e) e.preventDefault();
@@ -727,6 +730,12 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                     <div className="flex justify-between text-emerald-700 font-bold">
                       <span>Coupon ({appliedPromo.code})</span>
                       <span>-₹{discountAmt}</span>
+                    </div>
+                  )}
+                  {isOnlinePayment && paymentFee > 0 && (
+                    <div className="flex justify-between text-amber-700 font-semibold text-[11px]">
+                      <span>Online Payment Charge (2% Razorpay/UPI)</span>
+                      <span>+₹{paymentFee}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-base font-black text-slate-900 pt-1 border-t border-slate-100">
