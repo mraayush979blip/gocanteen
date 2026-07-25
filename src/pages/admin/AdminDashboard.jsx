@@ -404,7 +404,15 @@ export default function AdminDashboard() {
                   const pin = getOrderPin(order);
 
                   return (
-                    <tr key={order.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr
+                      key={order.id}
+                      className={`transition-colors ${
+                        order.status === 'cancelled'
+                          ? 'bg-red-50/70 hover:bg-red-100/70 border-l-4 border-l-red-500'
+                          : 'hover:bg-slate-50/80'
+                      }`}
+                    >
+
                       {/* Token, Order ID & PIN */}
                       <td className="p-3.5 font-black text-slate-900">
                         <div>#{order.token_number || order.id.slice(0, 4)}</div>

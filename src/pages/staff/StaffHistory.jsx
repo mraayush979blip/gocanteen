@@ -206,7 +206,15 @@ export default function StaffHistory() {
                   }
 
                   return (
-                    <tr key={order.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr
+                      key={order.id}
+                      className={`transition-colors ${
+                        isCancelled
+                          ? 'bg-red-50/70 hover:bg-red-100/70 border-l-4 border-l-red-500'
+                          : 'hover:bg-slate-50/80'
+                      }`}
+                    >
+
                       <td className="p-3.5 font-black text-slate-900">
                         <div>#{order.token_number || order.id.slice(0, 6)}</div>
                         {pin && (

@@ -563,10 +563,13 @@ export default function AdminOrders() {
             return (
               <div
                 key={order.id}
-                className={`bg-white border rounded-2xl transition-all shadow-2xs overflow-hidden ${
-                  order.status === 'cancelled' ? 'border-red-200 bg-red-50/20' : 'border-slate-200'
+                className={`border rounded-2xl transition-all shadow-2xs overflow-hidden ${
+                  order.status === 'cancelled'
+                    ? 'border-red-300 bg-red-50/70 border-l-4 border-l-red-500'
+                    : 'bg-white border-slate-200'
                 }`}
               >
+
                 {/* COMPACT LINEAR ROW */}
                 <div
                   onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
