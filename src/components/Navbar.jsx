@@ -219,26 +219,6 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 )}
               </button>
 
-              {/* Report Bug / Feedback Button (Desktop) */}
-              <button
-                onClick={onOpenReportBug}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200/80 text-amber-900 font-extrabold text-xs transition-all cursor-pointer shadow-2xs shrink-0"
-                title="Report Bug or Send Suggestions to gocanteen8@gmail.com & mraayush979@gmail.com"
-              >
-                <Bug className="w-3.5 h-3.5 text-amber-600" />
-                <span>Report Bug</span>
-              </button>
-
-              {/* About Developer Button (Desktop) */}
-              <button
-                onClick={onOpenAboutDev}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-indigo-300 font-extrabold text-xs transition-all cursor-pointer shadow-2xs shrink-0"
-                title="About Developer & Credits"
-              >
-                <Code className="w-3.5 h-3.5 text-indigo-400" />
-                <span>About Dev</span>
-              </button>
-              
               {/* Language Selector for Staff / Admin */}
               {(activePortal === 'staff' || activePortal === 'admin') && (
                 <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-xl border border-slate-200 text-xs font-bold shrink-0">
@@ -254,8 +234,6 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                   </select>
                 </div>
               )}
-
-
 
               {/* Cart Button */}
               {activePortal === 'customer' && (
@@ -299,21 +277,22 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 </button>
               )}
 
-              {/* Mobile Hamburger Menu */}
+              {/* 3-Bar Menu Toggle Button (Desktop & Mobile) */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 border border-slate-200"
+                className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                title="More Options & Menu"
               >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
+                {mobileMenuOpen ? <X className="w-5 h-5 font-bold" /> : <MenuIcon className="w-5 h-5 font-bold" />}
               </button>
             </div>
 
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
+        {/* Three-Bar Dropdown Menu (Desktop & Mobile) */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-100 bg-white p-4 space-y-3 animate-fade-in shadow-xl text-slate-900">
+          <div className="border-t border-slate-100 bg-white p-4 space-y-3 animate-fade-in shadow-xl text-slate-900">
             <div className="grid grid-cols-1 gap-1">
               {activePortal === 'customer' && (
                 <>
