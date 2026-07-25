@@ -14,7 +14,6 @@ export default function CustomerMenu({ onOpenCart }) {
   const [offers, setOffers] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [vegOnly, setVegOnly] = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'price-low' | 'price-high'
   const [loading, setLoading] = useState(true);
@@ -55,8 +54,7 @@ export default function CustomerMenu({ onOpenCart }) {
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesCategory = activeCategory === 'all' || item.category_id === activeCategory;
-      const matchesVeg = !vegOnly || item.is_veg;
-      return matchesSearch && matchesCategory && matchesVeg;
+      return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
       if (sortBy === 'price-low') return Number(a.price) - Number(b.price);
@@ -154,21 +152,6 @@ export default function CustomerMenu({ onOpenCart }) {
           {/* Filter Controls Row */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none shrink-0">
             
-            {/* Veg Only Toggle Button */}
-            <button
-              onClick={() => setVegOnly(!vegOnly)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 transition-all border shrink-0 ${
-                vegOnly
-                  ? 'bg-emerald-50 text-emerald-900 border-emerald-600 shadow-2xs'
-                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              <div className="w-3.5 h-3.5 rounded-xs border border-emerald-600 bg-white flex items-center justify-center p-0.5 shadow-2xs">
-                <div className="w-full h-full rounded-full bg-emerald-600" />
-              </div>
-              <span>Veg Only</span>
-            </button>
-
             {/* Sort Dropdown */}
             <select
               value={sortBy}
@@ -372,7 +355,7 @@ export default function CustomerMenu({ onOpenCart }) {
                 Try searching for a different dish or reset your Veg/Category filters.
               </p>
               <button
-                onClick={() => { setSearchQuery(''); setVegOnly(false); setActiveCategory('all'); }}
+                onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}
                 className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-extrabold text-xs shadow-sm hover:bg-emerald-700 transition-colors"
               >
                 Reset All Filters
