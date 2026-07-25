@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
@@ -10,14 +11,61 @@ import {
 
 export default function CustomerMenu({ onOpenCart }) {
   const { cart, addToCart, updateCartQty } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const urlQuery = searchParams.get('q') || '';
+  const urlCat = searchParams.get('category') || 'all';
+
   const [categories, setCategories] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [offers, setOffers] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState(urlCat);
+  const [searchQuery, setSearchQuery] = useState(urlQuery);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'price-low' | 'price-high'
   const [loading, setLoading] = useState(true);
+
+  // Sync state when URL params change externally
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+    setActiveCategory(searchParams.get('category') || 'all');
+  }, [searchParams]);
+
+  // Update URL params when search query or category changes
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
+    const params = new URLSearchParams(searchParams);
+    if (val.trim()) {
+      params.set('q', val);
+    } else {
+      params.delete('q');
+    }
+    setSearchParams(params, { replace: true });
+  };
+
+  const handleCategoryChange = (catId) => {
+    setActiveCategory(catId);
+    const params = new URLSearchParams(searchParams);
+    if (catId && catId !== 'all') {
+      params.set('category', catId);
+    } else {
+      params.delete('category');
+    }
+    setSearchParams(params, { replace: true });
+  };
+
+  // Dynamic Google SEO Document Title
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      document.title = `Search "${searchQuery}" — Go Canteen Menu`;
+    } else if (activeCategory !== 'all') {
+      const catObj = categories.find(c => c.id === activeCategory);
+      document.title = `${catObj ? catObj.name : 'Category'} — Go Canteen Menu`;
+    } else {
+      document.title = 'Go Canteen — Fresh Campus Food Ordering & Express Counter Pickup';
+    }
+  }, [searchQuery, activeCategory, categories]);
+
 
   // Framer-motion Flying Add-to-Cart Particles State
   const [flyingItems, setFlyingItems] = useState([]);
@@ -145,24 +193,57 @@ export default function CustomerMenu({ onOpenCart }) {
         </div>
       </div>
 
-      {/* 2. Modern Search & Multi-Filter Control Bar */}
+      {/* Google Search Engine Schema.org ItemList JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": searchQuery ? `Search results for "${searchQuery}"` : "Go Canteen Food Menu",
+            "description": "Order fresh fast food, wraps, beverages, rolls, and snacks online from Go Canteen.",
+            "itemListElement": filteredInventory.map((item, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "MenuItem",
+                "name": item.name,
+                "description": item.description || `Fresh ${item.name} at Go Canteen`,
+                "image": item.image_url || "https://www.gocanteen.in/aayush-profile.jpg",
+                "offers": {
+                  "@type": "Offer",
+                  "price": item.price,
+                  "priceCurrency": "INR",
+                  "availability": item.is_available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                }
+              }
+            }))
+          })
+        }}
+      />
+
+      {/* 2. Modern Search & Multi-Filter Control Bar with Google SEO Integration */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-2xs space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <form role="search" onSubmit={(e) => e.preventDefault()} className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           
           {/* Search Input */}
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
-              type="text"
+              type="search"
+              name="q"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search snacks, meals, cold drinks, combos..."
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search snacks, meals, cold drinks, combos (e.g. pizza, wrap)..."
+              aria-label="Search canteen food menu"
+              autoComplete="off"
               className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold focus:outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600/20 transition-all"
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-700 font-bold bg-slate-200 px-1.5 py-0.5 rounded-md"
+                type="button"
+                onClick={() => handleSearchChange('')}
+                className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-700 font-bold bg-slate-200 px-1.5 py-0.5 rounded-md cursor-pointer"
               >
                 Clear
               </button>
@@ -186,6 +267,7 @@ export default function CustomerMenu({ onOpenCart }) {
             {/* View Mode Toggle (Grid vs Compact List) */}
             <div className="hidden sm:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
               <button
+                type="button"
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-400 hover:text-slate-700'}`}
                 title="Grid View"
@@ -193,6 +275,7 @@ export default function CustomerMenu({ onOpenCart }) {
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-400 hover:text-slate-700'}`}
                 title="List View"
@@ -202,15 +285,17 @@ export default function CustomerMenu({ onOpenCart }) {
             </div>
 
           </div>
-        </div>
+        </form>
 
-        {/* 3. Sleek Horizontal Category Bar (Swiggy / Blinkit Desktop Style) */}
-        <div className="pt-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {/* 3. Sleek Horizontal Category Bar (SEO Accessible Navigation) */}
+        <nav aria-label="Food Categories" className="pt-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           
           {/* All Category Pill */}
           <button
-            onClick={() => setActiveCategory('all')}
-            className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 ${
+            type="button"
+            onClick={() => handleCategoryChange('all')}
+            aria-selected={activeCategory === 'all'}
+            className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
               activeCategory === 'all'
                 ? 'bg-slate-900 text-white shadow-md'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
@@ -225,8 +310,10 @@ export default function CustomerMenu({ onOpenCart }) {
           {/* Hot Deals Category Pill */}
           {offers.length > 0 && (
             <button
-              onClick={() => setActiveCategory('offers')}
-              className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 ${
+              type="button"
+              onClick={() => handleCategoryChange('offers')}
+              aria-selected={activeCategory === 'offers'}
+              className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeCategory === 'offers'
                   ? 'bg-amber-500 text-slate-950 shadow-md'
                   : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
@@ -246,8 +333,10 @@ export default function CustomerMenu({ onOpenCart }) {
             return (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 ${
+                type="button"
+                onClick={() => handleCategoryChange(cat.id)}
+                aria-selected={isSel}
+                className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
                   isSel
                     ? 'bg-emerald-600 text-white shadow-md'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
@@ -260,9 +349,10 @@ export default function CustomerMenu({ onOpenCart }) {
               </button>
             );
           })}
-        </div>
+        </nav>
 
       </div>
+
 
       {/* 4. Special Combo Offers Section */}
       {(activeCategory === 'all' || activeCategory === 'offers') && offers.length > 0 && (
