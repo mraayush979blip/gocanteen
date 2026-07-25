@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { 
-  X, Trash2, Plus, Minus, Ticket, Smartphone, DollarSign, ArrowRight, Loader2, Sparkles, CheckCircle2, LogIn, KeyRound, CreditCard, ShieldCheck, Save, Bookmark
+  X, Trash2, Plus, Minus, Ticket, Smartphone, DollarSign, ArrowRight, Loader2, Sparkles, CheckCircle2, LogIn, KeyRound, CreditCard, ShieldCheck, Save, Bookmark, Info, Calendar, ChevronRight, AlertCircle, Copy, Tag, Check, Gift
 } from 'lucide-react';
 
 export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlaced }) {
@@ -22,11 +22,35 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   const [promoError, setPromoError] = useState('');
   const [promoSuccess, setPromoSuccess] = useState('');
 
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [loadingCoupons, setLoadingCoupons] = useState(false);
+  const [showCouponsModal, setShowCouponsModal] = useState(false);
+
   const [placingOrder, setPlacingOrder] = useState(false);
   const [confirmedToken, setConfirmedToken] = useState(null);
   const [confirmedCode, setConfirmedCode] = useState(null);
 
-  // Pre-fill customer name & phone from profile/session/Supabase
+  // Fetch active available coupons
+  const fetchAvailableCoupons = async () => {
+    setLoadingCoupons(true);
+    try {
+      const { data, error } = await supabase
+        .from('promo_codes')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setAvailableCoupons(data);
+      }
+    } catch (err) {
+      console.error('Error fetching available coupons:', err);
+    } finally {
+      setLoadingCoupons(false);
+    }
+  };
+
+  // Pre-fill customer name & phone from profile/session/Supabase & fetch coupons
   useEffect(() => {
     const fetchFreshProfile = async () => {
       if (!session?.user?.id) return;
@@ -52,6 +76,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       if (profile?.phone) setPhone(profile.phone);
 
       fetchFreshProfile();
+      fetchAvailableCoupons();
     }
   }, [isOpen, session, profile]);
 
@@ -66,7 +91,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   const finalPayableAmount = Math.max(0, subtotal - discountAmt);
 
   const handleApplyPromo = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setPromoError('');
     setPromoSuccess('');
 
@@ -102,10 +127,49 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       }
 
       setAppliedPromo(data);
-      setPromoSuccess(`✓ Coupon Applied: ${data.discount_percent}% OFF!`);
+      const savings = Math.round((subtotal * Number(data.discount_percent || 0)) / 100);
+      setPromoSuccess(`✓ Coupon Applied: ${data.discount_percent}% OFF! (Saved ₹${savings})`);
+      showToast(`🎉 Coupon ${data.code} applied! Saved ₹${savings}`);
     } catch (err) {
       setPromoError('Error verifying coupon');
     }
+  };
+
+  const handleApplySelectedPromo = (coupon) => {
+    setPromoError('');
+    setPromoSuccess('');
+
+    if (coupon.valid_till && new Date(coupon.valid_till) < new Date()) {
+      showToast(`Coupon ${coupon.code} has expired`, true);
+      return;
+    }
+
+    const minOrder = Number(coupon.min_order_amount || 0);
+    if (minOrder > 0 && subtotal < minOrder) {
+      const diff = minOrder - subtotal;
+      showToast(`Add items worth ₹${diff} more to apply ${coupon.code}`, true);
+      return;
+    }
+
+    if (coupon.max_uses && coupon.current_uses >= coupon.max_uses) {
+      showToast(`Coupon ${coupon.code} usage limit reached`, true);
+      return;
+    }
+
+    setAppliedPromo(coupon);
+    setPromoCodeInput(coupon.code);
+    const savings = Math.round((subtotal * Number(coupon.discount_percent || 0)) / 100);
+    setPromoSuccess(`✓ Coupon Applied: ${coupon.discount_percent}% OFF! (Saved ₹${savings})`);
+    showToast(`🎉 Coupon ${coupon.code} applied! Saved ₹${savings}`);
+    setShowCouponsModal(false);
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoCodeInput('');
+    setPromoSuccess('');
+    setPromoError('');
+    showToast('Coupon removed');
   };
 
   const handleSaveToProfile = async () => {
@@ -450,27 +514,110 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
               {cart.length > 0 && (
                 <>
-                  {/* Coupon Form */}
-                  <form onSubmit={handleApplyPromo} className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">Apply Promo Coupon</label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Ticket className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                        <input
-                          type="text"
-                          value={promoCodeInput}
-                          onChange={(e) => setPromoCodeInput(e.target.value)}
-                          placeholder="e.g. WELCOME10"
-                          className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs uppercase focus:outline-none focus:border-emerald-600 font-bold"
-                        />
+                  {/* Coupon Section */}
+                  <div className="space-y-2">
+                    {/* IF A COUPON IS ALREADY APPLIED */}
+                    {appliedPromo ? (
+                      <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3 flex items-center justify-between shadow-2xs">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-sm">
+                            🏷️
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-black text-emerald-950 uppercase tracking-wider">{appliedPromo.code}</span>
+                              <span className="text-[10px] font-extrabold bg-emerald-600 text-white px-1.5 py-0.2 rounded">
+                                {appliedPromo.discount_percent || appliedPromo.discount}% OFF
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-emerald-700 font-bold">
+                              🎉 Saved ₹{discountAmt} on this order!
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemovePromo}
+                          className="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 rounded-xl transition-all"
+                        >
+                          Remove
+                        </button>
                       </div>
-                      <button type="submit" className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl">
-                        Apply
-                      </button>
-                    </div>
-                    {promoError && <p className="text-[11px] text-red-600 font-bold">{promoError}</p>}
-                    {promoSuccess && <p className="text-[11px] text-emerald-600 font-bold">{promoSuccess}</p>}
-                  </form>
+                    ) : (
+                      <>
+                        {/* COUPON INPUT FORM & AVAILABLE COUPONS SHORTCUT */}
+                        <form onSubmit={handleApplyPromo} className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-xs font-bold text-slate-700">Apply Promo Coupon</label>
+                            {availableCoupons.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  fetchAvailableCoupons();
+                                  setShowCouponsModal(true);
+                                }}
+                                className="text-[11px] font-black text-purple-700 hover:text-purple-800 flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-xl border border-purple-200 transition-all"
+                              >
+                                <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                                <span>View Coupons ({availableCoupons.length})</span>
+                                <ChevronRight className="w-3.5 h-3.5 text-purple-600" />
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="flex gap-2">
+                            <div className="relative flex-1">
+                              <Ticket className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                value={promoCodeInput}
+                                onChange={(e) => setPromoCodeInput(e.target.value)}
+                                placeholder="e.g. WELCOME10"
+                                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs uppercase focus:outline-none focus:border-emerald-600 font-bold"
+                              />
+                            </div>
+                            <button type="submit" className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl">
+                              Apply
+                            </button>
+                          </div>
+                          {promoError && <p className="text-[11px] text-red-600 font-bold">{promoError}</p>}
+                          {promoSuccess && <p className="text-[11px] text-emerald-600 font-bold">{promoSuccess}</p>}
+                        </form>
+
+                        {/* BLINKIT-STYLE COUPON BANNER SHORTCUT */}
+                        {availableCoupons.length > 0 && (
+                          <div
+                            onClick={() => {
+                              fetchAvailableCoupons();
+                              setShowCouponsModal(true);
+                            }}
+                            className="cursor-pointer bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 text-white p-3 rounded-2xl flex items-center justify-between border border-purple-500/30 shadow-sm group transition-all hover:scale-[1.01]"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-xl bg-yellow-400 text-slate-950 flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                                🎟️
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs font-black text-yellow-300">Save extra with Coupons</span>
+                                  <span className="text-[9px] font-black bg-yellow-400 text-slate-950 px-1.5 py-0.2 rounded-full uppercase">
+                                    {availableCoupons.length} Deals
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-purple-200 font-medium">
+                                  Tap to see discount codes & min order conditions
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs font-bold text-yellow-300 group-hover:translate-x-1 transition-transform">
+                              <span>See All</span>
+                              <ChevronRight className="w-4 h-4" />
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
 
                   {/* Customer Details Form */}
                   <div className="space-y-3 pt-3 border-t border-slate-100">
@@ -655,6 +802,191 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         )}
 
       </div>
+
+      {/* BLINKIT-STYLE AVAILABLE COUPONS OVERLAY DRAWER */}
+      {showCouponsModal && (
+        <div className="absolute inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs animate-fade-in text-slate-900">
+          <div className="bg-slate-50 w-full h-full flex flex-col shadow-2xl relative animate-slide-in-right">
+            
+            {/* Header */}
+            <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-black text-lg">
+                  🎟️
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900">Available Coupons & Offers</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Select best coupon to apply to your order</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCouponsModal(false)}
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Cart Subtotal Banner */}
+            <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between text-xs font-bold shadow-inner">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-yellow-300" />
+                <span>Cart Subtotal: <b className="text-yellow-300 text-sm">₹{subtotal}</b></span>
+              </div>
+              {appliedPromo && (
+                <span className="bg-emerald-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full border border-emerald-400">
+                  {appliedPromo.code} Applied ✓
+                </span>
+              )}
+            </div>
+
+            {/* Coupons List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {loadingCoupons ? (
+                <div className="text-center py-12 space-y-2">
+                  <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
+                  <p className="text-xs text-slate-500 font-bold">Loading available coupons...</p>
+                </div>
+              ) : availableCoupons.length === 0 ? (
+                <div className="text-center py-16 space-y-2">
+                  <span className="text-4xl">🎟️</span>
+                  <p className="text-xs text-slate-500 font-bold">No promo coupons available right now.</p>
+                </div>
+              ) : (
+                availableCoupons.map((coupon) => {
+                  const minOrder = Number(coupon.min_order_amount || 0);
+                  const qualifies = subtotal >= minOrder;
+                  const shortBy = minOrder - subtotal;
+                  const discountPercent = Number(coupon.discount_percent || 0);
+                  const calculatedSavings = Math.round((subtotal * discountPercent) / 100);
+                  const isApplied = appliedPromo?.id === coupon.id || appliedPromo?.code === coupon.code;
+                  const isExpired = coupon.valid_till && new Date(coupon.valid_till) < new Date();
+
+                  return (
+                    <div
+                      key={coupon.id}
+                      className={`bg-white border rounded-2xl overflow-hidden shadow-xs transition-all relative ${
+                        isApplied
+                          ? 'border-emerald-500 ring-2 ring-emerald-500/20'
+                          : isExpired
+                          ? 'border-slate-200 opacity-60'
+                          : qualifies
+                          ? 'border-slate-200 hover:border-emerald-400'
+                          : 'border-amber-200 bg-amber-50/10'
+                      }`}
+                    >
+                      {/* Top Accent Ribbon */}
+                      <div className={`h-1.5 w-full ${isApplied ? 'bg-emerald-500' : qualifies ? 'bg-purple-600' : 'bg-amber-400'}`} />
+
+                      <div className="p-4 space-y-3">
+                        
+                        {/* Top Row: Discount Tag + Code + Apply Button */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="bg-emerald-700 text-white font-black text-[11px] px-2 py-0.5 rounded-md uppercase tracking-wide">
+                                FLAT {discountPercent}% OFF
+                              </span>
+                              <span className="border-2 border-dashed border-emerald-600 text-emerald-950 font-black text-xs px-2.5 py-0.5 rounded-lg font-mono bg-emerald-50">
+                                {coupon.code}
+                              </span>
+                            </div>
+                            
+                            {qualifies && calculatedSavings > 0 && (
+                              <p className="text-xs font-black text-emerald-700 flex items-center gap-1 pt-0.5">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                <span>Save ₹{calculatedSavings} on this order!</span>
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Action Button */}
+                          {isApplied ? (
+                            <button
+                              type="button"
+                              onClick={handleRemovePromo}
+                              className="px-3 py-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 font-black text-xs rounded-xl flex items-center gap-1 hover:bg-emerald-200 transition-all shrink-0"
+                            >
+                              <Check className="w-3.5 h-3.5" /> APPLIED
+                            </button>
+                          ) : isExpired ? (
+                            <span className="px-3 py-1.5 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl shrink-0">
+                              EXPIRED
+                            </span>
+                          ) : qualifies ? (
+                            <button
+                              type="button"
+                              onClick={() => handleApplySelectedPromo(coupon)}
+                              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-xs transition-all active:scale-95 shrink-0"
+                            >
+                              APPLY
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled
+                              className="px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] rounded-xl shrink-0 cursor-not-allowed"
+                            >
+                              ADD ₹{shortBy} MORE
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Description */}
+                        {coupon.description && (
+                          <p className="text-xs font-semibold text-slate-700 leading-snug">
+                            {coupon.description}
+                          </p>
+                        )}
+
+                        {/* Dynamic min-order progress warning */}
+                        {!qualifies && !isExpired && (
+                          <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-center gap-2 text-xs text-amber-950 font-bold">
+                            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                            <span>Add items worth <b className="text-amber-900 underline font-black">₹{shortBy}</b> more to unlock this coupon!</span>
+                          </div>
+                        )}
+
+                        {/* Terms & Conditions Section (Blinkit Style) */}
+                        <div className="pt-2 border-t border-slate-100 space-y-2">
+                          <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider block">
+                            Terms & Conditions
+                          </span>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-700 font-medium">
+                            
+                            {/* Min Order Condition */}
+                            <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                              <Tag className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                              <span>Min Order: <b className="text-slate-900 font-bold">₹{minOrder}</b></span>
+                            </div>
+
+                            {/* Validity Date Condition */}
+                            <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                              <Calendar className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                              <span>
+                                {coupon.valid_till
+                                  ? `Valid till ${new Date(coupon.valid_till).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                                  : 'No Expiry Date'}
+                              </span>
+                            </div>
+
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
-  );
+  </div>
+);
 }
+
