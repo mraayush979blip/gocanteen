@@ -85,6 +85,25 @@
       }
     }
     </script>
+
+    <!-- Google WebSite & Search Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Go Canteen",
+      "alternateName": ["GoCanteen", "Go Canteen India"],
+      "url": "https://www.gocanteen.in/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://www.gocanteen.in/#/menu?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body class="bg-slate-50 text-slate-900 antialiased font-['Plus_Jakarta_Sans',sans-serif]">
     <div id="root"></div>
