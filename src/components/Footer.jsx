@@ -130,7 +130,7 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
             <span>•</span>
             <button onClick={onOpenAboutDev} className="hover:text-indigo-400 font-semibold text-indigo-300">About Developer</button>
             <span>•</span>
-            <button onClick={() => navigate('/privacy')} className="hover:text-white">Privacy</button>tton>
+            <button onClick={() => navigate('/privacy')} className="hover:text-white">Privacy</button>
             <button onClick={() => navigate('/terms')} className="hover:text-white">Terms</button>
             <button onClick={() => navigate('/refund')} className="hover:text-white">Refunds</button>
             <button onClick={() => navigate('/contact')} className="hover:text-white">Contact</button>
