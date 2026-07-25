@@ -68,15 +68,10 @@ export default function AdminOrders() {
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     const targetOrder = orders.find(o => o.id === orderId);
+    if (!targetOrder) return;
 
     if (newStatus === 'cancelled') {
       setCancelModalOrder(targetOrder);
-      return;
-    }
-
-    if (newStatus !== 'cancelled' && targetOrder && targetOrder.payment_status !== 'paid') {
-      setPayModalOrder(targetOrder);
-      setPayModalTargetStatus(newStatus);
       return;
     }
 
@@ -91,12 +86,14 @@ export default function AdminOrders() {
         .eq('id', orderId);
 
       if (error) throw error;
-      showToast(`Order status updated to ${newStatus.toUpperCase()}`);
+      showToast(`✓ Order status updated to ${newStatus.toUpperCase()}`);
       fetchOrders();
     } catch (err) {
+      console.error('Update status error:', err);
       showToast('Failed to update status: ' + err.message, true);
     }
   };
+
 
   const handleConfirmCancellation = async (cancelReason) => {
     if (!cancelModalOrder) return;
@@ -321,19 +318,24 @@ export default function AdminOrders() {
 
   filteredOrders.forEach(o => {
     if (o.status !== 'cancelled') {
-      const { grossSale, couponDiscount, netPayable } = getOrderFinancials(o);
-      totalGrossSales += grossSale;
-      totalCouponDiscounts += couponDiscount;
-      totalNetSales += netPayable;
+      const { subtotal, discount, customerPaid } = getOrderFinancials(o);
+      const gross = Number(subtotal) || 0;
+      const disc = Number(discount) || 0;
+      const net = Number(customerPaid) || 0;
+
+      totalGrossSales += gross;
+      totalCouponDiscounts += disc;
+      totalNetSales += net;
 
       const pMethod = (o.payment_method || '').toLowerCase();
       if (pMethod.includes('cash')) {
-        totalCashSales += netPayable;
+        totalCashSales += net;
       } else {
-        totalUpiSales += netPayable;
+        totalUpiSales += net;
       }
     }
   });
+
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 text-slate-900">
@@ -599,14 +601,16 @@ export default function AdminOrders() {
                   <div className="flex items-center gap-2 min-w-[170px]">
                     <span className="text-sm font-black text-slate-900">₹{customerPaid}</span>
                     <button
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleTogglePaymentStatus(order.id, order.payment_status);
                       }}
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border transition-all ${
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border transition-all cursor-pointer ${
                         order.payment_status === 'paid'
-                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                          : 'bg-red-100 text-red-800 border-red-300'
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200'
+                          : 'bg-red-100 text-red-800 border-red-300 hover:bg-red-200'
                       }`}
                     >
                       {order.payment_status === 'paid' ? 'PAID ✓' : 'UNPAID ✕'} ({order.payment_method?.toUpperCase() || 'CASH'})
@@ -617,8 +621,13 @@ export default function AdminOrders() {
                   <div className="flex items-center gap-2 shrink-0">
                     <select
                       value={order.status}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleUpdateStatus(order.id, e.target.value);
+                      }}
                       className={`px-2.5 py-1 rounded-xl text-xs font-extrabold border focus:outline-none cursor-pointer ${
                         order.status === 'pending' ? 'bg-amber-100 text-amber-800 border-amber-300' :
                         order.status === 'preparing' ? 'bg-blue-100 text-blue-800 border-blue-300' :
@@ -633,6 +642,7 @@ export default function AdminOrders() {
                       <option value="completed">Delivered 🎉</option>
                       <option value="cancelled">Cancelled ✕</option>
                     </select>
+
 
                     <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
                       {isExpanded ? <ChevronUp className="w-4 h-4 text-purple-600" /> : <ChevronDown className="w-4 h-4" />}
