@@ -7,8 +7,10 @@ import {
 
 import PaymentConfirmModal from '../../components/PaymentConfirmModal';
 import CancelOrderModal from '../../components/CancelOrderModal';
+import { getOrderPin, getUserSpecialInstructions } from '../../lib/orderUtils';
 
 export default function AdminOrders() {
+
   const { showToast, profile, session } = useAuth();
   const adminIdentifier = profile?.full_name || profile?.email || session?.user?.email || 'Admin';
 
@@ -572,11 +574,18 @@ export default function AdminOrders() {
         <div className="space-y-4">
           {filteredOrders.map(order => {
             const { subtotal, discount, foodSalesAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
+            const pin = getOrderPin(order);
+            const cleanNotes = getUserSpecialInstructions(order.special_instructions);
+
+            let attributionName = order.handled_by_name || '';
+            if (attributionName.toLowerCase().includes('customer') || attributionName.toLowerCase().includes('student')) {
+              attributionName = 'Customer';
+            }
 
             return (
               <div
                 key={order.id}
-                className={`bg-white border rounded-3xl p-5 space-y-4 shadow-2xs hover:shadow-md transition-all ${
+                className={`bg-white border-2 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs transition-all ${
                   order.status === 'cancelled' ? 'border-red-200 bg-red-50/20' : 'border-slate-200'
                 }`}
               >
@@ -587,9 +596,9 @@ export default function AdminOrders() {
                       <span className="text-xl font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 font-mono">
                         Token #{order.token_number || order.id.slice(0, 4)}
                       </span>
-                      {order.pickup_code && (
-                        <span className="text-xs font-black text-purple-900 bg-purple-50 px-2.5 py-1 rounded-xl border border-purple-200 tracking-wider">
-                          🔑 PIN: {order.pickup_code}
+                      {pin && (
+                        <span className="text-xs font-black text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl border border-purple-300 font-mono tracking-wider">
+                          🔑 PIN: {pin}
                         </span>
                       )}
                     </div>
@@ -639,7 +648,7 @@ export default function AdminOrders() {
                       <span>Order Cancelled</span>
                     </div>
                     <p className="text-[11px] text-slate-900">
-                      Reason: <b>{order.cancellation_reason || 'Out of stock or staff cancellation'}</b>
+                      Reason: <b>{order.cancellation_reason || 'Out of stock or customer cancellation'}</b>
                     </p>
                   </div>
                 )}
@@ -662,9 +671,9 @@ export default function AdminOrders() {
                         </span>
                       ))}
                     </div>
-                    {order.special_instructions && (
+                    {cleanNotes && (
                       <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5 mt-2">
-                        📝 Note: {order.special_instructions}
+                        📝 Special Request: {cleanNotes}
                       </p>
                     )}
                   </div>
@@ -716,8 +725,8 @@ export default function AdminOrders() {
                           <User className="w-3.5 h-3.5 text-purple-600 shrink-0" />
                           <span>
                             {order.status === 'cancelled'
-                              ? `Cancelled by ${order.handled_by_name || 'Staff'}`
-                              : `Handled by ${order.handled_by_name || 'Staff'}`}
+                              ? `Cancelled by ${attributionName || 'Staff'}`
+                              : `Handled by ${attributionName || 'Staff'}`}
                           </span>
                         </div>
                       </div>

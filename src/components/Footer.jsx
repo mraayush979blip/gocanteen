@@ -34,10 +34,6 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
               Fast, fresh canteen ordering. Order your favorite food online for instant counter pickup.
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                <span>Razorpay Verified Merchant</span>
-              </div>
               <button
                 onClick={onOpenAboutDev}
                 className="px-2.5 py-1 rounded-lg bg-indigo-950/80 hover:bg-indigo-900/90 text-indigo-300 font-extrabold text-[10px] border border-indigo-700/40 flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
@@ -58,127 +54,118 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
 
         {/* Collapsible Content */}
         {isExpanded && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6 border-b border-slate-800/40 animate-slide-down">
-            {/* Col 1: Razorpay Legal Policies */}
-            <div className="space-y-4">
-              <h4 className="text-white font-black text-xs uppercase tracking-wider flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                Razorpay Legal Policies
-              </h4>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 font-medium text-slate-400">
-                <li>
-                  <button
-                    onClick={() => navigate('/terms')}
-                    className="hover:text-emerald-400 transition-colors text-left py-0.5"
-                  >
-                    Terms & Conditions
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate('/privacy')}
-                    className="hover:text-emerald-400 transition-colors text-left py-0.5"
-                  >
-                    Privacy Policy
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate('/refund')}
-                    className="hover:text-emerald-400 transition-colors text-left py-0.5"
-                  >
-                    Cancellation & Refund Policy
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate('/shipping')}
-                    className="hover:text-emerald-400 transition-colors text-left py-0.5"
-                  >
-                    Shipping & Delivery Policy
-                  </button>
-                </li>
-                <li className="sm:col-span-2">
-                  <button
-                    onClick={() => navigate('/contact')}
-                    className="hover:text-emerald-400 transition-colors text-left py-0.5"
-                  >
-                    Contact Us
-                  </button>
-                </li>
-              </ul>
+          <div className="space-y-6 py-6 border-b border-slate-800/40 animate-slide-down">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Col 1: Razorpay Legal Policies */}
+              <div className="space-y-4">
+                <h4 className="text-white font-black text-xs uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  Razorpay Legal Policies
+                </h4>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 font-medium text-slate-400">
+                  <li>
+                    <button
+                      onClick={() => navigate('/terms')}
+                      className="hover:text-emerald-400 transition-colors text-left py-0.5"
+                    >
+                      Terms & Conditions
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => navigate('/privacy')}
+                      className="hover:text-emerald-400 transition-colors text-left py-0.5"
+                    >
+                      Privacy Policy
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => navigate('/refund')}
+                      className="hover:text-emerald-400 transition-colors text-left py-0.5"
+                    >
+                      Cancellation & Refund Policy
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => navigate('/shipping')}
+                      className="hover:text-emerald-400 transition-colors text-left py-0.5"
+                    >
+                      Shipping & Delivery Policy
+                    </button>
+                  </li>
+                  <li className="sm:col-span-2">
+                    <button
+                      onClick={() => navigate('/contact')}
+                      className="hover:text-emerald-400 transition-colors text-left py-0.5"
+                    >
+                      Contact Us
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Col 2: Contact & Support */}
+              <div className="space-y-4">
+                <h4 className="text-white font-black text-xs uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                  Contact & Support
+                </h4>
+                <ul className="space-y-3 font-medium text-slate-400">
+                  <li className="flex items-center gap-2.5">
+                    <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <a href="mailto:gocanteen8@gmail.com" className="hover:text-white transition-colors">
+                      gocanteen8@gmail.com
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
+                    <a href="mailto:mraayush979@gmail.com" className="hover:text-white transition-colors font-semibold text-indigo-300 font-['Plus_Jakarta_Sans',sans-serif]">
+                      mraayush979@gmail.com (Dev)
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <a href="tel:+919244217287" className="hover:text-white transition-colors">
+                      +91 9244217287
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-            {/* Col 2: Contact & Support */}
-            <div className="space-y-4">
-              <h4 className="text-white font-black text-xs uppercase tracking-wider flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-                Contact & Support
-              </h4>
-              <ul className="space-y-3 font-medium text-slate-400">
-                <li className="flex items-center gap-2.5">
-                  <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <a href="mailto:gocanteen8@gmail.com" className="hover:text-white transition-colors">
-                    gocanteen8@gmail.com
-                  </a>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <a href="mailto:mraayush979@gmail.com" className="hover:text-white transition-colors font-semibold text-indigo-300 font-['Plus_Jakarta_Sans',sans-serif]">
-                    mraayush979@gmail.com (Dev)
-                  </a>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <a href="tel:+919244217287" className="hover:text-white transition-colors">
-                    +91 9244217287
-                  </a>
-                </li>
-              </ul>
-            </div>
+            {/* Portal Action Buttons inside Dropdown (Hidden when user is logged in) */}
+            {!session && (
+              <div className="pt-4 border-t border-slate-800/40 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  onClick={() => {
+                    if (onOpenStaffAuth) onOpenStaffAuth();
+                    navigate('/staff');
+                  }}
+                  className="text-emerald-400 hover:text-emerald-300 font-extrabold flex items-center gap-1.5 bg-emerald-400/10 hover:bg-emerald-400/20 px-3.5 py-2 rounded-xl border border-emerald-400/20 transition-all cursor-pointer text-xs tracking-wider uppercase shrink-0"
+                >
+                  <ChefHat className="w-4 h-4 text-emerald-400" />
+                  <span>Staff Portal</span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (onOpenAdminAuth) onOpenAdminAuth();
+                    navigate('/admin');
+                  }}
+                  className="text-amber-400 hover:text-amber-300 font-extrabold flex items-center gap-1.5 bg-amber-400/10 hover:bg-amber-400/20 px-3.5 py-2 rounded-xl border border-amber-400/20 transition-all cursor-pointer text-xs tracking-wider uppercase shrink-0"
+                >
+                  <Shield className="w-4 h-4 text-amber-400" />
+                  <span>Admin Portal</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Bottom Bar — Mobile Responsive Layout */}
-        <div className="pt-4 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-450 text-[11px] text-center md:text-left text-slate-400">
-          
-          {/* Links (Privacy • Terms • Refunds • Contact) */}
-          <div className="flex items-center justify-center gap-4 order-1 md:order-2 flex-wrap">
-            <button onClick={() => navigate('/privacy')} className="hover:text-emerald-400 transition-colors">Privacy</button>
-            <span className="text-slate-700 font-bold">•</span>
-            <button onClick={() => navigate('/terms')} className="hover:text-emerald-400 transition-colors">Terms</button>
-            <span className="text-slate-700 font-bold">•</span>
-            <button onClick={() => navigate('/refund')} className="hover:text-emerald-400 transition-colors">Refunds</button>
-            <span className="text-slate-700 font-bold">•</span>
-            <button onClick={() => navigate('/contact')} className="hover:text-emerald-400 transition-colors">Contact</button>
-          </div>
-
-          {/* Render Staff & Admin Login buttons */}
-          <div className="flex items-center justify-center gap-3 order-2 md:order-3">
-            <button
-              onClick={() => {
-                if (onOpenStaffAuth) onOpenStaffAuth();
-                navigate('/staff');
-              }}
-              className="text-emerald-400 hover:text-emerald-300 font-extrabold flex items-center gap-1.5 bg-emerald-400/10 hover:bg-emerald-400/20 px-3 py-1.5 rounded-xl border border-emerald-400/20 transition-all cursor-pointer text-[10px] tracking-wider uppercase shrink-0"
-            >
-              <ChefHat className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Staff Portal</span>
-            </button>
-            <button
-              onClick={() => {
-                if (onOpenAdminAuth) onOpenAdminAuth();
-                navigate('/admin');
-              }}
-              className="text-amber-400 hover:text-amber-300 font-extrabold flex items-center gap-1.5 bg-amber-400/10 hover:bg-amber-400/20 px-3 py-1.5 rounded-xl border border-amber-400/20 transition-all cursor-pointer text-[10px] tracking-wider uppercase shrink-0"
-            >
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
-              <span>Admin Portal</span>
-            </button>
-          </div>
-
-          {/* Copyright text at the left / bottom */}
-          <p className="order-3 md:order-1 text-slate-500 text-center md:text-left">
+        {/* Minimal Bottom Bar */}
+        <div className="pt-2 flex items-center justify-center text-slate-500 text-[11px] text-center">
+          <p>
             © {new Date().getFullYear()} <span className="text-slate-350 font-extrabold uppercase text-xs tracking-wider">Go Canteen</span>. Designed & Engineered by <button onClick={onOpenAboutDev} className="text-indigo-400 hover:underline font-bold">Aayush Sharma</button>.
           </p>
         </div>

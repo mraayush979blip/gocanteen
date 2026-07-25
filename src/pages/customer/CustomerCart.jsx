@@ -266,19 +266,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         }
       }
 
-      let finalNotes = notes ? notes.trim() : '';
-      if (appliedPromo && discountAmt > 0) {
-        const promoTag = `🏷️ Coupon: ${appliedPromo.code} (${discountPercent}% OFF) | Subtotal: ₹${subtotal} | Saved: ₹${discountAmt}`;
-        finalNotes = finalNotes ? `${finalNotes} | ${promoTag}` : promoTag;
-      }
-      if (platformFee > 0) {
-        const feeTag = `⚡ Platform Fee (UPI/Online): +₹${platformFee}`;
-        finalNotes = finalNotes ? `${finalNotes} | ${feeTag}` : feeTag;
-      }
-      finalNotes = finalNotes ? `${finalNotes} | 🔑 PIN: ${pickupCode}` : `🔑 PIN: ${pickupCode}`;
-      if (paymentId) {
-        finalNotes = `${finalNotes} | 💳 Razorpay Payment ID: ${paymentId}`;
-      }
+      const userNotes = notes ? notes.trim() : '';
 
       const basePayload = {
         id: orderId,
@@ -288,8 +276,13 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         payment_status: paymentStatus,
         payment_method: pMethod,
         total_amount: finalPayableAmount,
-        special_instructions: finalNotes,
-        token_number: tokenNumber
+        special_instructions: userNotes,
+        token_number: tokenNumber,
+        pickup_code: pickupCode,
+        platform_fee: platformFee,
+        subtotal_amount: subtotal,
+        discount_amount: discountAmt,
+        coupon_code: appliedPromo ? appliedPromo.code : ''
       };
 
       if (session?.user?.id) {
@@ -298,12 +291,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
       const fullPayload = {
         ...basePayload,
-        customer_email: session?.user?.email || profile?.email || '',
-        subtotal_amount: subtotal,
-        discount_amount: discountAmt,
-        platform_fee: platformFee,
-        coupon_code: appliedPromo ? appliedPromo.code : '',
-        pickup_code: pickupCode
+        customer_email: session?.user?.email || profile?.email || ''
       };
 
       const { error: firstErr } = await supabase
@@ -318,6 +306,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
         if (fallbackErr) throw fallbackErr;
       }
+
 
       const orderItemsPayload = cart.map(i => ({
         order_id: orderId,

@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { Loader2, RefreshCw, Calendar, Filter, User, Ticket } from 'lucide-react';
-import { getOrderFinancials } from '../../lib/orderUtils';
+import { getOrderFinancials, getOrderPin } from '../../lib/orderUtils';
 
 export default function StaffHistory() {
+
   const { staffT } = useAuth();
   const [historyOrders, setHistoryOrders] = useState([]);
   const [filter, setFilter] = useState('all'); // 'all' | 'completed' | 'cancelled'
@@ -196,15 +197,21 @@ export default function StaffHistory() {
               <tbody className="divide-y divide-slate-100">
                 {filtered.map(order => {
                   const isCancelled = (order.status || '').toLowerCase().includes('cancel');
-                  const { subtotal, discount, finalAmount, couponCode } = getOrderFinancials(order);
+                  const { subtotal, discount, finalAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
+                  const pin = getOrderPin(order);
+
+                  let attributionText = order.handled_by_name || '';
+                  if (attributionText.toLowerCase().includes('customer') || attributionText.toLowerCase().includes('student')) {
+                    attributionText = 'Customer';
+                  }
 
                   return (
                     <tr key={order.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="p-3.5 font-black text-slate-900">
                         <div>#{order.token_number || order.id.slice(0, 6)}</div>
-                        {order.pickup_code && (
-                          <span className="text-[10px] font-extrabold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 block w-fit mt-0.5">
-                            🔑 {staffT.pin}: {order.pickup_code}
+                        {pin && (
+                          <span className="text-[10px] font-extrabold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 block w-fit mt-0.5 font-mono">
+                            🔑 {staffT.pin}: {pin}
                           </span>
                         )}
                         {order.cancellation_reason && (
@@ -225,6 +232,11 @@ export default function StaffHistory() {
                       </td>
                       <td className="p-3.5 font-black text-slate-900">
                         <div>₹{finalAmount}</div>
+                        {platformFee > 0 && (
+                          <span className="text-[10px] text-amber-800 font-extrabold block bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 w-fit mt-0.5">
+                            + ₹{platformFee} (Fee)
+                          </span>
+                        )}
                         {discount > 0 && (
                           <span className="text-[10px] text-slate-400 line-through font-medium block">₹{subtotal}</span>
                         )}
@@ -256,12 +268,12 @@ export default function StaffHistory() {
 
                       {/* Staff Audit Attribution Column */}
                       <td className="p-3.5">
-                        {order.handled_by_name ? (
+                        {attributionText ? (
                           <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1 w-fit border ${
                             isCancelled ? 'bg-red-50 text-red-900 border-red-200' : 'bg-purple-50 text-purple-900 border-purple-200'
                           }`}>
                             <User className="w-3.5 h-3.5 shrink-0" />
-                            {isCancelled ? `Cancelled by ${order.handled_by_name}` : `Done by ${order.handled_by_name}`}
+                            {isCancelled ? `Cancelled by ${attributionText}` : `Done by ${attributionText}`}
                           </span>
                         ) : (
                           <span className="text-slate-400 font-medium text-[11px] italic">System / Unassigned</span>

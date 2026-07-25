@@ -528,24 +528,53 @@ export default function CustomerMenu({ onOpenCart }) {
         </div>
       )}
 
-      {/* Framer-Motion Flying Cart Emoji Particles Layer */}
+      {/* Framer-Motion Enhanced Flying Cart Emoji Particles & Floating +1 Badge */}
       <AnimatePresence>
         {flyingItems.map(f => (
-          <motion.div
-            key={f.id}
-            initial={{ x: f.startX - 20, y: f.startY - 20, scale: 1.2, opacity: 1 }}
-            animate={{
-              x: window.innerWidth - 75,
-              y: 25,
-              scale: 0.2,
-              opacity: 0.1
-            }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.65, ease: [0.25, 1, 0.5, 1] }}
-            className="fixed top-0 left-0 z-50 pointer-events-none text-2xl bg-yellow-400/90 border border-slate-900 rounded-full p-2 shadow-2xl"
-          >
-            {f.emoji}
-          </motion.div>
+          <div key={f.id}>
+            {/* Flying Food Emoji with Curved Arc & Spin */}
+            <motion.div
+              initial={{
+                x: f.startX - 24,
+                y: f.startY - 24,
+                scale: 1,
+                rotate: 0,
+                opacity: 1
+              }}
+              animate={{
+                x: [f.startX - 24, (f.startX + (window.innerWidth - 60)) / 2, window.innerWidth - 65],
+                y: [f.startY - 24, Math.max(20, f.startY - 140), 22],
+                scale: [1.2, 1.6, 0.25],
+                rotate: [0, 180, 360],
+                opacity: [1, 1, 0.2]
+              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed top-0 left-0 z-50 pointer-events-none text-2xl bg-gradient-to-tr from-yellow-400 to-amber-300 border-2 border-slate-900 rounded-full p-2.5 shadow-2xl flex items-center justify-center ring-4 ring-yellow-400/40"
+            >
+              {f.emoji}
+            </motion.div>
+
+            {/* Floating +1 Added Badge */}
+            <motion.div
+              initial={{
+                x: f.startX - 20,
+                y: f.startY - 35,
+                scale: 0.8,
+                opacity: 1
+              }}
+              animate={{
+                y: f.startY - 80,
+                scale: 1.2,
+                opacity: 0
+              }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="fixed top-0 left-0 z-50 pointer-events-none text-[11px] font-black text-emerald-800 bg-emerald-100/90 border border-emerald-400 px-2.5 py-0.5 rounded-full shadow-lg backdrop-blur-xs flex items-center gap-1"
+            >
+              <span>+1</span>
+              <span>Added</span>
+            </motion.div>
+          </div>
         ))}
       </AnimatePresence>
 

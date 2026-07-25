@@ -8,9 +8,10 @@ import {
 import PaymentConfirmModal from '../../components/PaymentConfirmModal';
 import CancelOrderModal from '../../components/CancelOrderModal';
 import { sendOrderReadyEmail, sendRefundNotificationEmail } from '../../lib/emailNotifier';
-import { getOrderFinancials } from '../../lib/orderUtils';
+import { getOrderFinancials, getOrderPin, getUserSpecialInstructions } from '../../lib/orderUtils';
 
 export default function KitchenQueue() {
+
   const { showToast, profile, session, staffT } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -314,6 +315,8 @@ export default function KitchenQueue() {
             const isUnpaid = order.payment_status !== 'paid';
             const isCash = (order.payment_method || '').toLowerCase().includes('cash');
             const financials = getOrderFinancials(order);
+            const pin = getOrderPin(order);
+            const cleanNotes = getUserSpecialInstructions(order.special_instructions);
 
             // Rule 1: ANY Unpaid order (whether created as cash or abandoned UPI window) can be cancelled directly with a reason.
             // Rule 2: Paid UPI orders can be cancelled with a refund request.
@@ -344,9 +347,9 @@ export default function KitchenQueue() {
                           Token #{order.token_number || order.id.slice(0, 4)}
                         </span>
 
-                        {order.pickup_code && (
-                          <span className="text-xs font-black text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl border border-purple-300 tracking-wider">
-                            🔑 PIN: {order.pickup_code}
+                        {pin && (
+                          <span className="text-xs font-black text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl border border-purple-300 tracking-wider font-mono">
+                            🔑 PIN: {pin}
                           </span>
                         )}
                       </div>
@@ -405,9 +408,9 @@ export default function KitchenQueue() {
                       ))}
                     </ul>
 
-                    {order.special_instructions && (
+                    {cleanNotes && (
                       <div className="mt-2 text-[11px] text-amber-900 bg-amber-100/80 p-2.5 rounded-lg border border-amber-300 font-bold leading-relaxed">
-                        📝 Special Request: {order.special_instructions}
+                        📝 Special Request: {cleanNotes}
                       </div>
                     )}
                   </div>

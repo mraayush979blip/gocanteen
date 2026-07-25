@@ -6,7 +6,7 @@ import {
   XCircle, ChevronDown, ChevronUp, Sparkles, Zap, Calendar
 } from 'lucide-react';
 import CancelOrderModal from '../../components/CancelOrderModal';
-import { getOrderFinancials, getCancellationReason } from '../../lib/orderUtils';
+import { getOrderFinancials, getCancellationReason, getOrderPin, getUserSpecialInstructions } from '../../lib/orderUtils';
 
 export default function CustomerOrders({ onOpenAuth }) {
   const { user, profile, showToast } = useAuth();
@@ -69,15 +69,12 @@ export default function CustomerOrders({ onOpenAuth }) {
     try {
       const order = cancelModalOrder;
       const customerName = profile?.full_name || order.customer_name || 'Customer';
-      const cancellationTag = `❌ Cancelled Reason: ${cancelReason} (by Customer ${customerName})`;
-      let updatedNotes = order.special_instructions ? `${order.special_instructions} | ${cancellationTag}` : cancellationTag;
 
       const baseUpdate = {
         status: 'cancelled',
         cancellation_reason: cancelReason,
         refund_status: 'none',
-        special_instructions: updatedNotes,
-        handled_by_name: `${customerName} (STUDENT)`
+        handled_by_name: `Customer (${customerName})`
       };
 
       const { error } = await supabase
@@ -102,6 +99,7 @@ export default function CustomerOrders({ onOpenAuth }) {
       showToast('Failed to cancel order: ' + err.message, true);
     }
   };
+
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -265,9 +263,10 @@ export default function CustomerOrders({ onOpenAuth }) {
             const itemsList = order.order_items || [];
             const summaryText = itemsList.map(i => `${i.quantity}x ${i.inventory?.name || i.item_name || 'Item'}`).join(', ');
 
-            // Customer self-cancellation eligibility
-            const isUnpaidPending = order.payment_status !== 'paid' && order.status === 'pending';
+            const pin = getOrderPin(order);
+            const canCustomerCancel = order.status === 'pending';
             const cancellationReasonText = getCancellationReason(order);
+            const cleanUserNotes = getUserSpecialInstructions(order.special_instructions);
 
             return (
               <div
@@ -320,9 +319,9 @@ export default function CustomerOrders({ onOpenAuth }) {
                       <span className="text-[11px] font-black text-red-800 bg-red-100 px-2 py-0.5 rounded-md border border-red-300 shrink-0">
                         ❌ Reason: {cancellationReasonText}
                       </span>
-                    ) : order.pickup_code ? (
-                      <span className="text-[11px] font-black text-purple-900 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 shrink-0">
-                        🔑 PIN: {order.pickup_code}
+                    ) : pin ? (
+                      <span className="text-[11px] font-black text-purple-900 bg-purple-100 px-2.5 py-0.5 rounded-md border border-purple-300 shrink-0 font-mono shadow-2xs">
+                        🔑 PIN: {pin}
                       </span>
                     ) : null}
                   </div>
@@ -343,7 +342,7 @@ export default function CustomerOrders({ onOpenAuth }) {
                   <div className="border-t border-slate-100 bg-slate-50/60 p-4 space-y-4 animate-fade-in text-xs">
                     
                     {/* Security Pickup PIN Banner */}
-                    {order.pickup_code && order.status !== 'cancelled' && (
+                    {pin && order.status !== 'cancelled' && (
                       <div className="bg-purple-500/10 border border-purple-200 rounded-xl p-3 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                           <KeyRound className="w-5 h-5 text-purple-600 shrink-0" />
@@ -353,7 +352,7 @@ export default function CustomerOrders({ onOpenAuth }) {
                           </div>
                         </div>
                         <span className="text-xl font-black text-purple-900 tracking-widest font-mono bg-white px-3 py-1 rounded-lg border border-purple-200 shadow-2xs">
-                          {order.pickup_code}
+                          {pin}
                         </span>
                       </div>
                     )}
@@ -371,21 +370,28 @@ export default function CustomerOrders({ onOpenAuth }) {
                       </div>
                     )}
 
-                    {/* Customer Self-Service Cancel Button for Unpaid Pending Orders */}
-                    {isUnpaidPending ? (
+                    {/* Customer Special Instruction Notes if present */}
+                    {cleanUserNotes && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-amber-900 font-bold">
+                        📝 Special Request: {cleanUserNotes}
+                      </div>
+                    )}
+
+                    {/* Customer Self-Service Cancel Button for Pending Orders */}
+                    {canCustomerCancel ? (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setCancelModalOrder(order);
                         }}
-                        className="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                        className="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer active:scale-95"
                       >
                         <XCircle className="w-4 h-4 text-red-600" />
-                        <span>Cancel My Unpaid Order</span>
+                        <span>Cancel My Order</span>
                       </button>
-                    ) : order.payment_status !== 'paid' && order.status !== 'cancelled' ? (
+                    ) : order.status !== 'cancelled' ? (
                       <p className="text-[10px] text-slate-400 font-bold text-center italic">
-                        🔒 Food preparation started or cash confirmed. Order cannot be cancelled.
+                        🔒 Food preparation started or completed. Order cannot be cancelled.
                       </p>
                     ) : null}
 

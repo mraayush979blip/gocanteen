@@ -102,3 +102,36 @@ export function getCancellationReason(order) {
 
   return 'Cancelled by kitchen staff';
 }
+
+export function getOrderPin(order) {
+  if (!order) return '';
+  if (order.pickup_code) return String(order.pickup_code);
+  if (order.pickup_pin) return String(order.pickup_pin);
+  if (order.pin) return String(order.pin);
+  if (order.special_instructions) {
+    const match = order.special_instructions.match(/PIN:\s*([0-9A-Z]+)/i);
+    if (match && match[1]) return match[1];
+  }
+  return '';
+}
+
+export function getUserSpecialInstructions(instructions) {
+  if (!instructions || typeof instructions !== 'string') return '';
+  
+  // Filter out embedded system metadata tags separated by |
+  const parts = instructions.split('|').map(p => p.trim());
+  const cleanParts = parts.filter(p => {
+    if (!p) return false;
+    if (p.includes('Platform Fee')) return false;
+    if (p.includes('PIN:')) return false;
+    if (p.includes('Razorpay Payment ID:')) return false;
+    if (p.includes('Coupon:')) return false;
+    if (p.includes('Cancelled Reason:')) return false;
+    if (p.includes('Subtotal:')) return false;
+    if (p.includes('Saved:')) return false;
+    return true;
+  });
+  
+  return cleanParts.join(' | ');
+}
+

@@ -1,5 +1,6 @@
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Lock, ShieldAlert, LogIn, Clock, KeyRound } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
   const { session, userRole, profile, isAdminUnlocked } = useAuth();
@@ -12,30 +13,9 @@ export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
       : true;
 
   if (!isAuthorized) {
-    return (
-      <div className="min-h-[55vh] flex flex-col items-center justify-center p-6 text-center space-y-4 max-w-md mx-auto my-10 bg-white border border-purple-200 rounded-3xl shadow-xl">
-        <div className="w-16 h-16 rounded-2xl bg-purple-100 border border-purple-200 text-purple-700 flex items-center justify-center shadow-inner animate-bounce">
-          <KeyRound className="w-8 h-8" />
-        </div>
-        <div className="space-y-1.5">
-          <span className="text-[10px] font-black uppercase tracking-widest text-purple-900 bg-purple-100 px-3 py-1 rounded-full border border-purple-300">
-            Admin Passcode Gate
-          </span>
-          <h2 className="text-xl font-black text-slate-900">Admin Portal Locked 🔒</h2>
-          <p className="text-xs text-slate-500 font-medium leading-relaxed">
-            Enter the 6-digit Admin Security Passcode to unlock the Admin Executive Dashboard.
-          </p>
-        </div>
-        <button
-          onClick={() => (onOpenAuth ? onOpenAuth('admin') : null)}
-          className="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
-        >
-          <KeyRound className="w-4 h-4 text-yellow-300" />
-          <span>Unlock Admin Portal (Enter Passcode) →</span>
-        </button>
-      </div>
-    );
+    return <Navigate to="/menu" replace />;
   }
+
 
   // Temporary Staff Expiration Check
   const isTempExpired = profile?.is_temporary && profile?.valid_till && new Date(profile.valid_till) < new Date();
