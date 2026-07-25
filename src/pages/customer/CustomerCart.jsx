@@ -372,8 +372,10 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         prefill: {
           name: customerName,
           contact: phone,
-          email: session?.user?.email || profile?.email || '',
-          method: 'upi'
+          email: session?.user?.email || profile?.email || ''
+        },
+        upi: {
+          flow: 'intent'
         },
         theme: {
           color: '#0c831f'
