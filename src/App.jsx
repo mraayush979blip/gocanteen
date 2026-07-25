@@ -174,10 +174,22 @@ function MainContent() {
           {/* Default Redirect from Plain Root / */}
           <Route path="/" element={<Navigate to="/menu" replace />} />
 
-          {/* Customer Routes */}
-          <Route path="/menu" element={<CustomerMenu onOpenCart={() => setCartOpen(true)} />} />
-          <Route path="/orders" element={<CustomerOrders onOpenAuth={() => handleOpenAuth('customer')} />} />
-          <Route path="/profile" element={<CustomerProfile onOpenAuth={() => handleOpenAuth('customer')} />} />
+          {/* Customer Routes protected strictly for customers */}
+          <Route path="/menu" element={
+            <PortalGuard requiredRole="customer" onOpenAuth={() => handleOpenAuth('customer')}>
+              <CustomerMenu onOpenCart={() => setCartOpen(true)} />
+            </PortalGuard>
+          } />
+          <Route path="/orders" element={
+            <PortalGuard requiredRole="customer" onOpenAuth={() => handleOpenAuth('customer')}>
+              <CustomerOrders onOpenAuth={() => handleOpenAuth('customer')} />
+            </PortalGuard>
+          } />
+          <Route path="/profile" element={
+            <PortalGuard requiredRole="customer" onOpenAuth={() => handleOpenAuth('customer')}>
+              <CustomerProfile onOpenAuth={() => handleOpenAuth('customer')} />
+            </PortalGuard>
+          } />
 
           {/* Staff Routes */}
           <Route path="/staff" element={<Navigate to="/staff/kds" replace />} />

@@ -7,12 +7,20 @@ export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
 
   const isAuthorized =
     requiredRole === 'staff'
-      ? userRole === 'staff' || userRole === 'admin' || isAdminUnlocked
+      ? userRole === 'staff' || isAdminUnlocked
       : requiredRole === 'admin'
       ? userRole === 'admin' || isAdminUnlocked
+      : requiredRole === 'customer'
+      ? userRole === 'customer'
       : true;
 
   if (!isAuthorized) {
+    if (userRole === 'staff') {
+      return <Navigate to="/staff/kds" replace />;
+    }
+    if (userRole === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
     return <Navigate to="/menu" replace />;
   }
 

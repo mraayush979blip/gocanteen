@@ -6,7 +6,7 @@ import { X, Mail, Lock, Eye, EyeOff, Shield, ChefHat, UtensilsCrossed, ArrowRigh
 
 export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initialRole }) {
   const navigate = useNavigate();
-  const { session, activePortal, setActivePortal, showToast } = useAuth();
+  const { session, activePortal, setActivePortal, showToast, userRole } = useAuth();
   const [selectedRole, setSelectedRole] = useState(initialRole || activePortal || 'customer');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -77,6 +77,24 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
       if (error) throw error;
       
       if (data?.user) {
+        // Fetch database profile role to ensure strict enforcement
+        const { data: dbProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        let actualRole = 'customer';
+        if (!profileError && dbProfile) {
+          actualRole = dbProfile.role || 'customer';
+        }
+
+        // Strict role validation: user cannot sign in as a different role
+        if (actualRole !== selectedRole) {
+          await supabase.auth.signOut();
+          throw new Error(`Access Denied: This account is registered as ${actualRole.toUpperCase()}. Please select the correct portal view to log in.`);
+        }
+
         setActivePortal(selectedRole);
         if (selectedRole === 'admin') {
           if (onAdminLoginSuccess) onAdminLoginSuccess();
@@ -116,6 +134,13 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
       showToast('Please sign in first to switch portals!', true);
       return;
     }
+
+    // Ensure they don't switch to a portal their account role does not permit
+    if (userRole !== selectedRole) {
+      showToast(`Access Denied: Your account role (${userRole.toUpperCase()}) is not authorized to access the ${selectedRole.toUpperCase()} Portal.`, true);
+      return;
+    }
+
     setActivePortal(selectedRole);
     if (selectedRole === 'admin') {
       if (onAdminLoginSuccess) onAdminLoginSuccess();
