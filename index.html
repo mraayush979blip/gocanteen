@@ -2,12 +2,77 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Go Canteen — Fresh Food & Snacks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Go Canteen — Fresh Campus Food Ordering & Express Counter Pickup</title>
+    <meta name="title" content="Go Canteen — Fresh Campus Food Ordering & Express Counter Pickup" />
+    <meta name="description" content="Order fresh canteen food, beverages, rolls, pizzas, and snacks online at Go Canteen (gocanteen.in). Fast counter pickup, real-time token tracking, and exclusive discounts for students & staff." />
+    <meta name="keywords" content="Go Canteen, gocanteen.in, canteen food order, online canteen app, college canteen pickup, campus food ordering, canteen menu online, Aayush Sharma" />
+    <meta name="author" content="Aayush Sharma" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#059669" />
+    <link rel="canonical" href="https://www.gocanteen.in/" />
+    <meta name="google-site-verification" content="google846c0db8bd1aed20" />
+
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.gocanteen.in/" />
+    <meta property="og:title" content="Go Canteen — Fresh Campus Food Ordering & Express Counter Pickup" />
+    <meta property="og:description" content="Order fresh canteen food, beverages, and snacks online. Fast counter pickup, live token tracking, and discount offers at gocanteen.in." />
+    <meta property="og:image" content="https://www.gocanteen.in/aayush-profile.jpg" />
+    <meta property="og:site_name" content="Go Canteen" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter / X -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://www.gocanteen.in/" />
+    <meta property="twitter:title" content="Go Canteen — Fresh Campus Food Ordering & Express Counter Pickup" />
+    <meta property="twitter:description" content="Order fresh canteen food, beverages, and snacks online. Express counter pickup & live token tracking at gocanteen.in." />
+    <meta property="twitter:image" content="https://www.gocanteen.in/aayush-profile.jpg" />
+
+    <!-- Preconnect to Google Fonts & External Assets -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- Schema.org JSON-LD Structured Data for Google Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Restaurant",
+      "name": "Go Canteen",
+      "image": "https://www.gocanteen.in/aayush-profile.jpg",
+      "url": "https://www.gocanteen.in/",
+      "telephone": "+919244217287",
+      "priceRange": "₹",
+      "servesCuisine": ["Fast Food", "Indian", "Beverages", "Snacks", "Pizza"],
+      "description": "Express campus canteen online food ordering system with fast counter pickup and live order token status tracking.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "IN"
+      },
+      "potentialAction": {
+        "@type": "OrderAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://www.gocanteen.in/#/menu",
+          "inLanguage": "en-US",
+          "actionPlatform": [
+            "http://schema.org/DesktopWebPlatform",
+            "http://schema.org/MobileWebPlatform"
+          ]
+        },
+        "deliveryMethod": [
+          "http://purl.org/goodrelations/v1#DeliveryModePickUp"
+        ]
+      }
+    }
+    </script>
   </head>
   <body class="bg-slate-50 text-slate-900 antialiased font-['Plus_Jakarta_Sans',sans-serif]">
     <div id="root"></div>

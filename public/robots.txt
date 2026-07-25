@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Exclude private portals from public search indexing
+Disallow: /#/admin/
+Disallow: /#/staff/
+
+# Sitemap location
+Sitemap: https://www.gocanteen.in/sitemap.xml

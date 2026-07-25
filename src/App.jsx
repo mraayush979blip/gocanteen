@@ -32,8 +32,10 @@ import Footer from './components/Footer';
 import PolicyPage from './components/PolicyPage';
 import ReportBugModal from './components/ReportBugModal';
 import AboutDeveloperModal from './components/AboutDeveloperModal';
+import SEOHead from './components/SEOHead';
 
 function StaffLayout({ activeSubView, onOpenAuth }) {
+
   const navigate = useNavigate();
 
   return (
@@ -126,8 +128,10 @@ function MainContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-['Plus_Jakarta_Sans',sans-serif] w-full max-w-full overflow-x-hidden">
+      <SEOHead />
       
       {/* Supabase Connection Warning Banner */}
+
       {connectionError && (
         <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-3 text-amber-900 text-xs font-semibold flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 max-w-4xl">
