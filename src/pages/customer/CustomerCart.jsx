@@ -372,33 +372,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         prefill: {
           name: customerName,
           contact: phone,
-          email: session?.user?.email || profile?.email || ''
+          email: session?.user?.email || profile?.email || '',
+          method: 'upi'
         },
-        config: {
-          display: {
-            blocks: {
-              upi: {
-                name: 'Pay via UPI / QR (GPay, PhonePe, Paytm)',
-                instruments: [
-                  {
-                    method: 'upi'
-                  }
-                ]
-              },
-              other: {
-                name: 'Cards, Netbanking & Wallets',
-                instruments: [
-                  { method: 'card' },
-                  { method: 'netbanking' },
-                  { method: 'wallet' }
-                ]
-              }
-            },
-            sequence: ['block.upi', 'block.other'],
-            preferences: {
-              show_default_blocks: true
-            }
-          }
+        upi: {
+          flow: 'intent'
         },
         theme: {
           color: '#0c831f'
