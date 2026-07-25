@@ -167,7 +167,7 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
         {/* Minimal Bottom Bar */}
         <div className="pt-2 flex items-center justify-center text-slate-500 text-[11px] text-center">
           <p>
-            © {new Date().getFullYear()} <span className="text-slate-350 font-extrabold uppercase text-xs tracking-wider">Go Canteen</span>. Designed & Engineered by <button onClick={onOpenAboutDev} className="text-indigo-400 hover:underline font-bold">Aayush Sharma</button>.
+            © {new Date().getFullYear()} <span className="text-slate-350 font-extrabold uppercase text-xs tracking-wider">Go Canteen</span>. Designed & Engineered by <a href="https://itsaayushsharma.vercel.app" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline font-bold">Aayush Sharma</a>.
           </p>
         </div>
 
