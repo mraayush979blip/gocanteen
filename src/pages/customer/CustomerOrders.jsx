@@ -476,6 +476,7 @@ export default function CustomerOrders({ onOpenAuth }) {
       <CancelOrderModal
         isOpen={!!cancelModalOrder}
         order={cancelModalOrder}
+        isCustomer={true}
         onConfirm={handleCustomerCancelOrder}
         onClose={() => setCancelModalOrder(null)}
       />

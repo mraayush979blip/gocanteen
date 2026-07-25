@@ -1,20 +1,30 @@
 import { useState } from 'react';
 import { X, AlertTriangle, XCircle, Send } from 'lucide-react';
 
-export default function CancelOrderModal({ isOpen, order, onConfirm, onClose }) {
+export default function CancelOrderModal({ isOpen, order, onConfirm, onClose, isCustomer = false }) {
   const [reason, setReason] = useState('');
   const [customReason, setCustomReason] = useState('');
   const [error, setError] = useState('');
 
   if (!isOpen || !order) return null;
 
-  const presets = [
+  const staffPresets = [
     'Item Out of Stock 🍲',
     'Kitchen Closed / High Rush ⏰',
     'Customer Requested Cancellation 👤',
     'Payment / Duplicate Order Issue ⚠️',
     'Other / Custom Reason 📝'
   ];
+
+  const customerPresets = [
+    'Changed My Mind 🧠',
+    'Ordered Wrong Item 🍕',
+    'Taking Too Long / Change of Plans ⏳',
+    'Placing a New Order 🔄',
+    'Other / Custom Reason 📝'
+  ];
+
+  const presets = isCustomer ? customerPresets : staffPresets;
 
   const handleConfirm = (e) => {
     e.preventDefault();
@@ -58,7 +68,7 @@ export default function CancelOrderModal({ isOpen, order, onConfirm, onClose }) 
         <div className="bg-red-50 border border-red-200 rounded-2xl p-3 flex items-start gap-2.5 text-xs text-red-900 font-medium">
           <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
           <span>
-            <b>Cancellation Notice:</b> The reason you select will be displayed directly to the student/customer and recorded in audit logs.
+            <b>Cancellation Notice:</b> {isCustomer ? 'This will cancel your unpaid order and remove it from the kitchen queue.' : 'The reason you select will be displayed directly to the student/customer and recorded in audit logs.'}
           </span>
         </div>
 
