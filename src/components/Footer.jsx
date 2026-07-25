@@ -25,11 +25,12 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-800/40">
           <div className="space-y-3 w-full md:w-auto">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black shadow-xs">
-                <UtensilsCrossed className="w-4 h-4" />
+              <div className="w-9 h-9 rounded-xl bg-white border border-slate-700 overflow-hidden flex items-center justify-center shadow-xs p-0.5 shrink-0">
+                <img src="/app-icon.png" alt="Go Canteen Logo" className="w-full h-full object-contain rounded-lg" />
               </div>
               <span className="text-xl font-black tracking-tight text-white font-['Plus_Jakarta_Sans',sans-serif]">GO CANTEEN</span>
             </div>
+
             <p className="text-slate-400 text-xs leading-relaxed max-w-xl">
               Fast, fresh canteen ordering. Order your favorite food online for instant counter pickup.
             </p>
