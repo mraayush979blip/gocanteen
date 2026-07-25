@@ -80,6 +80,19 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     }
   }, [isOpen, session, profile]);
 
+  // Window anti-exit listener during payment execution (Must be declared before any conditional return)
+  useEffect(() => {
+    if (placingOrder) {
+      const handleBeforeUnload = (e) => {
+        e.preventDefault();
+        e.returnValue = 'Payment is processing. Closing this page will interrupt your transaction!';
+        return e.returnValue;
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }
+  }, [placingOrder]);
+
   if (!isOpen) return null;
 
   const subtotal = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 1)), 0);
@@ -480,19 +493,6 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       });
     }
   };
-
-  // Window anti-exit listener during payment execution
-  useEffect(() => {
-    if (placingOrder) {
-      const handleBeforeUnload = (e) => {
-        e.preventDefault();
-        e.returnValue = 'Payment is processing. Closing this page will interrupt your transaction!';
-        return e.returnValue;
-      };
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }
-  }, [placingOrder]);
 
   const handleSafeClose = () => {
     if (placingOrder) {
