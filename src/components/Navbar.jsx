@@ -129,11 +129,11 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 </div>
               )}
 
-              {/* Cart Button */}
+              {/* Cart Button (Hidden on Mobile View, visible on Tablet/Desktop) */}
               {activePortal === 'customer' && (
                 <button
                   onClick={onOpenCart}
-                  className="relative p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm shrink-0 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="hidden sm:flex relative p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm shrink-0 items-center gap-1.5 cursor-pointer active:scale-95"
                 >
                   <ShoppingCart className="w-5 h-5 font-bold" />
                   {cartCount > 0 && (
@@ -143,6 +143,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                   )}
                 </button>
               )}
+
 
               {/* Auth / Profile Actions */}
               {session ? (
