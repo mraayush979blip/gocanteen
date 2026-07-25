@@ -261,7 +261,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                   </div>
                   <button
                     onClick={logout}
-                    className="p-2.5 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all border border-slate-200"
+                    className="hidden sm:flex p-2.5 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all border border-slate-200"
                     title="Sign Out"
                   >
                     <LogOut className="w-4 h-4" />
@@ -270,9 +270,9 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
               ) : (
                 <button
                   onClick={onOpenAuth}
-                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all shrink-0"
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
                 >
-                  <LogIn className="w-3.5 h-3.5" />
+                  <LogIn className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Sign In</span>
                 </button>
               )}
@@ -316,6 +316,24 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                   </button>
                 </>
               )}
+
+              {/* View Cart Option inside 3-Bar Menu */}
+              <button
+                onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
+                className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200/80 flex items-center justify-between transition-colors shadow-2xs"
+              >
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="w-4 h-4 text-emerald-600" />
+                  <span>View Order Cart</span>
+                </div>
+                {cartCount > 0 ? (
+                  <span className="bg-emerald-600 text-white font-black text-[11px] px-2 py-0.5 rounded-full shadow-2xs">
+                    {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-emerald-600 font-bold">Empty</span>
+                )}
+              </button>
 
               {activePortal === 'staff' && (
                 <>
@@ -387,7 +405,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 </>
               )}
 
-              {/* Developer & Report Bug Action Links for All Users */}
+              {/* Developer, Report Bug, & Auth Links */}
               <div className="pt-2 border-t border-slate-100 space-y-1">
                 <button
                   onClick={() => { onOpenReportBug?.(); setMobileMenuOpen(false); }}
@@ -408,6 +426,28 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                   </div>
                   <span className="text-[10px] bg-indigo-500 text-white font-black px-2 py-0.5 rounded-md">Aayush Sharma</span>
                 </button>
+
+                {session ? (
+                  <button
+                    onClick={() => { logout(); setMobileMenuOpen(false); }}
+                    className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 flex items-center justify-between transition-colors mt-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <LogOut className="w-4 h-4 text-red-600" />
+                      <span>Sign Out ({profile?.full_name || session.user.email})</span>
+                    </div>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { onOpenAuth?.('customer'); setMobileMenuOpen(false); }}
+                    className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-between transition-colors mt-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <LogIn className="w-4 h-4 text-emerald-400" />
+                      <span>Sign In / Register</span>
+                    </div>
+                  </button>
+                )}
               </div>
 
             </div>
