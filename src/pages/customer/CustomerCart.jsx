@@ -29,6 +29,30 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   const [placingOrder, setPlacingOrder] = useState(false);
   const [confirmedToken, setConfirmedToken] = useState(null);
   const [confirmedCode, setConfirmedCode] = useState(null);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
+
+  // Fetch pending order count for user-level spam protection checks
+  useEffect(() => {
+    if (isOpen && session?.user?.id) {
+      const fetchPendingCount = async () => {
+        try {
+          const { count, error } = await supabase
+            .from('orders')
+            .select('id', { count: 'exact', head: true })
+            .eq('customer_id', session.user.id)
+            .eq('status', 'pending');
+          if (!error && count !== null) {
+            setPendingOrdersCount(count);
+          }
+        } catch (e) {
+          console.warn('Could not fetch pending orders count:', e);
+        }
+      };
+      fetchPendingCount();
+    } else if (!isOpen) {
+      setPendingOrdersCount(0);
+    }
+  }, [isOpen, session]);
 
   // Fetch active available coupons
   const fetchAvailableCoupons = async () => {
@@ -397,6 +421,25 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   };
 
   const handlePlaceOrder = async () => {
+    // Check pending order limit before proceeding to payment
+    if (session?.user?.id) {
+      try {
+        const { count, error } = await supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('customer_id', session.user.id)
+          .eq('status', 'pending');
+
+        if (!error && count !== null && count >= 3) {
+          setPendingOrdersCount(count);
+          showToast('⚠️ Order Limit Reached: You already have 3 pending orders. Please wait for them to be prepared!', true);
+          return;
+        }
+      } catch (err) {
+        console.warn('Spam order check warning:', err);
+      }
+    }
+
     let hasErr = false;
     if (!customerName.trim()) {
       setNameError('Full name is strictly required');
@@ -913,6 +956,22 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
             {/* Sticky Checkout Footer */}
             {cart.length > 0 && (
               <div className="p-4 border-t border-slate-100 bg-white space-y-3 shadow-lg">
+                
+                {/* Pending Orders Warning Callout */}
+                {pendingOrdersCount >= 3 && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-start gap-2.5 text-amber-900 shadow-2xs">
+                    <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="space-y-0.5 text-left">
+                      <span className="text-xs font-black uppercase tracking-wider block text-amber-700">
+                        Order Limit Reached
+                      </span>
+                      <p className="text-[11px] font-bold text-amber-900 leading-snug">
+                        You already have 3 pending orders in queue. Please wait for the kitchen to prepare them before placing another order.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-1 text-xs">
                   <div className="flex justify-between text-slate-600">
                     <span>Subtotal</span>
@@ -938,14 +997,20 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
                 <button
                   onClick={handlePlaceOrder}
-                  disabled={placingOrder}
-                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
+                  disabled={placingOrder || pendingOrdersCount >= 3}
+                  className={`w-full py-4 font-black text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 ${
+                    pendingOrdersCount >= 3 
+                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none border border-slate-200' 
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.99]'
+                  }`}
                 >
                   {placingOrder ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
                       <span>Processing Order...</span>
                     </>
+                  ) : pendingOrdersCount >= 3 ? (
+                    <span>LIMIT REACHED (3 PENDING ORDERS)</span>
                   ) : (
                     <>
                       <span>{paymentMethod === 'razorpay' ? 'PAY & PLACE ORDER (UPI)' : 'CONFIRM ORDER (CASH)'}</span>
