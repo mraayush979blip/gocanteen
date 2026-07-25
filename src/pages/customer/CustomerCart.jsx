@@ -480,7 +480,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     }
 
     if (paymentMethod === 'razorpay') {
-      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_THmyfytpyvBHQl';
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_THo2IUiDVzSCsC';
 
       if (typeof window.Razorpay === 'undefined') {
         showToast('Razorpay SDK loading... Please wait a moment.', true);
