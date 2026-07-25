@@ -78,10 +78,10 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-18">
             
-            {/* Top Header Logo */}
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-md shadow-emerald-600/20 active:scale-95 transition-transform">
-                <UtensilsCrossed className="w-5 h-5" />
+            {/* Top Header Logo with App Icon */}
+            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+              <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/90 overflow-hidden flex items-center justify-center shadow-md active:scale-95 transition-transform p-0.5 shrink-0">
+                <img src="/app-icon.png" alt="Go Canteen Logo" className="w-full h-full object-contain rounded-xl" />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
@@ -95,6 +95,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 </span>
               </div>
             </div>
+
 
             {/* Right Action Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-2">
