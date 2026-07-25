@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gocanteen-cache-v1';
+const CACHE_NAME = 'gocanteen-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -34,7 +34,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Event - Stale-while-revalidate strategy
+// Fetch Event
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests and skip external analytics, Supabase or other dynamic calls
   if (
@@ -47,6 +47,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const isHtmlRequest = event.request.mode === 'navigate' || 
+                        event.request.url === self.location.origin + '/' || 
+                        event.request.url.endsWith('/index.html');
+
+  // Network-First strategy for HTML navigation requests to prevent stale asset hashes / white screens on updates
+  if (isHtmlRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Stale-while-revalidate strategy for other static assets (JS, CSS, images)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request)
@@ -66,3 +91,4 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
