@@ -480,7 +480,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     }
 
     if (paymentMethod === 'razorpay') {
-      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_THIkRDo41sOum4';
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_THmyfytpyvBHQl';
 
       if (typeof window.Razorpay === 'undefined') {
         showToast('Razorpay SDK loading... Please wait a moment.', true);
@@ -489,13 +489,42 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
       setPlacingOrder(true);
 
+      // 1. Create order on the backend serverless endpoint
+      let orderData;
+      try {
+        const orderResponse = await fetch('/api/create-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            amount: Math.round(finalPayableAmount * 100),
+            currency: 'INR',
+            receipt: `receipt_${Date.now()}`
+          })
+        });
+
+        if (!orderResponse.ok) {
+          const errData = await orderResponse.json();
+          throw new Error(errData.error || 'Failed to initialize payment order');
+        }
+
+        orderData = await orderResponse.json();
+      } catch (err) {
+        setPlacingOrder(false);
+        showToast(`❌ Payment Initialization Error: ${err.message}`, true);
+        return;
+      }
+
+      // 2. Open official Razorpay modal using order_id
       const options = {
         key: razorpayKey,
-        amount: Math.round(finalPayableAmount * 100),
-        currency: 'INR',
+        amount: orderData.amount,
+        currency: orderData.currency,
         name: 'Go Canteen',
         description: `Food Order (${cart.length} items)`,
         image: 'https://cdn-icons-png.flaticon.com/512/3081/3081559.png',
+        order_id: orderData.order_id,
         prefill: {
           name: customerName,
           contact: phone,
@@ -508,17 +537,43 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         theme: {
           color: '#0c831f'
         },
-        handler: function (response) {
-          if (!response || !response.razorpay_payment_id) {
+        handler: async function (response) {
+          if (!response || !response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
             setPlacingOrder(false);
             showToast('❌ Invalid Payment Response from Razorpay. Transaction failed.', true);
             return;
           }
-          executeOrderPlacement({
-            paymentStatus: 'paid',
-            paymentId: response.razorpay_payment_id,
-            pMethod: 'razorpay_upi'
-          });
+
+          // 3. Cryptographically verify signature on the backend
+          try {
+            setPlacingOrder(true);
+            const verifyResponse = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+
+            if (!verifyResponse.ok) {
+              const verifyErrData = await verifyResponse.json();
+              throw new Error(verifyErrData.error || 'Signature verification failed');
+            }
+
+            // 4. Record order details into database as PAID online
+            executeOrderPlacement({
+              paymentStatus: 'paid',
+              paymentId: response.razorpay_payment_id,
+              pMethod: 'razorpay_upi'
+            });
+          } catch (verifyErr) {
+            setPlacingOrder(false);
+            showToast(`❌ Payment Verification Failed: ${verifyErr.message}`, true);
+          }
         },
         modal: {
           ondismiss: function () {
