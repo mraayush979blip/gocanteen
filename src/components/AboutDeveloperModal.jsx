@@ -90,10 +90,10 @@ export default function AboutDeveloperModal({ isOpen, onClose }) {
                 href={linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="py-3 px-4 rounded-2xl bg-sky-950/80 hover:bg-sky-900/90 border border-sky-800/60 text-slate-100 font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer backdrop-blur-md"
+                className="py-3 px-2 rounded-2xl bg-sky-950/80 hover:bg-sky-900/90 border border-sky-800/60 text-slate-100 font-extrabold text-[10px] sm:text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer backdrop-blur-md"
               >
                 <Linkedin className="w-4 h-4 text-sky-400 shrink-0" />
-                <span>LinkedIn</span>
+                <span>Let's Connect on LinkedIn</span>
               </a>
 
               <a
