@@ -59,11 +59,7 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
 
       if (adminPasscodeInput.trim() === validCode) {
         setIsAdminUnlocked(true);
-        setActivePortal('admin');
-        showToast('🔓 Admin Gate Unlocked! Welcome Admin 🙌');
-        if (onAdminLoginSuccess) onAdminLoginSuccess();
-        navigate('/admin/dashboard');
-        onClose();
+        showToast('🔓 Admin Security Gate Unlocked! Please enter your Admin Login Credentials.');
       } else {
         showToast('❌ Incorrect Admin Unlock Code', true);
       }

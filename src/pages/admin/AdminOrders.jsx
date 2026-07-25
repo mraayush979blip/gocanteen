@@ -571,7 +571,7 @@ export default function AdminOrders() {
       ) : (
         <div className="space-y-4">
           {filteredOrders.map(order => {
-            const { grossSale, couponDiscount, netPayable } = getOrderFinancials(order);
+            const { subtotal, discount, foodSalesAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
 
             return (
               <div
@@ -676,14 +676,14 @@ export default function AdminOrders() {
 
                     <div className="space-y-1.5 text-slate-700 font-semibold">
                       <div className="flex justify-between">
-                        <span>Gross Amount</span>
-                        <span className="font-extrabold text-slate-900">₹{grossSale}</span>
+                        <span>Food Subtotal</span>
+                        <span className="font-extrabold text-slate-900">₹{subtotal}</span>
                       </div>
 
-                      {couponDiscount > 0 ? (
+                      {discount > 0 ? (
                         <div className="flex justify-between text-amber-700 font-extrabold bg-amber-100/60 px-2 py-1 rounded-lg">
-                          <span>Discount {order.promo_code ? `(${order.promo_code})` : ''}</span>
-                          <span>-₹{couponDiscount}</span>
+                          <span>Discount {couponCode ? `(${couponCode})` : ''}</span>
+                          <span>-₹{discount}</span>
                         </div>
                       ) : (
                         <div className="flex justify-between text-slate-400">
@@ -693,8 +693,20 @@ export default function AdminOrders() {
                       )}
 
                       <div className="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-purple-200">
-                        <span>Net Revenue</span>
-                        <span className="text-emerald-700 text-base">₹{netPayable}</span>
+                        <span>Net Food Revenue</span>
+                        <span className="text-emerald-700 text-base">₹{foodSalesAmount}</span>
+                      </div>
+
+                      {platformFee > 0 && (
+                        <div className="flex justify-between text-amber-900 font-extrabold bg-amber-100/80 px-2 py-1 rounded-lg border border-amber-300">
+                          <span>Platform Fee (UPI/Online)</span>
+                          <span>+₹{platformFee}</span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between text-xs font-black text-slate-900 pt-1 border-t border-slate-200">
+                        <span>Customer Total Paid</span>
+                        <span className="text-purple-950 font-black">₹{customerPaid}</span>
                       </div>
 
                       {/* STAFF / ADMIN ATTRIBUTION BADGE */}

@@ -1,10 +1,10 @@
 /**
  * Centralized Financial & Metadata Helper for Orders
- * Handles orders with or without applied promo coupons and cancellation reason extraction.
+ * Handles orders with or without applied promo coupons, platform fees, and cancellation reasons.
  */
 export function getOrderFinancials(order) {
   if (!order) {
-    return { subtotal: 0, discount: 0, finalAmount: 0, couponCode: '' };
+    return { subtotal: 0, discount: 0, foodSalesAmount: 0, platformFee: 0, finalAmount: 0, customerPaid: 0, couponCode: '' };
   }
 
   // 1. Calculate sum of items if order_items are attached
@@ -20,14 +20,16 @@ export function getOrderFinancials(order) {
   // 2. Read explicit DB columns if present
   let subtotal = Number(order.subtotal_amount || 0);
   let discount = Number(order.discount_amount || 0);
+  let platformFee = Number(order.platform_fee || order.gateway_fee || 0);
   let couponCode = order.coupon_code || order.promo_code || '';
   let rawTotalAmount = Number(order.total_amount || 0);
 
-  // 3. Fallback: Parse coupon metadata embedded in special_instructions if DB columns were empty
+  // 3. Fallback: Parse metadata embedded in special_instructions if DB columns were empty
   if (order.special_instructions) {
     const savedMatch = order.special_instructions.match(/Saved:\s*₹?(\d+(\.\d+)?)/i);
     const subtotalMatch = order.special_instructions.match(/Subtotal:\s*₹?(\d+(\.\d+)?)/i);
     const couponMatch = order.special_instructions.match(/Coupon:\s*([A-Z0-9_-]+)/i);
+    const platformMatch = order.special_instructions.match(/Platform Fee[^:]*:\s*\+?₹?(\d+(\.\d+)?)/i);
 
     if (savedMatch && savedMatch[1] && discount === 0) {
       discount = Number(savedMatch[1]);
@@ -38,37 +40,50 @@ export function getOrderFinancials(order) {
     if (couponMatch && couponMatch[1] && !couponCode) {
       couponCode = couponMatch[1];
     }
+    if (platformMatch && platformMatch[1] && platformFee === 0) {
+      platformFee = Number(platformMatch[1]);
+    }
   }
 
   // 4. Derive subtotal if still 0
   if (subtotal <= 0) {
     if (grossItemsTotal > 0) {
       subtotal = grossItemsTotal;
-    } else {
-      subtotal = rawTotalAmount + discount;
+    } else if (rawTotalAmount > 0) {
+      subtotal = rawTotalAmount;
     }
   }
 
-  // 5. Derive final amount after coupon discount
-  let finalAmount = rawTotalAmount;
-  if (discount > 0) {
-    if (rawTotalAmount === subtotal || rawTotalAmount > (subtotal - discount)) {
-      finalAmount = Math.max(0, subtotal - discount);
+  // 5. Calculate Food Net Sales Amount (EXCLUDING Platform Fee)
+  const foodSalesAmount = Math.max(0, subtotal - discount);
+
+  // 6. Platform Fee calculation if online payment was used and platformFee wasn't parsed
+  const isOnline = order.payment_method === 'razorpay' || order.payment_method === 'razorpay_upi' || order.payment_method === 'online';
+  if (isOnline && platformFee <= 0 && foodSalesAmount > 0) {
+    if (rawTotalAmount > foodSalesAmount) {
+      platformFee = Number((rawTotalAmount - foodSalesAmount).toFixed(2));
+    } else {
+      platformFee = Number((foodSalesAmount * 0.0236).toFixed(2));
     }
-  } else {
-    finalAmount = subtotal > 0 ? subtotal : rawTotalAmount;
   }
+
+  // 7. Customer Total Paid
+  const customerPaid = Number((foodSalesAmount + platformFee).toFixed(2));
 
   return {
     subtotal: Math.round(subtotal),
     discount: Math.round(discount),
-    finalAmount: Math.round(finalAmount),
+    foodSalesAmount: Math.round(foodSalesAmount), // PURE CANTEEN SALES (No tax/fee)
+    platformFee: platformFee, // ONLINE TAX / PLATFORM FEE
+    finalAmount: Math.round(foodSalesAmount), // FOR SALES REVENUE CALCULATION: EXCLUDES PLATFORM FEE
+    customerPaid: customerPaid, // TOTAL COST PAID BY CUSTOMER
     couponCode: couponCode ? couponCode.toUpperCase() : ''
   };
 }
 
 export function getEffectiveOrderPrice(order) {
-  return getOrderFinancials(order).finalAmount;
+  // Always returns PURE CANTEEN FOOD SALES for revenue calculations
+  return getOrderFinancials(order).foodSalesAmount;
 }
 
 export function getCancellationReason(order) {

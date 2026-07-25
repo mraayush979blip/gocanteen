@@ -260,7 +260,7 @@ export default function CustomerOrders({ onOpenAuth }) {
             const isExpanded = expandedOrderId === order.id;
             const badge = getStatusBadge(order.status);
             const orderIsToday = isToday(order.created_at);
-            const { subtotal, discount, finalAmount, couponCode } = getOrderFinancials(order);
+            const { subtotal, discount, foodSalesAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
 
             const itemsList = order.order_items || [];
             const summaryText = itemsList.map(i => `${i.quantity}x ${i.inventory?.name || i.item_name || 'Item'}`).join(', ');
@@ -297,7 +297,7 @@ export default function CustomerOrders({ onOpenAuth }) {
                     {/* Right: Price & Expand Arrow */}
                     <div className="flex items-center gap-2 shrink-0">
                       <div className="text-right">
-                        <span className="text-sm sm:text-base font-black text-slate-900">₹{finalAmount}</span>
+                        <span className="text-sm sm:text-base font-black text-slate-900">₹{customerPaid}</span>
                         {discount > 0 && (
                           <span className="text-[10px] text-emerald-600 font-bold block -mt-0.5">Saved ₹{discount}</span>
                         )}
@@ -449,9 +449,15 @@ export default function CustomerOrders({ onOpenAuth }) {
                           <span>-₹{discount}</span>
                         </div>
                       )}
+                      {platformFee > 0 && (
+                        <div className="flex justify-between text-amber-900 font-extrabold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                          <span>Platform Fee (UPI/Online)</span>
+                          <span>+₹{platformFee}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between font-black text-slate-900 pt-1 border-t border-slate-100 text-xs">
-                        <span>Total Payable</span>
-                        <span className="text-emerald-700">₹{finalAmount}</span>
+                        <span>Total Paid</span>
+                        <span className="text-emerald-700">₹{customerPaid}</span>
                       </div>
                       <div className="pt-1 text-[10px] text-slate-400 font-medium">
                         Payment via <b>{order.payment_method?.toUpperCase()}</b> ({order.payment_status?.toUpperCase()})
