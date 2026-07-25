@@ -1,26 +1,37 @@
 import { useAuth } from '../context/AuthContext';
-import { Lock, ShieldAlert, LogIn, Clock } from 'lucide-react';
+import { Lock, ShieldAlert, LogIn, Clock, KeyRound } from 'lucide-react';
 
 export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
-  const { session, userRole, profile } = useAuth();
+  const { session, userRole, profile, isAdminUnlocked } = useAuth();
 
-  if (!session) {
+  const isAuthorized =
+    requiredRole === 'staff'
+      ? userRole === 'staff' || userRole === 'admin' || isAdminUnlocked
+      : requiredRole === 'admin'
+      ? userRole === 'admin' || isAdminUnlocked
+      : true;
+
+  if (!isAuthorized) {
     return (
-      <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-center space-y-3 max-w-md mx-auto my-10 bg-white border border-slate-200 rounded-2xl shadow-xs">
-        <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center animate-bounce">
-          <Lock className="w-7 h-7" />
+      <div className="min-h-[55vh] flex flex-col items-center justify-center p-6 text-center space-y-4 max-w-md mx-auto my-10 bg-white border border-purple-200 rounded-3xl shadow-xl">
+        <div className="w-16 h-16 rounded-2xl bg-purple-100 border border-purple-200 text-purple-700 flex items-center justify-center shadow-inner animate-bounce">
+          <KeyRound className="w-8 h-8" />
         </div>
-        <div className="space-y-1">
-          <h2 className="text-xl font-extrabold text-slate-900">Authentication Required</h2>
-          <p className="text-xs text-slate-500 font-medium">
-            You must be signed in with an authorized <b className="text-slate-900 capitalize">{requiredRole}</b> account to access this portal.
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-black uppercase tracking-widest text-purple-900 bg-purple-100 px-3 py-1 rounded-full border border-purple-300">
+            Admin Passcode Gate
+          </span>
+          <h2 className="text-xl font-black text-slate-900">Admin Portal Locked 🔒</h2>
+          <p className="text-xs text-slate-500 font-medium leading-relaxed">
+            Enter the 6-digit Admin Security Passcode (Default: <b className="text-purple-700 font-mono">919191</b>) to unlock the Admin Executive Dashboard.
           </p>
         </div>
         <button
           onClick={onOpenAuth}
-          className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5"
+          className="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
         >
-          <LogIn className="w-4 h-4" /> Sign In to Access Portal
+          <KeyRound className="w-4 h-4 text-yellow-300" />
+          <span>Unlock Admin Portal (Enter Passcode) →</span>
         </button>
       </div>
     );
@@ -49,38 +60,6 @@ export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
           className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2"
         >
           Switch Account
-        </button>
-      </div>
-    );
-  }
-
-  const isAuthorized =
-    requiredRole === 'staff'
-      ? userRole === 'staff' || userRole === 'admin'
-      : requiredRole === 'admin'
-      ? userRole === 'admin'
-      : true;
-
-  if (!isAuthorized) {
-    return (
-      <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-center space-y-3 max-w-md mx-auto my-10 bg-white border border-red-200 rounded-2xl shadow-xs">
-        <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center">
-          <ShieldAlert className="w-7 h-7" />
-        </div>
-        <div className="space-y-1">
-          <span className="text-[10px] font-black uppercase tracking-wider text-red-700 bg-red-100 px-2.5 py-0.5 rounded-md">
-            Access Restricted
-          </span>
-          <h2 className="text-xl font-extrabold text-slate-900">Unauthorized Role</h2>
-          <p className="text-xs text-slate-500 font-medium">
-            Your current account role (<span className="text-slate-900 font-bold">{userRole}</span>) does not have permission to view the <b className="text-slate-900 uppercase">{requiredRole}</b> portal.
-          </p>
-        </div>
-        <button
-          onClick={onOpenAuth}
-          className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2"
-        >
-          Switch to Authorized Account
         </button>
       </div>
     );

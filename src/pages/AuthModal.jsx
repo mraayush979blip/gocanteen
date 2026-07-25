@@ -28,14 +28,7 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
     }
   }, [isOpen, initialRole, activePortal]);
 
-  // Auto-close modal whenever user is signed in
-  useEffect(() => {
-    if (session?.user && isOpen) {
-      if (onClose) onClose();
-    }
-  }, [session, isOpen, onClose]);
-
-  if (!isOpen || session?.user) return null;
+  if (!isOpen) return null;
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
@@ -66,7 +59,11 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
 
       if (adminPasscodeInput.trim() === validCode) {
         setIsAdminUnlocked(true);
-        showToast('🔓 Admin Gate Unlocked! Enter your credentials.');
+        setActivePortal('admin');
+        showToast('🔓 Admin Gate Unlocked! Welcome Admin 🙌');
+        if (onAdminLoginSuccess) onAdminLoginSuccess();
+        navigate('/admin/dashboard');
+        onClose();
       } else {
         showToast('❌ Incorrect Admin Unlock Code', true);
       }

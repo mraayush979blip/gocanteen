@@ -113,31 +113,29 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth }) {
             <button onClick={() => navigate('/contact')} className="hover:text-white">Contact</button>
           </div>
 
-          {/* Render Staff & Admin Login buttons ONLY when NO USER is logged in */}
-          {!session?.user && (
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => {
-                  if (onOpenStaffAuth) onOpenStaffAuth();
-                  navigate('/staff');
-                }}
-                className="text-emerald-400 hover:text-emerald-300 font-extrabold flex items-center gap-1.5 bg-emerald-400/10 hover:bg-emerald-400/20 px-2.5 py-1 rounded-lg border border-emerald-400/30 transition-all cursor-pointer text-[11px] shrink-0"
-              >
-                <ChefHat className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Staff Login</span>
-              </button>
-              <button
-                onClick={() => {
-                  if (onOpenAdminAuth) onOpenAdminAuth();
-                  navigate('/admin');
-                }}
-                className="text-amber-400 hover:text-amber-300 font-extrabold flex items-center gap-1.5 bg-amber-400/10 hover:bg-amber-400/20 px-2.5 py-1 rounded-lg border border-amber-400/30 transition-all cursor-pointer text-[11px] shrink-0"
-              >
-                <Shield className="w-3.5 h-3.5 text-amber-400" />
-                <span>Admin Login</span>
-              </button>
-            </div>
-          )}
+          {/* Render Staff & Admin Login buttons */}
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => {
+                if (onOpenStaffAuth) onOpenStaffAuth();
+                navigate('/staff');
+              }}
+              className="text-emerald-400 hover:text-emerald-300 font-extrabold flex items-center gap-1.5 bg-emerald-400/10 hover:bg-emerald-400/20 px-2.5 py-1 rounded-lg border border-emerald-400/30 transition-all cursor-pointer text-[11px] shrink-0"
+            >
+              <ChefHat className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Staff Login</span>
+            </button>
+            <button
+              onClick={() => {
+                if (onOpenAdminAuth) onOpenAdminAuth();
+                navigate('/admin');
+              }}
+              className="text-amber-400 hover:text-amber-300 font-extrabold flex items-center gap-1.5 bg-amber-400/10 hover:bg-amber-400/20 px-2.5 py-1 rounded-lg border border-amber-400/30 transition-all cursor-pointer text-[11px] shrink-0"
+            >
+              <Shield className="w-3.5 h-3.5 text-amber-400" />
+              <span>Admin Login</span>
+            </button>
+          </div>
         </div>
 
       </div>

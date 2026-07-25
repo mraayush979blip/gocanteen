@@ -201,6 +201,16 @@ export const AuthProvider = ({ children }) => {
 
   const staffT = staffTranslations[staffLanguage] || staffTranslations.en;
 
+  // Admin Passcode Gate state
+  const [isAdminUnlocked, setIsAdminUnlockedState] = useState(() => {
+    return sessionStorage.getItem('cg-admin-unlocked') === 'true';
+  });
+
+  const setIsAdminUnlocked = (val) => {
+    sessionStorage.setItem('cg-admin-unlocked', val ? 'true' : 'false');
+    setIsAdminUnlockedState(val);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -212,6 +222,8 @@ export const AuthProvider = ({ children }) => {
         userRole: profile?.role || 'customer',
         activePortal,
         setActivePortal,
+        isAdminUnlocked,
+        setIsAdminUnlocked,
         staffLanguage,
         setStaffLanguage,
         staffT,
