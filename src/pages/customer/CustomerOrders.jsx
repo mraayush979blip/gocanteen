@@ -69,11 +69,13 @@ export default function CustomerOrders({ onOpenAuth }) {
     try {
       const order = cancelModalOrder;
       const customerName = profile?.full_name || order.customer_name || 'Customer';
+      const isPaid = order.payment_status === 'paid';
+      const refundStatusValue = isPaid ? 'requested' : 'none';
 
       const baseUpdate = {
         status: 'cancelled',
         cancellation_reason: cancelReason,
-        refund_status: 'none',
+        refund_status: refundStatusValue,
         handled_by_name: `Customer (${customerName})`
       };
 
@@ -83,22 +85,27 @@ export default function CustomerOrders({ onOpenAuth }) {
         .eq('id', order.id);
 
       if (error) {
+        console.warn('DB update fallback for customer cancellation:', error.message);
         delete baseUpdate.cancellation_reason;
         delete baseUpdate.refund_status;
         const { error: fbErr } = await supabase
           .from('orders')
-          .update(baseUpdate)
+          .update({
+            status: 'cancelled',
+            handled_by_name: `Customer (${customerName})`
+          })
           .eq('id', order.id);
         if (fbErr) throw fbErr;
       }
 
-      showToast('✓ Order cancelled successfully');
+      showToast(isPaid ? '✓ Order cancelled. Refund application sent to Canteen Admin (5-7 Days)' : '✓ Order cancelled successfully');
       setCancelModalOrder(null);
       fetchUserOrders();
     } catch (err) {
       showToast('Failed to cancel order: ' + err.message, true);
     }
   };
+
 
 
   const getStatusBadge = (status) => {
@@ -264,7 +271,8 @@ export default function CustomerOrders({ onOpenAuth }) {
             const summaryText = itemsList.map(i => `${i.quantity}x ${i.inventory?.name || i.item_name || 'Item'}`).join(', ');
 
             const pin = getOrderPin(order);
-            const canCustomerCancel = order.status === 'pending';
+            const canCustomerCancel = (order.status === 'pending' || order.status === 'preparing') && order.status !== 'cancelled';
+
             const cancellationReasonText = getCancellationReason(order);
             const cleanUserNotes = getUserSpecialInstructions(order.special_instructions);
 

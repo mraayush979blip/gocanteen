@@ -135,3 +135,15 @@ export function getUserSpecialInstructions(instructions) {
   return cleanParts.join(' | ');
 }
 
+export function getPaymentId(order) {
+  if (!order) return '';
+  if (order.payment_id) return String(order.payment_id);
+  if (order.razorpay_payment_id) return String(order.razorpay_payment_id);
+  if (order.special_instructions) {
+    const match = order.special_instructions.match(/Razorpay Payment ID:\s*([a-zA-Z0-9_]+)/i);
+    if (match && match[1]) return match[1];
+  }
+  return '';
+}
+
+

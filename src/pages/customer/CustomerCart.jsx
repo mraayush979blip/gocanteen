@@ -268,6 +268,12 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
       const userNotes = notes ? notes.trim() : '';
 
+      let enrichedNotes = userNotes;
+      if (paymentId) {
+        const payTag = `💳 Razorpay Payment ID: ${paymentId}`;
+        enrichedNotes = enrichedNotes ? `${enrichedNotes} | ${payTag}` : payTag;
+      }
+
       const basePayload = {
         id: orderId,
         customer_name: customerName.trim(),
@@ -276,14 +282,17 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         payment_status: paymentStatus,
         payment_method: pMethod,
         total_amount: finalPayableAmount,
-        special_instructions: userNotes,
+        special_instructions: enrichedNotes,
         token_number: tokenNumber,
         pickup_code: pickupCode,
         platform_fee: platformFee,
         subtotal_amount: subtotal,
         discount_amount: discountAmt,
-        coupon_code: appliedPromo ? appliedPromo.code : ''
+        coupon_code: appliedPromo ? appliedPromo.code : '',
+        payment_id: paymentId || '',
+        razorpay_payment_id: paymentId || ''
       };
+
 
       if (session?.user?.id) {
         basePayload.customer_id = session.user.id;

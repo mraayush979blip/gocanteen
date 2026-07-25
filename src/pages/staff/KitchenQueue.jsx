@@ -8,9 +8,10 @@ import {
 import PaymentConfirmModal from '../../components/PaymentConfirmModal';
 import CancelOrderModal from '../../components/CancelOrderModal';
 import { sendOrderReadyEmail, sendRefundNotificationEmail } from '../../lib/emailNotifier';
-import { getOrderFinancials, getOrderPin, getUserSpecialInstructions } from '../../lib/orderUtils';
+import { getOrderFinancials, getOrderPin, getUserSpecialInstructions, getPaymentId } from '../../lib/orderUtils';
 
 export default function KitchenQueue() {
+
 
   const { showToast, profile, session, staffT } = useAuth();
   const [orders, setOrders] = useState([]);
@@ -24,7 +25,8 @@ export default function KitchenQueue() {
   // Cancellation Modal state
   const [cancelModalOrder, setCancelModalOrder] = useState(null);
 
-  const staffIdentifier = profile?.full_name || profile?.email || session?.user?.email || 'Staff Member';
+  const staffIdentifier = profile?.full_name && !profile.full_name.includes('@') ? profile.full_name : 'Kitchen Staff';
+
 
   useEffect(() => {
     fetchOrders();
@@ -316,6 +318,7 @@ export default function KitchenQueue() {
             const isCash = (order.payment_method || '').toLowerCase().includes('cash');
             const financials = getOrderFinancials(order);
             const pin = getOrderPin(order);
+            const paymentId = getPaymentId(order);
             const cleanNotes = getUserSpecialInstructions(order.special_instructions);
 
             // Rule 1: ANY Unpaid order (whether created as cash or abandoned UPI window) can be cancelled directly with a reason.
@@ -348,7 +351,7 @@ export default function KitchenQueue() {
                         </span>
 
                         {pin && (
-                          <span className="text-xs font-black text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl border border-purple-300 tracking-wider font-mono">
+                          <span className="text-xs font-black text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl border border-purple-300 tracking-wider font-mono shadow-2xs">
                             🔑 PIN: {pin}
                           </span>
                         )}
@@ -416,24 +419,39 @@ export default function KitchenQueue() {
                   </div>
                 </div>
 
-                {/* Footer Controls & Big Action Buttons */}
+                {/* Footer Controls & Financial Details */}
                 <div className="space-y-2.5 pt-3 border-t border-slate-100">
-                  <div className="flex items-center justify-between text-xs">
-                    <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Payment Status</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className={`font-black text-xs ${order.payment_status === 'paid' ? 'text-emerald-700' : 'text-red-600'}`}>
-                          {order.payment_status === 'paid' ? 'PAID ✓' : 'UNPAID ✕'} ({order.payment_method?.toUpperCase() || 'CASH'})
-                        </span>
-                        <span className="font-black text-slate-900">• ₹{financials.finalAmount}</span>
-                      </div>
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 space-y-1 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 uppercase font-extrabold">Payment Status</span>
+                      <span className={`font-black text-xs ${order.payment_status === 'paid' ? 'text-emerald-700' : 'text-red-600'}`}>
+                        {order.payment_status === 'paid' ? 'PAID ✓' : 'UNPAID ✕'} ({order.payment_method?.toUpperCase() || 'CASH'})
+                      </span>
                     </div>
 
-                    {order.handled_by_name && (
-                      <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                        👨‍🍳 {order.handled_by_name}
-                      </span>
+                    <div className="flex items-center justify-between text-slate-700 font-bold pt-1 border-t border-slate-200/60">
+                      <span>Food Amount</span>
+                      <span>₹{financials.foodSalesAmount}</span>
+                    </div>
+
+                    {financials.platformFee > 0 && (
+                      <div className="flex items-center justify-between text-amber-900 font-extrabold text-[11px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                        <span>⚡ Platform Fee (UPI/Online)</span>
+                        <span>+₹{financials.platformFee}</span>
+                      </div>
                     )}
+
+                    {paymentId && (
+                      <div className="flex items-center justify-between text-purple-900 font-bold text-[10px] bg-purple-50 px-2 py-0.5 rounded border border-purple-200 font-mono">
+                        <span>💳 Payment ID</span>
+                        <span className="truncate max-w-[150px]">{paymentId}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between text-xs font-black text-slate-900 pt-1 border-t border-slate-200/80">
+                      <span>Total Paid</span>
+                      <span className="text-emerald-700">₹{financials.customerPaid}</span>
+                    </div>
                   </div>
 
                   {/* 1-TAP BIG ACTION BUTTONS */}
