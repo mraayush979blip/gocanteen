@@ -183,6 +183,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('cg-admin-unlocked');
     setSession(null);
     setProfile(null);
     clearCart();
@@ -203,11 +204,11 @@ export const AuthProvider = ({ children }) => {
 
   // Admin Passcode Gate state
   const [isAdminUnlocked, setIsAdminUnlockedState] = useState(() => {
-    return sessionStorage.getItem('cg-admin-unlocked') === 'true';
+    return localStorage.getItem('cg-admin-unlocked') === 'true';
   });
 
   const setIsAdminUnlocked = (val) => {
-    sessionStorage.setItem('cg-admin-unlocked', val ? 'true' : 'false');
+    localStorage.setItem('cg-admin-unlocked', val ? 'true' : 'false');
     setIsAdminUnlockedState(val);
   };
 
