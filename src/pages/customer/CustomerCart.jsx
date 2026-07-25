@@ -988,7 +988,6 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       )}
 
     </div>
-  </div>
-);
+  );
 }
 
