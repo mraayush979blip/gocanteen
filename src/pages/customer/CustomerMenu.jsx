@@ -507,7 +507,13 @@ export default function CustomerMenu({ onOpenCart }) {
                             <Minus className="w-3.5 h-3.5" />
                           </button>
                           <span className="text-xs font-black px-1">{qty}</span>
-                          <button onClick={() => updateCartQty(item.id, 1)} className="hover:opacity-80 p-0.5">
+                          <button
+                            onClick={(e) => {
+                              updateCartQty(item.id, 1);
+                              handleAddToCartWithAnim(e, item);
+                            }}
+                            className="hover:opacity-80 p-0.5"
+                          >
                             <Plus className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -530,52 +536,63 @@ export default function CustomerMenu({ onOpenCart }) {
 
       {/* Framer-Motion Enhanced Flying Cart Emoji Particles & Floating +1 Badge */}
       <AnimatePresence>
-        {flyingItems.map(f => (
-          <div key={f.id}>
-            {/* Flying Food Emoji with Curved Arc & Spin */}
-            <motion.div
-              initial={{
-                x: f.startX - 24,
-                y: f.startY - 24,
-                scale: 1,
-                rotate: 0,
-                opacity: 1
-              }}
-              animate={{
-                x: [f.startX - 24, (f.startX + (window.innerWidth - 60)) / 2, window.innerWidth - 65],
-                y: [f.startY - 24, Math.max(20, f.startY - 140), 22],
-                scale: [1.2, 1.6, 0.25],
-                rotate: [0, 180, 360],
-                opacity: [1, 1, 0.2]
-              }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-0 left-0 z-50 pointer-events-none text-2xl bg-gradient-to-tr from-yellow-400 to-amber-300 border-2 border-slate-900 rounded-full p-2.5 shadow-2xl flex items-center justify-center ring-4 ring-yellow-400/40"
-            >
-              {f.emoji}
-            </motion.div>
+        {flyingItems.map(f => {
+          const isMobileView = typeof window !== 'undefined' && window.innerWidth < 640;
+          const targetX = isMobileView ? window.innerWidth / 2 : window.innerWidth - 65;
+          const targetY = isMobileView ? window.innerHeight - 50 : 22;
+          const midX = (f.startX + targetX) / 2;
+          const midY = isMobileView
+            ? Math.min(window.innerHeight - 20, (f.startY + targetY) / 2 + 30)
+            : Math.max(20, f.startY - 140);
 
-            {/* Floating +1 Added Badge */}
-            <motion.div
-              initial={{
-                x: f.startX - 20,
-                y: f.startY - 35,
-                scale: 0.8,
-                opacity: 1
-              }}
-              animate={{
-                y: f.startY - 80,
-                scale: 1.2,
-                opacity: 0
-              }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="fixed top-0 left-0 z-50 pointer-events-none text-[11px] font-black text-emerald-800 bg-emerald-100/90 border border-emerald-400 px-2.5 py-0.5 rounded-full shadow-lg backdrop-blur-xs flex items-center gap-1"
-            >
-              <span>+1</span>
-              <span>Added</span>
-            </motion.div>
-          </div>
-        ))}
+          return (
+            <div key={f.id}>
+              {/* Flying Food Emoji with Responsive Arc (Downward on Mobile, Upward on Desktop) */}
+              <motion.div
+                initial={{
+                  x: f.startX - 24,
+                  y: f.startY - 24,
+                  scale: 1,
+                  rotate: 0,
+                  opacity: 1
+                }}
+                animate={{
+                  x: [f.startX - 24, midX, targetX],
+                  y: [f.startY - 24, midY, targetY],
+                  scale: [1.2, 1.6, 0.25],
+                  rotate: [0, 180, 360],
+                  opacity: [1, 1, 0.2]
+                }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+                className="fixed top-0 left-0 z-50 pointer-events-none text-2xl bg-gradient-to-tr from-yellow-400 to-amber-300 border-2 border-slate-900 rounded-full p-2.5 shadow-2xl flex items-center justify-center ring-4 ring-yellow-400/40"
+              >
+                {f.emoji}
+              </motion.div>
+
+              {/* Floating +1 Added Badge */}
+              <motion.div
+                initial={{
+                  x: f.startX - 20,
+                  y: f.startY - 35,
+                  scale: 0.8,
+                  opacity: 1
+                }}
+                animate={{
+                  y: isMobileView ? f.startY + 40 : f.startY - 80,
+                  scale: 1.2,
+                  opacity: 0
+                }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+                className="fixed top-0 left-0 z-50 pointer-events-none text-[11px] font-black text-emerald-800 bg-emerald-100/90 border border-emerald-400 px-2.5 py-0.5 rounded-full shadow-lg backdrop-blur-xs flex items-center gap-1"
+              >
+                <span>+1</span>
+                <span>Added</span>
+              </motion.div>
+            </div>
+          );
+        })}
+
       </AnimatePresence>
 
       {/* 6. Mobile Floating Sticky Cart Bar (Swiggy / Blinkit style) */}
