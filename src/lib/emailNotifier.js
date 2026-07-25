@@ -75,28 +75,19 @@ export async function sendRefundNotificationEmail(order, cancellationReason) {
 
     const orderIdStr = getOrderId(order);
 
-    // Trigger Supabase SMTP for refund notification
-    const { error: smtpError } = await supabase.auth.signInWithOtp({
+    // Trigger Supabase SMTP for refund notification using confirm signup (resend signup type)
+    const { error: smtpError } = await supabase.auth.resend({
+      type: 'signup',
       email: customerEmail,
       options: {
-        emailRedirectTo: `${window.location.origin}/#/orders`,
-        data: {
-          order_id: orderIdStr,
-          token_number: order.token_number || order.id.slice(0, 4),
-          cancellation_reason: cancellationReason || 'Kitchen out of stock or staff cancellation',
-          customer_name: order.customer_name || 'Valued Customer',
-          amount_paid: `₹${order.total_amount || 0}`,
-          admin_contact: '+91 9244217287',
-          admin_email: 'gocanteen8@gmail.com',
-          pickup_code: `CANCELLED: ${cancellationReason || 'Refund Application Sent'}`
-        }
+        emailRedirectTo: `${window.location.origin}/#/orders`
       }
     });
 
     if (smtpError) {
       console.warn('Supabase SMTP refund trigger notice:', smtpError.message);
     } else {
-      console.log('✅ Supabase SMTP refund email sent successfully to:', customerEmail);
+      console.log('✅ Supabase SMTP refund email sent successfully via confirm signup template to:', customerEmail);
     }
 
     return { success: true, email: customerEmail };
