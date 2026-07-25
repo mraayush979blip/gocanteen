@@ -69,41 +69,39 @@ export default function AdminDashboard() {
           pending += 1;
         }
 
-        if (isNotCancelled) {
+        if (isPaid && isNotCancelled) {
           gross += financials.subtotal;
           discounts += financials.discount;
+          rev += financials.customerPaid;
+          paidOrdersCount += 1;
 
-          if (isPaid) {
-            rev += financials.finalAmount;
-            paidOrdersCount += 1;
+          const pMethod = (o.payment_method || '').toLowerCase();
+          if (pMethod.includes('cash')) {
+            cash += financials.customerPaid;
+          } else {
+            upi += financials.customerPaid;
+          }
 
-            const pMethod = (o.payment_method || '').toLowerCase();
-            if (pMethod.includes('cash')) {
-              cash += financials.finalAmount;
-            } else {
-              upi += financials.finalAmount;
-            }
+          // Aggregate Items Sold & Top Sellers (ONLY FOR PAID ORDERS)
+          if (o.order_items && Array.isArray(o.order_items)) {
+            o.order_items.forEach(item => {
+              const qty = Number(item.quantity || 1);
+              itemsCount += qty;
 
-            // Aggregate Items Sold & Top Sellers (ONLY FOR PAID ORDERS)
-            if (o.order_items && Array.isArray(o.order_items)) {
-              o.order_items.forEach(item => {
-                const qty = Number(item.quantity || 1);
-                itemsCount += qty;
+              const itemName = item.inventory?.name || item.item_name || 'Delicious Item';
+              const emoji = item.inventory?.emoji || '🍽️';
+              const itemPrice = Number(item.price_at_time || 0);
 
-                const itemName = item.inventory?.name || item.item_name || 'Delicious Item';
-                const emoji = item.inventory?.emoji || '🍽️';
-                const itemPrice = Number(item.price_at_time || 0);
-
-                if (!itemAggregator[itemName]) {
-                  itemAggregator[itemName] = { name: itemName, emoji, qty: 0, revenue: 0 };
-                }
-                itemAggregator[itemName].qty += qty;
-                itemAggregator[itemName].revenue += qty * itemPrice;
-              });
-            }
+              if (!itemAggregator[itemName]) {
+                itemAggregator[itemName] = { name: itemName, emoji, qty: 0, revenue: 0 };
+              }
+              itemAggregator[itemName].qty += qty;
+              itemAggregator[itemName].revenue += qty * itemPrice;
+            });
           }
         }
       });
+
 
       const sortedTop = Object.values(itemAggregator)
         .sort((a, b) => b.qty - a.qty)

@@ -317,7 +317,10 @@ export default function AdminOrders() {
   let totalCashSales = 0;
 
   filteredOrders.forEach(o => {
-    if (o.status !== 'cancelled') {
+    const isPaid = o.payment_status === 'paid';
+    const isNotCancelled = o.status !== 'cancelled';
+
+    if (isPaid && isNotCancelled) {
       const { subtotal, discount, customerPaid } = getOrderFinancials(o);
       const gross = Number(subtotal) || 0;
       const disc = Number(discount) || 0;
@@ -335,6 +338,7 @@ export default function AdminOrders() {
       }
     }
   });
+
 
 
   return (
