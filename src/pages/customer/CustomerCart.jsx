@@ -360,6 +360,62 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       return;
     }
 
+    // DUAL-LAYER COD ANTI-SPAM & FAKE ORDER PROTECTION
+    if (paymentMethod === 'cash') {
+      const targetPhone = phone.trim();
+      const targetUserId = session?.user?.id;
+
+      try {
+        setPlacingOrder(true);
+
+        // 1. Rule 1: Max 2 Active Unpaid Cash Orders Limit
+        let activeQuery = supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('payment_status', 'unpaid')
+          .in('status', ['pending', 'preparing', 'ready']);
+
+        if (targetUserId) {
+          activeQuery = activeQuery.or(`customer_id.eq.${targetUserId},phone.eq.${targetPhone}`);
+        } else {
+          activeQuery = activeQuery.eq('phone', targetPhone);
+        }
+
+        const { count: activeUnpaidCount, error: activeErr } = await activeQuery;
+
+        if (!activeErr && activeUnpaidCount !== null && activeUnpaidCount >= 2) {
+          setPlacingOrder(false);
+          showToast('⚠️ Anti-Spam Lock: You have 2 unpaid Cash orders in queue! Pay at counter or use UPI Online to order more.', true);
+          return;
+        }
+
+        // 2. Rule 2: Hourly COD Rate Limit (Max 5 Cash Orders per Hour)
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+        let hourlyQuery = supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', oneHourAgo);
+
+        if (targetUserId) {
+          hourlyQuery = hourlyQuery.or(`customer_id.eq.${targetUserId},phone.eq.${targetPhone}`);
+        } else {
+          hourlyQuery = hourlyQuery.eq('phone', targetPhone);
+        }
+
+        const { count: hourlyCount, error: hourlyErr } = await hourlyQuery;
+
+        if (!hourlyErr && hourlyCount !== null && hourlyCount >= 5) {
+          setPlacingOrder(false);
+          showToast('⚠️ Anti-Spam Security: Hourly Cash order limit reached (max 5/hour). Please use UPI online payment!', true);
+          return;
+        }
+      } catch (checkErr) {
+        console.warn('Anti-spam check warning:', checkErr);
+      } finally {
+        setPlacingOrder(false);
+      }
+    }
+
     if (paymentMethod === 'razorpay') {
       const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_THIkRDo41sOum4';
 
