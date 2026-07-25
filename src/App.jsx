@@ -34,6 +34,7 @@ import ReportBugModal from './components/ReportBugModal';
 import AboutDeveloperModal from './components/AboutDeveloperModal';
 import SEOHead from './components/SEOHead';
 import SplashScreen from './components/SplashScreen';
+import PwaInstallPrompt from './components/PwaInstallPrompt';
 
 
 function StaffLayout({ activeSubView, onOpenAuth }) {
@@ -242,6 +243,7 @@ function MainContent() {
       />
 
       <Toast />
+      <PwaInstallPrompt />
     </div>
   );
 }
