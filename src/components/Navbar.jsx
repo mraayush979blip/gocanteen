@@ -78,130 +78,23 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-18">
             
-            {/* Brand Logo */}
-            <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={handleLogoClick}>
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 text-yellow-300 flex items-center justify-center shadow-sm shrink-0">
-                <UtensilsCrossed className="w-5 h-5 font-black" />
+            {/* Top Header Logo */}
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+              <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-md shadow-emerald-600/20 active:scale-95 transition-transform">
+                <UtensilsCrossed className="w-5 h-5" />
               </div>
-              <div>
+              <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-base sm:text-xl font-black tracking-tight text-slate-900 leading-none">
-                    GO CANTEEN
-                  </span>
-                  <span className="hidden sm:inline-block text-[10px] font-extrabold bg-yellow-400 text-slate-950 px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                  <span className="font-black text-lg tracking-tight text-slate-900 leading-none">GO CANTEEN</span>
+                  <span className="bg-yellow-400 text-slate-950 font-black text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow-2xs">
                     FAST
                   </span>
                 </div>
-                <span className="hidden sm:block text-[10px] font-bold text-slate-400 uppercase tracking-widest -mt-0.5">
-                  {activePortal.toUpperCase()} PORTAL
+                <span className="text-[10px] text-slate-500 font-extrabold tracking-wider uppercase mt-0.5">
+                  {activePortal === 'admin' ? 'Executive Admin' : activePortal === 'staff' ? 'Kitchen Staff KDS' : 'Customer Portal'}
                 </span>
               </div>
             </div>
-
-            {/* Navigation Tabs (Desktop) */}
-            <nav className="hidden md:flex items-center gap-1">
-              {activePortal === 'customer' && (
-                <>
-                  <button
-                    onClick={() => navigate('/menu')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/' || pathname === '/menu' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    Menu
-                  </button>
-                  <button
-                    onClick={() => navigate('/orders')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/orders' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    My Orders
-                  </button>
-                  <button
-                    onClick={() => navigate('/profile')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/profile' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    Profile
-                  </button>
-                </>
-              )}
-
-
-
-              {activePortal === 'admin' && (
-                <>
-                  <button
-                    onClick={() => navigate('/admin/dashboard')}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/admin' || pathname === '/admin/dashboard' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    Dashboard
-                  </button>
-                  <button
-                    onClick={() => navigate('/admin/orders')}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/admin/orders' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    Orders
-                  </button>
-                  <button
-                    onClick={() => navigate('/admin/inventory')}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/admin/inventory' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    Inventory
-                  </button>
-                  <button
-                    onClick={() => navigate('/admin/categories')}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/admin/categories' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    Categories
-                  </button>
-                  <button
-                    onClick={() => navigate('/admin/offers')}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/admin/offers' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    Offers
-                  </button>
-                  <button
-                    onClick={() => navigate('/admin/promos')}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/admin/promos' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    Coupons
-                  </button>
-                  <button
-                    onClick={() => navigate('/admin/staff')}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                      pathname === '/admin/staff' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    Staff
-                  </button>
-                  
-                  {/* Change Unlock Passcode Button */}
-                  <button
-                    onClick={() => setShowChangeCodeModal(true)}
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-purple-100 hover:bg-purple-200 text-purple-900 border border-purple-300 flex items-center gap-1 transition-all"
-                    title="Change Admin Gate Unlock Passcode"
-                  >
-                    <KeyRound className="w-3.5 h-3.5" />
-                    <span>Unlock Code</span>
-                  </button>
-                </>
-              )}
-            </nav>
 
             {/* Right Action Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -239,7 +132,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
               {activePortal === 'customer' && (
                 <button
                   onClick={onOpenCart}
-                  className="relative p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm shrink-0 flex items-center gap-1.5"
+                  className="relative p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm shrink-0 flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
                   <ShoppingCart className="w-5 h-5 font-bold" />
                   {cartCount > 0 && (
@@ -259,18 +152,11 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                       {profile?.full_name || session.user.email}
                     </span>
                   </div>
-                  <button
-                    onClick={logout}
-                    className="hidden sm:flex p-2.5 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all border border-slate-200"
-                    title="Sign Out"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
                 </div>
               ) : (
                 <button
                   onClick={onOpenAuth}
-                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer active:scale-95"
                 >
                   <LogIn className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Sign In</span>
@@ -280,7 +166,11 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
               {/* 3-Bar Menu Toggle Button (Desktop & Mobile) */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                className={`p-2 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+                  mobileMenuOpen 
+                    ? 'bg-slate-900 text-white border-slate-900' 
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
+                }`}
                 title="More Options & Menu"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5 font-bold" /> : <MenuIcon className="w-5 h-5 font-bold" />}
@@ -290,70 +180,98 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
           </div>
         </div>
 
-        {/* Three-Bar Dropdown Menu (Desktop & Mobile) */}
+        {/* Backdrop overlay to close menu on outside click */}
         {mobileMenuOpen && (
-          <div className="border-t border-slate-100 bg-white p-4 space-y-3 animate-fade-in shadow-xl text-slate-900">
-            <div className="grid grid-cols-1 gap-1">
+          <div className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-xs animate-fade-in" onClick={() => setMobileMenuOpen(false)} />
+        )}
+
+        {/* Standard Professional 3-Bar Floating Popover Menu */}
+        {mobileMenuOpen && (
+          <div className="absolute right-4 sm:right-6 top-16 z-50 w-72 sm:w-80 rounded-2xl bg-white border border-slate-200/90 shadow-2xl p-2 font-medium animate-fade-in text-slate-900 space-y-1">
+            
+            {/* User Profile Header if signed in */}
+            {session && (
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3 mb-1">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-sm uppercase shrink-0">
+                  {profile?.full_name?.charAt(0) || session.user.email?.charAt(0) || 'U'}
+                </div>
+                <div className="truncate">
+                  <div className="text-xs font-black text-slate-900 truncate">
+                    {profile?.full_name || 'Logged In User'}
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-medium truncate">{session.user.email}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Section 1: Navigation Links */}
+            <div className="px-2 pt-1 pb-0.5 text-[10px] font-black uppercase tracking-wider text-slate-400">
+              Navigation
+            </div>
+
+            <div className="space-y-0.5">
               {activePortal === 'customer' && (
                 <>
                   <button
                     onClick={() => { navigate('/menu'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/' || pathname === '/menu' ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/' || pathname === '/menu' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    🍽️ Menu
+                    <span>🍽️</span>
+                    <span>Explore Menu</span>
                   </button>
+
                   <button
                     onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/orders' ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/orders' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    📦 My Orders & Live Tokens
+                    <span>📦</span>
+                    <span>My Orders & Live Tokens</span>
                   </button>
+
                   <button
                     onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/profile' ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/profile' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    👤 My Profile
+                    <span>👤</span>
+                    <span>My Profile</span>
                   </button>
                 </>
               )}
-
-              {/* View Cart Option inside 3-Bar Menu */}
-              <button
-                onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
-                className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200/80 flex items-center justify-between transition-colors shadow-2xs"
-              >
-                <div className="flex items-center gap-2">
-                  <ShoppingCart className="w-4 h-4 text-emerald-600" />
-                  <span>View Order Cart</span>
-                </div>
-                {cartCount > 0 ? (
-                  <span className="bg-emerald-600 text-white font-black text-[11px] px-2 py-0.5 rounded-full shadow-2xs">
-                    {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
-                  </span>
-                ) : (
-                  <span className="text-[10px] text-emerald-600 font-bold">Empty</span>
-                )}
-              </button>
 
               {activePortal === 'staff' && (
                 <>
                   <button
                     onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/staff' || pathname === '/staff/kds' ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/staff' || pathname === '/staff/kds' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    👨‍🍳 Live Kitchen Queue (KDS)
+                    <span>👨‍🍳</span>
+                    <span>Live Kitchen Queue (KDS)</span>
                   </button>
                   <button
                     onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/staff/stock' ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/staff/stock' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    📦 Quick Stock Availability Toggle
+                    <span>📦</span>
+                    <span>Quick Stock Availability</span>
                   </button>
                   <button
                     onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/staff/history' ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/staff/history' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    📋 Order History Log
+                    <span>📋</span>
+                    <span>Order History Log</span>
                   </button>
                 </>
               )}
@@ -362,95 +280,115 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 <>
                   <button
                     onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/admin' || pathname === '/admin/dashboard' ? 'bg-purple-50 text-purple-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/admin' || pathname === '/admin/dashboard' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    📊 Executive Dashboard
+                    <span>📊</span>
+                    <span>Executive Dashboard</span>
                   </button>
                   <button
                     onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/admin/orders' ? 'bg-purple-50 text-purple-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/admin/orders' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    💵 Sales Controls & Refund Applications
+                    <span>💵</span>
+                    <span>Sales Controls & Refunds</span>
                   </button>
                   <button
                     onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/admin/inventory' ? 'bg-purple-50 text-purple-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/admin/inventory' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    🍱 Menu Inventory
-                  </button>
-                  <button
-                    onClick={() => { navigate('/admin/categories'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/admin/categories' ? 'bg-purple-50 text-purple-700 font-extrabold' : 'text-slate-700'}`}
-                  >
-                    🏷️ Categories
-                  </button>
-                  <button
-                    onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/admin/offers' ? 'bg-purple-50 text-purple-700 font-extrabold' : 'text-slate-700'}`}
-                  >
-                    🔥 Combo Deals & Banners
+                    <span>🍱</span>
+                    <span>Menu Inventory</span>
                   </button>
                   <button
                     onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/admin/promos' ? 'bg-purple-50 text-purple-700 font-extrabold' : 'text-slate-700'}`}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
+                      pathname === '/admin/promos' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
-                    🎟️ Coupon Codes
+                    <span>🎟️</span>
+                    <span>Coupon Codes</span>
                   </button>
                   <button
-                    onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left p-3 rounded-xl text-xs font-bold ${pathname === '/admin/staff' ? 'bg-purple-50 text-purple-700 font-extrabold' : 'text-slate-700'}`}
+                    onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }}
+                    className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold text-purple-700 bg-purple-50 hover:bg-purple-100 flex items-center gap-2.5 transition-all"
                   >
-                    👨‍🍳 Staff Roles
+                    <KeyRound className="w-4 h-4 text-purple-600" />
+                    <span>Change Admin Passcode</span>
                   </button>
                 </>
               )}
-
-              {/* Developer, Report Bug, & Auth Links */}
-              <div className="pt-2 border-t border-slate-100 space-y-1">
-                <button
-                  onClick={() => { onOpenReportBug?.(); setMobileMenuOpen(false); }}
-                  className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 flex items-center justify-between transition-colors shadow-2xs"
-                >
-                  <div className="flex items-center gap-2">
-                    <span>🐞 Report Bug / Suggestions</span>
-                  </div>
-                  <span className="text-[10px] bg-amber-200 text-amber-950 font-black px-2 py-0.5 rounded-md">Feedback</span>
-                </button>
-
-                <button
-                  onClick={() => { onOpenAboutDev?.(); setMobileMenuOpen(false); }}
-                  className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-indigo-950 hover:bg-indigo-900 text-indigo-100 flex items-center justify-between transition-colors shadow-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <span>💻 About Developer & Credits</span>
-                  </div>
-                  <span className="text-[10px] bg-indigo-500 text-white font-black px-2 py-0.5 rounded-md">Aayush Sharma</span>
-                </button>
-
-                {session ? (
-                  <button
-                    onClick={() => { logout(); setMobileMenuOpen(false); }}
-                    className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 flex items-center justify-between transition-colors mt-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <LogOut className="w-4 h-4 text-red-600" />
-                      <span>Sign Out ({profile?.full_name || session.user.email})</span>
-                    </div>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => { onOpenAuth?.('customer'); setMobileMenuOpen(false); }}
-                    className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-between transition-colors mt-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <LogIn className="w-4 h-4 text-emerald-400" />
-                      <span>Sign In / Register</span>
-                    </div>
-                  </button>
-                )}
-              </div>
-
             </div>
+
+            {/* Section 2: Quick Cart Action */}
+            <div className="pt-2 border-t border-slate-100 space-y-0.5">
+              <button
+                onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
+                className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 flex items-center justify-between transition-colors border border-emerald-200/60"
+              >
+                <div className="flex items-center gap-2.5">
+                  <ShoppingCart className="w-4 h-4 text-emerald-600" />
+                  <span>View Order Cart</span>
+                </div>
+                {cartCount > 0 ? (
+                  <span className="bg-emerald-600 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
+                    {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-emerald-600 font-bold">Empty</span>
+                )}
+              </button>
+            </div>
+
+            {/* Section 3: Support & Developer Credits */}
+            <div className="pt-2 border-t border-slate-100 space-y-0.5">
+              <button
+                onClick={() => { onOpenReportBug?.(); setMobileMenuOpen(false); }}
+                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
+              >
+                <Bug className="w-4 h-4 text-amber-600" />
+                <span>Report Bug / Suggestions</span>
+              </button>
+
+              <button
+                onClick={() => { onOpenAboutDev?.(); setMobileMenuOpen(false); }}
+                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
+              >
+                <Code className="w-4 h-4 text-indigo-600" />
+                <span>About Developer (Aayush Sharma)</span>
+              </button>
+            </div>
+
+            {/* Section 4: Account Actions */}
+            <div className="pt-2 border-t border-slate-100">
+              {session ? (
+                <button
+                  onClick={() => { logout(); setMobileMenuOpen(false); }}
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-red-50 hover:bg-red-100 text-red-700 flex items-center justify-between transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <LogOut className="w-4 h-4 text-red-600" />
+                    <span>Sign Out</span>
+                  </div>
+                </button>
+              ) : (
+                <button
+                  onClick={() => { onOpenAuth?.('customer'); setMobileMenuOpen(false); }}
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white rounded-xl flex items-center justify-between transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <LogIn className="w-4 h-4 text-emerald-400" />
+                    <span>Sign In / Register</span>
+                  </div>
+                </button>
+              )}
+            </div>
+
           </div>
         )}
       </header>
