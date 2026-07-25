@@ -146,4 +146,15 @@ export function getPaymentId(order) {
   return '';
 }
 
+export function getOrderId(order) {
+  if (!order) return '';
+  if (order.order_number) return String(order.order_number);
+  if (order.id) {
+    const cleanId = String(order.id).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    return 'GC-' + cleanId.slice(0, 6);
+  }
+  return '';
+}
+
+
 

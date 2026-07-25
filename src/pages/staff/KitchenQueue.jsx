@@ -8,9 +8,10 @@ import {
 import PaymentConfirmModal from '../../components/PaymentConfirmModal';
 import CancelOrderModal from '../../components/CancelOrderModal';
 import { sendOrderReadyEmail, sendRefundNotificationEmail } from '../../lib/emailNotifier';
-import { getOrderFinancials, getOrderPin, getUserSpecialInstructions, getPaymentId } from '../../lib/orderUtils';
+import { getOrderFinancials, getOrderPin, getUserSpecialInstructions, getPaymentId, getOrderId } from '../../lib/orderUtils';
 
 export default function KitchenQueue() {
+
 
 
   const { showToast, profile, session, staffT } = useAuth();
@@ -319,6 +320,7 @@ export default function KitchenQueue() {
             const financials = getOrderFinancials(order);
             const pin = getOrderPin(order);
             const paymentId = getPaymentId(order);
+            const orderIdStr = getOrderId(order);
             const cleanNotes = getUserSpecialInstructions(order.special_instructions);
 
             // Rule 1: ANY Unpaid order (whether created as cash or abandoned UPI window) can be cancelled directly with a reason.
@@ -341,7 +343,7 @@ export default function KitchenQueue() {
                     : 'border-emerald-400 bg-emerald-50/30'
                 }`}
               >
-                {/* Header: TOKEN NUMBER & PIN */}
+                {/* Header: TOKEN NUMBER, ORDER ID & PIN */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div>
@@ -350,12 +352,19 @@ export default function KitchenQueue() {
                           Token #{order.token_number || order.id.slice(0, 4)}
                         </span>
 
+                        {orderIdStr && (
+                          <span className="text-xs font-extrabold text-indigo-900 bg-indigo-50 px-2.5 py-1 rounded-xl border border-indigo-200 font-mono shadow-2xs">
+                            🆔 {orderIdStr}
+                          </span>
+                        )}
+
                         {pin && (
                           <span className="text-xs font-black text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl border border-purple-300 tracking-wider font-mono shadow-2xs">
                             🔑 PIN: {pin}
                           </span>
                         )}
                       </div>
+
 
                       <div className="flex items-center gap-2 mt-1.5">
                         <h3 className="text-xs font-black text-slate-900">{order.customer_name || 'Walk-in Customer'}</h3>

@@ -4,7 +4,8 @@ import {
   IndianRupee, ShoppingBag, Clock, TrendingUp, Loader2, RefreshCw, Ticket, 
   Smartphone, DollarSign, Award, Flame, CheckCircle2, User, Phone, KeyRound, Sparkles, ArrowRight
 } from 'lucide-react';
-import { getOrderFinancials } from '../../lib/orderUtils';
+import { getOrderFinancials, getOrderId, getOrderPin } from '../../lib/orderUtils';
+
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -399,18 +400,26 @@ export default function AdminDashboard() {
               <tbody className="divide-y divide-slate-100">
                 {recentOrders.map(order => {
                   const financials = getOrderFinancials(order);
+                  const orderIdStr = getOrderId(order);
+                  const pin = getOrderPin(order);
 
                   return (
                     <tr key={order.id} className="hover:bg-slate-50/80 transition-colors">
-                      {/* Token & PIN */}
+                      {/* Token, Order ID & PIN */}
                       <td className="p-3.5 font-black text-slate-900">
-                        <div>#{order.token_number || order.id.slice(0, 6)}</div>
-                        {order.pickup_code && (
-                          <span className="text-[10px] font-extrabold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 block w-fit mt-0.5">
-                            🔑 PIN: {order.pickup_code}
+                        <div>#{order.token_number || order.id.slice(0, 4)}</div>
+                        {orderIdStr && (
+                          <span className="text-[10px] font-extrabold text-indigo-900 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200 block w-fit mt-0.5 font-mono">
+                            🆔 {orderIdStr}
+                          </span>
+                        )}
+                        {pin && (
+                          <span className="text-[10px] font-extrabold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 block w-fit mt-0.5 font-mono">
+                            🔑 PIN: {pin}
                           </span>
                         )}
                       </td>
+
 
                       {/* Customer Name & Phone */}
                       <td className="p-3.5 font-bold text-slate-900">

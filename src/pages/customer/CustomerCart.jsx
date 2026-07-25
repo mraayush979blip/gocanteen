@@ -274,8 +274,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         enrichedNotes = enrichedNotes ? `${enrichedNotes} | ${payTag}` : payTag;
       }
 
+      const uniqueOrderId = 'GC-' + orderId.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6);
+
       const basePayload = {
         id: orderId,
+        order_number: uniqueOrderId,
         customer_name: customerName.trim(),
         phone: phone.trim(),
         status: 'pending',
@@ -292,6 +295,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         payment_id: paymentId || '',
         razorpay_payment_id: paymentId || ''
       };
+
 
 
       if (session?.user?.id) {

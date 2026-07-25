@@ -7,17 +7,18 @@ import {
 
 import PaymentConfirmModal from '../../components/PaymentConfirmModal';
 import CancelOrderModal from '../../components/CancelOrderModal';
-import { getOrderPin, getUserSpecialInstructions } from '../../lib/orderUtils';
+import { getOrderFinancials, getOrderPin, getUserSpecialInstructions, getPaymentId, getOrderId } from '../../lib/orderUtils';
 
 export default function AdminOrders() {
-
   const { showToast, profile, session } = useAuth();
   const adminIdentifier = profile?.full_name || profile?.email || session?.user?.email || 'Admin';
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   // Custom Payment Modal state
+
   const [payModalOrder, setPayModalOrder] = useState(null);
   const [payModalTargetStatus, setPayModalTargetStatus] = useState(null);
 
@@ -203,38 +204,6 @@ export default function AdminOrders() {
     }
   };
 
-  // Helper calculation for gross sale and coupon discount for each order
-  const getOrderFinancials = (order) => {
-    let grossItemsTotal = 0;
-    if (order.order_items && order.order_items.length > 0) {
-      grossItemsTotal = order.order_items.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0);
-    }
-
-    let netPayable = Number(order.total_amount) || 0;
-    let couponDiscount = Number(order.discount_amount) || 0;
-    let couponCode = order.coupon_code || '';
-
-    if (order.special_instructions) {
-      const savedMatch = order.special_instructions.match(/Saved:\s*₹?(\d+)/i);
-      const subtotalMatch = order.special_instructions.match(/Subtotal:\s*₹?(\d+)/i);
-      const couponMatch = order.special_instructions.match(/Coupon:\s*([A-Z0-9_-]+)/i);
-
-      if (savedMatch && savedMatch[1]) couponDiscount = Number(savedMatch[1]);
-      if (subtotalMatch && subtotalMatch[1]) grossItemsTotal = Math.max(grossItemsTotal, Number(subtotalMatch[1]));
-      if (couponMatch && couponMatch[1]) couponCode = couponMatch[1];
-    }
-
-    if (couponDiscount > 0) {
-      if (netPayable === grossItemsTotal || netPayable > (grossItemsTotal - couponDiscount)) {
-        netPayable = Math.max(0, grossItemsTotal - couponDiscount);
-      }
-    }
-
-    const grossSale = grossItemsTotal > netPayable ? grossItemsTotal : netPayable + couponDiscount;
-
-    return { grossSale, couponDiscount, netPayable, couponCode };
-  };
-
   // Filter Logic
   const filteredOrders = orders.filter(order => {
     const orderDateStr = order.created_at ? order.created_at.split('T')[0] : '';
@@ -248,8 +217,8 @@ export default function AdminOrders() {
       if (paymentFilter === 'upi' && (pMethod.includes('cash'))) return false;
     }
 
-    const { couponDiscount } = getOrderFinancials(order);
-    const hasCoupon = couponDiscount > 0 || Boolean(order.promo_code);
+    const { discount } = getOrderFinancials(order);
+    const hasCoupon = discount > 0 || Boolean(order.promo_code);
     if (couponFilter === 'coupon_used' && !hasCoupon) return false;
     if (couponFilter === 'no_coupon' && hasCoupon) return false;
 
@@ -264,12 +233,15 @@ export default function AdminOrders() {
       const nameMatch = order.customer_name?.toLowerCase().includes(q);
       const phoneMatch = order.phone?.includes(q);
       const tokenMatch = order.token_number?.toString().includes(q);
+      const orderIdMatch = getOrderId(order).toLowerCase().includes(q) || order.id?.toLowerCase().includes(q);
+      const pinMatch = getOrderPin(order).includes(q);
       const promoMatch = order.promo_code?.toLowerCase().includes(q);
-      if (!nameMatch && !phoneMatch && !tokenMatch && !promoMatch) return false;
+      if (!nameMatch && !phoneMatch && !tokenMatch && !orderIdMatch && !pinMatch && !promoMatch) return false;
     }
 
     return true;
   });
+
 
   // Export Filtered Orders to Excel (CSV)
   const exportToExcel = () => {
@@ -571,11 +543,14 @@ export default function AdminOrders() {
           <p className="text-xs text-slate-500">Try adjusting the date range or status filters above.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           {filteredOrders.map(order => {
             const { subtotal, discount, foodSalesAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
             const pin = getOrderPin(order);
+            const paymentId = getPaymentId(order);
+            const orderIdStr = getOrderId(order);
             const cleanNotes = getUserSpecialInstructions(order.special_instructions);
+            const isExpanded = expandedOrderId === order.id;
 
             let attributionName = order.handled_by_name || '';
             if (attributionName.toLowerCase().includes('customer') || attributionName.toLowerCase().includes('student')) {
@@ -585,34 +560,65 @@ export default function AdminOrders() {
             return (
               <div
                 key={order.id}
-                className={`bg-white border-2 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs transition-all ${
+                className={`bg-white border rounded-2xl transition-all shadow-2xs overflow-hidden ${
                   order.status === 'cancelled' ? 'border-red-200 bg-red-50/20' : 'border-slate-200'
                 }`}
               >
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xl font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 font-mono">
-                        Token #{order.token_number || order.id.slice(0, 4)}
+                {/* COMPACT LINEAR ROW */}
+                <div
+                  onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                  className="p-3.5 sm:p-4 cursor-pointer hover:bg-slate-50/90 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
+                >
+                  {/* Left: Token Number, Order ID & PIN */}
+                  <div className="flex items-center gap-2 flex-wrap min-w-[220px]">
+                    <span className="text-sm font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-mono">
+                      Token #{order.token_number || order.id.slice(0, 4)}
+                    </span>
+
+                    {orderIdStr && (
+                      <span className="text-xs font-extrabold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 font-mono">
+                        🆔 {orderIdStr}
                       </span>
-                      {pin && (
-                        <span className="text-xs font-black text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl border border-purple-300 font-mono tracking-wider">
-                          🔑 PIN: {pin}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-extrabold text-slate-900">{order.customer_name || 'Guest'}</h4>
-                      <span className="text-xs text-slate-500 font-semibold">{order.phone || 'No phone'}</span>
-                    </div>
+                    )}
+
+                    {pin && (
+                      <span className="text-[11px] font-black text-purple-900 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 font-mono">
+                        🔑 {pin}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-2 flex-wrap">
+                  {/* Customer Name & Phone */}
+                  <div className="min-w-[180px]">
+                    <h4 className="text-xs font-black text-slate-900 truncate">{order.customer_name || 'Walk-in Guest'}</h4>
+                    <span className="text-[11px] text-slate-500 font-bold block">{order.phone || 'No phone'}</span>
+                  </div>
+
+                  {/* Price (Rupees) & Payment Status */}
+                  <div className="flex items-center gap-2 min-w-[170px]">
+                    <span className="text-sm font-black text-slate-900">₹{customerPaid}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTogglePaymentStatus(order.id, order.payment_status);
+                      }}
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border transition-all ${
+                        order.payment_status === 'paid'
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                          : 'bg-red-100 text-red-800 border-red-300'
+                      }`}
+                    >
+                      {order.payment_status === 'paid' ? 'PAID ✓' : 'UNPAID ✕'} ({order.payment_method?.toUpperCase() || 'CASH'})
+                    </button>
+                  </div>
+
+                  {/* Status Selector & Tap Arrow */}
+                  <div className="flex items-center gap-2 shrink-0">
                     <select
                       value={order.status}
+                      onClick={(e) => e.stopPropagation()}
                       onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border focus:outline-none cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-xl text-xs font-extrabold border focus:outline-none cursor-pointer ${
                         order.status === 'pending' ? 'bg-amber-100 text-amber-800 border-amber-300' :
                         order.status === 'preparing' ? 'bg-blue-100 text-blue-800 border-blue-300' :
                         order.status === 'ready' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
@@ -621,122 +627,129 @@ export default function AdminOrders() {
                       }`}
                     >
                       <option value="pending">Pending ⏳</option>
-                      <option value="preparing">Preparing 👨‍🍳</option>
+                      <option value="preparing">Cooking 👨‍🍳</option>
                       <option value="ready">Ready ✅</option>
                       <option value="completed">Delivered 🎉</option>
                       <option value="cancelled">Cancelled ✕</option>
                     </select>
 
-                    <button
-                      onClick={() => handleTogglePaymentStatus(order.id, order.payment_status)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${
-                        order.payment_status === 'paid'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
-                          : 'bg-red-50 text-red-700 border-red-300 hover:bg-red-100'
-                      }`}
-                    >
-                      {order.payment_status === 'paid' ? 'PAID ✓' : 'UNPAID ✕'}
-                    </button>
+                    <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
+                      {isExpanded ? <ChevronUp className="w-4 h-4 text-purple-600" /> : <ChevronDown className="w-4 h-4" />}
+                    </div>
                   </div>
                 </div>
 
-                {/* Cancellation Reason Banner (If Cancelled) */}
-                {order.status === 'cancelled' && (
-                  <div className="bg-red-100 border border-red-300 text-red-950 p-3 rounded-2xl text-xs space-y-1 font-bold">
-                    <div className="flex items-center gap-1.5 text-red-700">
-                      <XCircle className="w-4 h-4 text-red-600" />
-                      <span>Order Cancelled</span>
+                {/* EXPANDABLE DETAILED SUMMARY DRAWER */}
+                {isExpanded && (
+                  <div className="border-t border-slate-100 bg-slate-50/60 p-4 space-y-4 animate-fade-in text-xs">
+                    
+                    {/* Cancellation Reason Banner (If Cancelled) */}
+                    {order.status === 'cancelled' && (
+                      <div className="bg-red-100 border border-red-300 text-red-950 p-3 rounded-2xl text-xs space-y-1 font-bold">
+                        <div className="flex items-center gap-1.5 text-red-700">
+                          <XCircle className="w-4 h-4 text-red-600" />
+                          <span>Order Cancelled</span>
+                        </div>
+                        <p className="text-[11px] text-slate-900">
+                          Reason: <b>{order.cancellation_reason || 'Out of stock or customer cancellation'}</b>
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Items & Financial Breakdown Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-2 bg-white rounded-2xl p-4 border border-slate-200 space-y-2">
+                        <span className="text-[11px] uppercase font-extrabold text-slate-500 tracking-wider block">
+                          Ordered Items ({order.order_items?.length || 0})
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {order.order_items?.map((item, idx) => (
+                            <span
+                              key={idx}
+                              className="bg-slate-50 border border-slate-200 text-slate-800 text-xs px-2.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-2xs"
+                            >
+                              <span className="text-emerald-700 font-extrabold">{item.quantity}x</span>
+                              {item.inventory?.emoji || '🍽️'} {item.inventory?.name || item.item_name || 'Item'}
+                              <span className="text-slate-400 font-medium">@ ₹{item.price_at_time}</span>
+                            </span>
+                          ))}
+                        </div>
+                        {cleanNotes && (
+                          <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5 mt-2">
+                            📝 Special Request: {cleanNotes}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="bg-purple-50/50 border border-purple-200 rounded-2xl p-4 space-y-2 text-xs">
+                        <span className="text-[11px] uppercase font-extrabold text-purple-900 tracking-wider block">
+                          Audit & Financial Breakdown
+                        </span>
+
+                        <div className="space-y-1.5 text-slate-700 font-semibold">
+                          <div className="flex justify-between">
+                            <span>Food Subtotal</span>
+                            <span className="font-extrabold text-slate-900">₹{subtotal}</span>
+                          </div>
+
+                          {discount > 0 ? (
+                            <div className="flex justify-between text-amber-700 font-extrabold bg-amber-100/60 px-2 py-1 rounded-lg">
+                              <span>Discount {couponCode ? `(${couponCode})` : ''}</span>
+                              <span>-₹{discount}</span>
+                            </div>
+                          ) : (
+                            <div className="flex justify-between text-slate-400">
+                              <span>Discount</span>
+                              <span>No Coupon</span>
+                            </div>
+                          )}
+
+                          <div className="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-purple-200">
+                            <span>Net Food Revenue</span>
+                            <span className="text-emerald-700 text-base">₹{foodSalesAmount}</span>
+                          </div>
+
+                          {platformFee > 0 && (
+                            <div className="flex justify-between text-amber-900 font-extrabold bg-amber-100/80 px-2 py-1 rounded-lg border border-amber-300">
+                              <span>⚡ Platform Fee (UPI/Online)</span>
+                              <span>+₹{platformFee}</span>
+                            </div>
+                          )}
+
+                          {paymentId && (
+                            <div className="flex justify-between text-purple-950 font-bold text-[10px] bg-white px-2 py-1 rounded-lg border border-purple-200 font-mono">
+                              <span>💳 Payment ID</span>
+                              <span className="truncate max-w-[140px]">{paymentId}</span>
+                            </div>
+                          )}
+
+                          <div className="flex justify-between text-xs font-black text-slate-900 pt-1 border-t border-slate-200">
+                            <span>Customer Total Paid</span>
+                            <span className="text-purple-950 font-black">₹{customerPaid}</span>
+                          </div>
+
+                          {/* STAFF / ADMIN ATTRIBUTION BADGE */}
+                          <div className="pt-2 border-t border-purple-200/60">
+                            <span className="text-[10px] text-slate-400 block font-bold uppercase">Staff Audit Trail</span>
+                            <div className="flex items-center gap-1 text-[11px] font-black text-purple-900 bg-white px-2.5 py-1 rounded-lg border border-purple-200 mt-1">
+                              <User className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                              <span>
+                                {order.status === 'cancelled'
+                                  ? `Cancelled by ${attributionName || 'Staff'}`
+                                  : `Handled by ${attributionName || 'Staff'}`}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-[10px] text-slate-400 pt-1">
+                            Placed: {new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-slate-900">
-                      Reason: <b>{order.cancellation_reason || 'Out of stock or customer cancellation'}</b>
-                    </p>
+
                   </div>
                 )}
-
-                {/* Items & Financial Breakdown Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2 bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2">
-                    <span className="text-[11px] uppercase font-extrabold text-slate-500 tracking-wider block">
-                      Ordered Items ({order.order_items?.length || 0})
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {order.order_items?.map((item, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-white border border-slate-200 text-slate-800 text-xs px-2.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-2xs"
-                        >
-                          <span className="text-emerald-700 font-extrabold">{item.quantity}x</span>
-                          {item.inventory?.emoji || '🍽️'} {item.inventory?.name || item.item_name || 'Item'}
-                          <span className="text-slate-400 font-medium">@ ₹{item.price_at_time}</span>
-                        </span>
-                      ))}
-                    </div>
-                    {cleanNotes && (
-                      <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5 mt-2">
-                        📝 Special Request: {cleanNotes}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="bg-purple-50/40 border border-purple-200/80 rounded-2xl p-4 space-y-2 text-xs">
-                    <span className="text-[11px] uppercase font-extrabold text-purple-900 tracking-wider block">
-                      Audit & Financial Breakdown
-                    </span>
-
-                    <div className="space-y-1.5 text-slate-700 font-semibold">
-                      <div className="flex justify-between">
-                        <span>Food Subtotal</span>
-                        <span className="font-extrabold text-slate-900">₹{subtotal}</span>
-                      </div>
-
-                      {discount > 0 ? (
-                        <div className="flex justify-between text-amber-700 font-extrabold bg-amber-100/60 px-2 py-1 rounded-lg">
-                          <span>Discount {couponCode ? `(${couponCode})` : ''}</span>
-                          <span>-₹{discount}</span>
-                        </div>
-                      ) : (
-                        <div className="flex justify-between text-slate-400">
-                          <span>Discount</span>
-                          <span>No Coupon</span>
-                        </div>
-                      )}
-
-                      <div className="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-purple-200">
-                        <span>Net Food Revenue</span>
-                        <span className="text-emerald-700 text-base">₹{foodSalesAmount}</span>
-                      </div>
-
-                      {platformFee > 0 && (
-                        <div className="flex justify-between text-amber-900 font-extrabold bg-amber-100/80 px-2 py-1 rounded-lg border border-amber-300">
-                          <span>Platform Fee (UPI/Online)</span>
-                          <span>+₹{platformFee}</span>
-                        </div>
-                      )}
-
-                      <div className="flex justify-between text-xs font-black text-slate-900 pt-1 border-t border-slate-200">
-                        <span>Customer Total Paid</span>
-                        <span className="text-purple-950 font-black">₹{customerPaid}</span>
-                      </div>
-
-                      {/* STAFF / ADMIN ATTRIBUTION BADGE */}
-                      <div className="pt-2 border-t border-purple-200/60">
-                        <span className="text-[10px] text-slate-400 block font-bold uppercase">Staff Audit Trail</span>
-                        <div className="flex items-center gap-1 text-[11px] font-black text-purple-900 bg-white px-2.5 py-1 rounded-lg border border-purple-200 mt-1">
-                          <User className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                          <span>
-                            {order.status === 'cancelled'
-                              ? `Cancelled by ${attributionName || 'Staff'}`
-                              : `Handled by ${attributionName || 'Staff'}`}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-[10px] text-slate-400 pt-1">
-                        Placed: {new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             );
           })}

@@ -6,9 +6,10 @@ import {
   XCircle, ChevronDown, ChevronUp, Sparkles, Zap, Calendar
 } from 'lucide-react';
 import CancelOrderModal from '../../components/CancelOrderModal';
-import { getOrderFinancials, getCancellationReason, getOrderPin, getUserSpecialInstructions } from '../../lib/orderUtils';
+import { getOrderFinancials, getCancellationReason, getOrderPin, getUserSpecialInstructions, getOrderId } from '../../lib/orderUtils';
 
 export default function CustomerOrders({ onOpenAuth }) {
+
   const { user, profile, showToast } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -271,8 +272,8 @@ export default function CustomerOrders({ onOpenAuth }) {
             const summaryText = itemsList.map(i => `${i.quantity}x ${i.inventory?.name || i.item_name || 'Item'}`).join(', ');
 
             const pin = getOrderPin(order);
+            const orderIdStr = getOrderId(order);
             const canCustomerCancel = (order.status === 'pending' || order.status === 'preparing') && order.status !== 'cancelled';
-
             const cancellationReasonText = getCancellationReason(order);
             const cleanUserNotes = getUserSpecialInstructions(order.special_instructions);
 
@@ -290,11 +291,17 @@ export default function CustomerOrders({ onOpenAuth }) {
                 >
                   <div className="flex items-center justify-between gap-2">
                     
-                    {/* Left: Token Number & Status */}
+                    {/* Left: Token Number, Order ID & Status */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm sm:text-base font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200 font-mono">
                         Token #{order.token_number || order.id.slice(0, 4)}
                       </span>
+
+                      {orderIdStr && (
+                        <span className="text-xs font-extrabold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-200 font-mono">
+                          🆔 {orderIdStr}
+                        </span>
+                      )}
 
                       <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${badge.bg}`}>
                         {badge.label}
@@ -365,14 +372,23 @@ export default function CustomerOrders({ onOpenAuth }) {
                       </div>
                     )}
 
-                    {/* Cancellation Reason Banner */}
+                    {/* Cancellation Reason Banner with Refund Support Contact */}
                     {order.status === 'cancelled' && (
-                      <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2.5 text-xs text-red-900 font-medium">
-                        <XCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                        <div>
-                          <span className="font-extrabold uppercase block text-[10px] text-red-700">Cancellation Reason</span>
-                          <p className="font-bold text-slate-900">
-                            {cancellationReasonText}
+                      <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5 space-y-2 text-xs text-red-950 font-medium">
+                        <div className="flex items-center gap-2 text-red-700 font-black">
+                          <XCircle className="w-4 h-4 text-red-600 shrink-0" />
+                          <span>Order Cancelled</span>
+                        </div>
+                        <p className="font-bold text-slate-900">
+                          Reason: {cancellationReasonText}
+                        </p>
+
+                        <div className="mt-2 p-2.5 bg-white border border-red-200 rounded-xl text-[11px] text-slate-700 space-y-1">
+                          <span className="font-black text-red-800 block">📞 Refund & Admin Support:</span>
+                          <p className="leading-relaxed">
+                            For refund queries or support, please call/WhatsApp Canteen Admin at{' '}
+                            <a href="tel:+919244217287" className="font-extrabold text-indigo-600 hover:underline">+91 9244217287</a>{' '}
+                            with your <b>Order ID ({orderIdStr})</b> & Token #{order.token_number || order.id.slice(0, 4)}.
                           </p>
                         </div>
                       </div>
