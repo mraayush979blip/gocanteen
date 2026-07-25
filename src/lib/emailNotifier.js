@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { getOrderId } from './orderUtils';
 
 export async function sendOrderReadyEmail(order) {
   try {
@@ -26,12 +27,13 @@ export async function sendOrderReadyEmail(order) {
       if (pinMatch) pickupPin = pinMatch[1];
     }
 
-    // Trigger Supabase SMTP using Magic Link / OTP template
+    // Trigger Supabase SMTP
     const { error: smtpError } = await supabase.auth.signInWithOtp({
       email: customerEmail,
       options: {
         emailRedirectTo: `${window.location.origin}/#/orders`,
         data: {
+          order_id: getOrderId(order),
           token_number: order.token_number || order.id.slice(0, 4),
           pickup_code: pickupPin || '----',
           customer_name: order.customer_name || 'Valued Customer'
@@ -71,15 +73,22 @@ export async function sendRefundNotificationEmail(order, cancellationReason) {
       return { success: false, message: 'No customer email found' };
     }
 
-    // Trigger Supabase SMTP using Magic Link / OTP template for refund notification
+    const orderIdStr = getOrderId(order);
+
+    // Trigger Supabase SMTP for refund notification
     const { error: smtpError } = await supabase.auth.signInWithOtp({
       email: customerEmail,
       options: {
         emailRedirectTo: `${window.location.origin}/#/orders`,
         data: {
+          order_id: orderIdStr,
           token_number: order.token_number || order.id.slice(0, 4),
-          pickup_code: `CANCELLED: ${cancellationReason || 'Refund Initiated'}`,
-          customer_name: order.customer_name || 'Valued Customer'
+          cancellation_reason: cancellationReason || 'Kitchen out of stock or staff cancellation',
+          customer_name: order.customer_name || 'Valued Customer',
+          amount_paid: `₹${order.total_amount || 0}`,
+          admin_contact: '+91 9244217287',
+          admin_email: 'gocanteen8@gmail.com',
+          pickup_code: `CANCELLED: ${cancellationReason || 'Refund Application Sent'}`
         }
       }
     });
@@ -96,3 +105,4 @@ export async function sendRefundNotificationEmail(order, cancellationReason) {
     return { success: false, error: err.message };
   }
 }
+
