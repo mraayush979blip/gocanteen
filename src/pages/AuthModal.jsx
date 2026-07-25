@@ -129,7 +129,7 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
     onClose();
   };
 
-  const isAdminOnlyMode = initialRole === 'admin';
+  const isAdminOnlyMode = selectedRole === 'admin';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in text-slate-900">
@@ -245,9 +245,17 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-sm transition-all disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-sm transition-all disabled:opacity-50 cursor-pointer"
             >
               {loading ? 'Verifying Code...' : 'Unlock Admin Credentials Gate →'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleRoleSelect('customer')}
+              className="w-full text-center text-xs text-slate-500 hover:text-slate-800 font-bold pt-1 transition-colors"
+            >
+              ← Back to Customer / Staff Login
             </button>
           </form>
         ) : selectedRole === 'customer' ? (

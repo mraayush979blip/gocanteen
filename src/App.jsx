@@ -209,7 +209,7 @@ function MainContent() {
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        defaultRole={authModalRole}
+        initialRole={authModalRole}
       />
 
       <Toast />

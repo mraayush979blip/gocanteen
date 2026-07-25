@@ -23,11 +23,11 @@ export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
           </span>
           <h2 className="text-xl font-black text-slate-900">Admin Portal Locked 🔒</h2>
           <p className="text-xs text-slate-500 font-medium leading-relaxed">
-            Enter the 6-digit Admin Security Passcode (Default: <b className="text-purple-700 font-mono">919191</b>) to unlock the Admin Executive Dashboard.
+            Enter the 6-digit Admin Security Passcode to unlock the Admin Executive Dashboard.
           </p>
         </div>
         <button
-          onClick={onOpenAuth}
+          onClick={() => (onOpenAuth ? onOpenAuth('admin') : null)}
           className="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
         >
           <KeyRound className="w-4 h-4 text-yellow-300" />
