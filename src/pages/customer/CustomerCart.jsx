@@ -359,6 +359,43 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     }
   };
 
+  const verifyStockAvailability = async () => {
+    try {
+      const inventoryIds = cart
+        .map(i => i.id)
+        .filter(id => typeof id === 'string' && id.length > 20);
+
+      if (inventoryIds.length === 0) return { ok: true };
+
+      const { data: invItems, error } = await supabase
+        .from('inventory')
+        .select('id, name, is_available, is_active')
+        .in('id', inventoryIds);
+
+      if (error) {
+        console.warn('Stock verification query warning:', error.message);
+        return { ok: true };
+      }
+
+      const outOfStockNames = [];
+      invItems?.forEach(dbItem => {
+        if (dbItem.is_available === false || dbItem.is_active === false) {
+          outOfStockNames.push(dbItem.name);
+          updateCartQty(dbItem.id, -999);
+        }
+      });
+
+      if (outOfStockNames.length > 0) {
+        return { ok: false, outOfStockNames };
+      }
+
+      return { ok: true };
+    } catch (err) {
+      console.warn('Stock verification error:', err);
+      return { ok: true };
+    }
+  };
+
   const handlePlaceOrder = async () => {
     let hasErr = false;
     if (!customerName.trim()) {
@@ -375,12 +412,23 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       return;
     }
 
+    // Live background stock check before proceeding with payment/checkout (prevents stale local cache orders)
+    setPlacingOrder(true);
+    const stockCheck = await verifyStockAvailability();
+    if (!stockCheck.ok) {
+      setPlacingOrder(false);
+      const itemNames = stockCheck.outOfStockNames.join(', ');
+      showToast(`⚠️ Out of Stock Alert: [${itemNames}] became unavailable in database! It has been removed from your cart.`, true);
+      return;
+    }
+
     // DUAL-LAYER COD ANTI-SPAM & FAKE ORDER PROTECTION
     if (paymentMethod === 'cash') {
       const targetPhone = phone.trim();
       const targetUserId = session?.user?.id;
 
       try {
+
         setPlacingOrder(true);
 
         // 1. Rule 1: Max 2 Active Unpaid Cash Orders Limit

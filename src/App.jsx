@@ -33,6 +33,8 @@ import PolicyPage from './components/PolicyPage';
 import ReportBugModal from './components/ReportBugModal';
 import AboutDeveloperModal from './components/AboutDeveloperModal';
 import SEOHead from './components/SEOHead';
+import SplashScreen from './components/SplashScreen';
+
 
 function StaffLayout({ activeSubView, onOpenAuth }) {
 
@@ -105,6 +107,7 @@ function MainContent() {
   const location = useLocation();
   const { connectionError, session } = useAuth();
   
+  const [showSplash, setShowSplash] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalRole, setAuthModalRole] = useState('customer');
   const [cartOpen, setCartOpen] = useState(false);
@@ -129,6 +132,8 @@ function MainContent() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-['Plus_Jakarta_Sans',sans-serif] w-full max-w-full overflow-x-hidden">
       <SEOHead />
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+
       
       {/* Supabase Connection Warning Banner */}
 

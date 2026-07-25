@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { MenuGridSkeleton } from '../../components/SkeletonLoader';
+
 import { 
   Search, Flame, Plus, Minus, Loader2, ShoppingCart, 
   ArrowRight, Sparkles, Filter, Check, LayoutGrid, List,
@@ -139,18 +141,17 @@ export default function CustomerMenu({ onOpenCart }) {
   const totalCartPrice = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 1)), 0);
 
   if (loading) {
+
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <div className="relative">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-600/10 border-2 border-emerald-500 flex items-center justify-center">
-            <UtensilsCrossed className="w-6 h-6 text-emerald-600 animate-pulse" />
-          </div>
-          <Loader2 className="w-14 h-14 text-emerald-600 animate-spin absolute -top-1 -left-1" />
+      <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between gap-4 p-4 bg-white border border-slate-200 rounded-2xl animate-pulse">
+          <div className="h-10 bg-slate-200 rounded-xl w-full" />
         </div>
-        <span className="text-xs font-black text-slate-600 tracking-wider uppercase">Preparing Fresh Canteen Menu...</span>
+        <MenuGridSkeleton count={8} />
       </div>
     );
   }
+
 
   return (
     <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto">
