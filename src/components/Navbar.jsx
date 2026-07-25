@@ -22,6 +22,17 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  // Close mobile menu automatically on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [mobileMenuOpen]);
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => {
@@ -182,14 +193,14 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
           </div>
         </div>
 
-        {/* Backdrop overlay to close menu on outside click */}
+        {/* Backdrop overlay to close menu on outside click (starts below header to prevent blurring it) */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-xs animate-fade-in" onClick={() => setMobileMenuOpen(false)} />
+          <div className="fixed top-16 sm:top-[72px] inset-x-0 bottom-0 z-40 bg-slate-900/20 backdrop-blur-xs animate-fade-in" onClick={() => setMobileMenuOpen(false)} />
         )}
 
         {/* Standard Professional 3-Bar Floating Popover Menu */}
         {mobileMenuOpen && (
-          <div className="absolute right-4 sm:right-6 top-16 z-50 w-72 sm:w-80 rounded-2xl bg-white border border-slate-200/90 shadow-2xl p-2 font-medium animate-fade-in text-slate-900 space-y-1">
+          <div className="absolute right-4 sm:right-6 top-[68px] sm:top-[76px] z-50 w-72 sm:w-80 rounded-2xl bg-white border border-slate-200/90 shadow-2xl p-2 font-medium animate-fade-in text-slate-900 space-y-1">
             
             {/* User Profile Header if signed in */}
             {session && (
