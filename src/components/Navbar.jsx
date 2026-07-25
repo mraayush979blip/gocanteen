@@ -3,10 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { 
-  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize
+  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles
 } from 'lucide-react';
 
-export default function Navbar({ onOpenAuth, onOpenCart }) {
+export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpenAboutDev }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { session, profile, activePortal, setActivePortal, cart, logout, showToast, staffLanguage, setStaffLanguage } = useAuth();
@@ -218,6 +218,26 @@ export default function Navbar({ onOpenAuth, onOpenCart }) {
                   <Maximize className="w-4 h-4 text-slate-700 font-bold" />
                 )}
               </button>
+
+              {/* Report Bug / Feedback Button (Desktop) */}
+              <button
+                onClick={onOpenReportBug}
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200/80 text-amber-900 font-extrabold text-xs transition-all cursor-pointer shadow-2xs shrink-0"
+                title="Report Bug or Send Suggestions to gocanteen8@gmail.com & mraayush979@gmail.com"
+              >
+                <Bug className="w-3.5 h-3.5 text-amber-600" />
+                <span>Report Bug</span>
+              </button>
+
+              {/* About Developer Button (Desktop) */}
+              <button
+                onClick={onOpenAboutDev}
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-indigo-300 font-extrabold text-xs transition-all cursor-pointer shadow-2xs shrink-0"
+                title="About Developer & Credits"
+              >
+                <Code className="w-3.5 h-3.5 text-indigo-400" />
+                <span>About Dev</span>
+              </button>
               
               {/* Language Selector for Staff / Admin */}
               {(activePortal === 'staff' || activePortal === 'admin') && (
@@ -387,6 +407,30 @@ export default function Navbar({ onOpenAuth, onOpenCart }) {
                   </button>
                 </>
               )}
+
+              {/* Developer & Report Bug Action Links for All Users */}
+              <div className="pt-2 border-t border-slate-100 space-y-1">
+                <button
+                  onClick={() => { onOpenReportBug?.(); setMobileMenuOpen(false); }}
+                  className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 flex items-center justify-between transition-colors shadow-2xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <span>🐞 Report Bug / Suggestions</span>
+                  </div>
+                  <span className="text-[10px] bg-amber-200 text-amber-950 font-black px-2 py-0.5 rounded-md">Feedback</span>
+                </button>
+
+                <button
+                  onClick={() => { onOpenAboutDev?.(); setMobileMenuOpen(false); }}
+                  className="w-full text-left p-3 rounded-xl text-xs font-extrabold bg-indigo-950 hover:bg-indigo-900 text-indigo-100 flex items-center justify-between transition-colors shadow-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <span>💻 About Developer & Credits</span>
+                  </div>
+                  <span className="text-[10px] bg-indigo-500 text-white font-black px-2 py-0.5 rounded-md">Aayush Sharma</span>
+                </button>
+              </div>
+
             </div>
           </div>
         )}

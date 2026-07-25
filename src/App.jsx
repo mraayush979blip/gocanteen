@@ -30,6 +30,8 @@ import AdminOrders from './pages/admin/AdminOrders';
 
 import Footer from './components/Footer';
 import PolicyPage from './components/PolicyPage';
+import ReportBugModal from './components/ReportBugModal';
+import AboutDeveloperModal from './components/AboutDeveloperModal';
 
 function StaffLayout({ activeSubView, onOpenAuth }) {
   const navigate = useNavigate();
@@ -104,6 +106,8 @@ function MainContent() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalRole, setAuthModalRole] = useState('customer');
   const [cartOpen, setCartOpen] = useState(false);
+  const [reportBugOpen, setReportBugOpen] = useState(false);
+  const [aboutDevOpen, setAboutDevOpen] = useState(false);
 
   const handleOpenAuth = (role = 'customer') => {
     setAuthModalRole(role);
@@ -147,6 +151,8 @@ function MainContent() {
       <Navbar
         onOpenAuth={() => handleOpenAuth('customer')}
         onOpenCart={() => setCartOpen(true)}
+        onOpenReportBug={() => setReportBugOpen(true)}
+        onOpenAboutDev={() => setAboutDevOpen(true)}
       />
 
       {/* Floating Coupon & Deal Ticker Banner */}
@@ -195,6 +201,8 @@ function MainContent() {
       <Footer
         onOpenAdminAuth={() => handleOpenAuth('admin')}
         onOpenStaffAuth={() => handleOpenAuth('staff')}
+        onOpenReportBug={() => setReportBugOpen(true)}
+        onOpenAboutDev={() => setAboutDevOpen(true)}
       />
 
       {/* Slide-over Cart Modal */}
@@ -210,6 +218,18 @@ function MainContent() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialRole={authModalRole}
+      />
+
+      {/* Report Bug / Suggestions Modal */}
+      <ReportBugModal
+        isOpen={reportBugOpen}
+        onClose={() => setReportBugOpen(false)}
+      />
+
+      {/* About Developer Modal */}
+      <AboutDeveloperModal
+        isOpen={aboutDevOpen}
+        onClose={() => setAboutDevOpen(false)}
       />
 
       <Toast />

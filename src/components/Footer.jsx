@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { UtensilsCrossed, ShieldCheck, Mail, Phone, Shield, ChefHat } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export default function Footer({ onOpenAdminAuth, onOpenStaffAuth }) {
+export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportBug, onOpenAboutDev }) {
   const navigate = useNavigate();
   const { session } = useAuth();
 
@@ -26,6 +26,16 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth }) {
             <div className="pt-1 flex items-center gap-1.5 text-[11px] text-emerald-400 font-bold">
               <ShieldCheck className="w-4 h-4" />
               <span>Razorpay Verified Merchant</span>
+            </div>
+
+            {/* Quick Developer Credits Link */}
+            <div className="pt-2">
+              <button
+                onClick={onOpenAboutDev}
+                className="px-3 py-1.5 rounded-xl bg-indigo-950 hover:bg-indigo-900 text-indigo-300 font-extrabold text-[11px] border border-indigo-700/50 flex items-center gap-1.5 transition-all shadow-xs"
+              >
+                <span>💻 About Developer (Aayush Sharma)</span>
+              </button>
             </div>
           </div>
 
@@ -79,11 +89,17 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth }) {
           {/* Col 3: Contact & Support */}
           <div className="space-y-3">
             <h4 className="text-white font-extrabold text-xs uppercase tracking-wider">Contact & Support</h4>
-            <ul className="space-y-2.5 font-medium text-slate-400">
+            <ul className="space-y-2 font-medium text-slate-400">
               <li className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <a href="mailto:gocanteen8@gmail.com" className="hover:text-white transition-colors">
                   gocanteen8@gmail.com
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <a href="mailto:mraayush979@gmail.com" className="hover:text-white transition-colors font-semibold text-indigo-300">
+                  mraayush979@gmail.com (Dev)
                 </a>
               </li>
               <li className="flex items-center gap-2">
@@ -93,10 +109,13 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth }) {
                 </a>
               </li>
             </ul>
-            <div className="pt-2 space-y-1">
-              <span className="text-[11px] text-slate-400 font-extrabold block">Accepted Payments</span>
-              <p className="text-[11px] text-slate-400 font-medium">UPI (GPay / PhonePe / Paytm) • Cash</p>
-              <p className="text-[10px] text-emerald-400 font-bold">Secured by Razorpay Payments</p>
+            <div className="pt-2 space-y-2">
+              <button
+                onClick={onOpenReportBug}
+                className="w-full px-3 py-1.5 rounded-xl bg-amber-950 hover:bg-amber-900 text-amber-300 font-extrabold text-[11px] border border-amber-700/50 flex items-center justify-center gap-1.5 transition-all"
+              >
+                <span>🐞 Report Bug / Suggestions</span>
+              </button>
             </div>
           </div>
 
@@ -104,10 +123,14 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth }) {
 
         {/* Bottom Bar — Mobile Responsive Layout */}
         <div className="pt-6 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-400 text-[11px] text-center md:text-left">
-          <p>© {new Date().getFullYear()} <span className="text-white font-bold uppercase">Go Canteen</span>. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} <span className="text-white font-bold uppercase">Go Canteen</span>. Designed & Engineered by <button onClick={onOpenAboutDev} className="text-indigo-400 hover:underline font-bold">Aayush Sharma</button>.</p>
 
           <div className="flex items-center justify-center gap-3 flex-wrap">
-            <button onClick={() => navigate('/privacy')} className="hover:text-white">Privacy</button>
+            <button onClick={onOpenReportBug} className="hover:text-amber-400 font-semibold text-amber-300">Report Bug</button>
+            <span>•</span>
+            <button onClick={onOpenAboutDev} className="hover:text-indigo-400 font-semibold text-indigo-300">About Developer</button>
+            <span>•</span>
+            <button onClick={() => navigate('/privacy')} className="hover:text-white">Privacy</button>tton>
             <button onClick={() => navigate('/terms')} className="hover:text-white">Terms</button>
             <button onClick={() => navigate('/refund')} className="hover:text-white">Refunds</button>
             <button onClick={() => navigate('/contact')} className="hover:text-white">Contact</button>
