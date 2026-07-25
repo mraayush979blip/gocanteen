@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -17,6 +18,25 @@ export default function CustomerMenu({ onOpenCart }) {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'price-low' | 'price-high'
   const [loading, setLoading] = useState(true);
+
+  // Framer-motion Flying Add-to-Cart Particles State
+  const [flyingItems, setFlyingItems] = useState([]);
+
+  const handleAddToCartWithAnim = (e, item) => {
+    addToCart({ id: item.id, name: item.name, price: Number(item.price), emoji: item.emoji || '🍽️' });
+
+    // Calculate start position from button click
+    const rect = e.currentTarget.getBoundingClientRect();
+    const startX = rect.left + rect.width / 2;
+    const startY = rect.top + rect.height / 2;
+
+    const animId = Date.now() + Math.random();
+    setFlyingItems(prev => [...prev, { id: animId, emoji: item.emoji || '🍽️', startX, startY }]);
+
+    setTimeout(() => {
+      setFlyingItems(prev => prev.filter(f => f.id !== animId));
+    }, 750);
+  };
 
   useEffect(() => {
     fetchData();
@@ -412,8 +432,8 @@ export default function CustomerMenu({ onOpenCart }) {
                         </div>
                       ) : (
                         <button
-                          onClick={() => addToCart({ id: item.id, name: item.name, price: Number(item.price), emoji: item.emoji || '🍽️' })}
-                          className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0"
+                          onClick={(e) => handleAddToCartWithAnim(e, item)}
+                          className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95"
                         >
                           + ADD
                         </button>
@@ -423,10 +443,12 @@ export default function CustomerMenu({ onOpenCart }) {
                 }
 
                 return (
-                  /* Premium Bento Box Grid Card Layout */
-                  <div
+                  /* Premium Bento Box Grid Card Layout with framer-motion */
+                  <motion.div
                     key={item.id}
-                    className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 hover:-translate-y-1 transition-all duration-300 shadow-2xs group relative overflow-hidden"
+                    whileHover={{ scale: 1.015 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 shadow-2xs group relative overflow-hidden"
                   >
                     <div className="space-y-2">
                       
@@ -491,20 +513,41 @@ export default function CustomerMenu({ onOpenCart }) {
                         </div>
                       ) : (
                         <button
-                          onClick={() => addToCart({ id: item.id, name: item.name, price: Number(item.price), emoji: item.emoji || '🍽️' })}
-                          className="px-4 py-1.5 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0"
+                          onClick={(e) => handleAddToCartWithAnim(e, item)}
+                          className="px-4 py-1.5 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95"
                         >
                           + ADD
                         </button>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
           )}
         </div>
       )}
+
+      {/* Framer-Motion Flying Cart Emoji Particles Layer */}
+      <AnimatePresence>
+        {flyingItems.map(f => (
+          <motion.div
+            key={f.id}
+            initial={{ x: f.startX - 20, y: f.startY - 20, scale: 1.2, opacity: 1 }}
+            animate={{
+              x: window.innerWidth - 75,
+              y: 25,
+              scale: 0.2,
+              opacity: 0.1
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.65, ease: [0.25, 1, 0.5, 1] }}
+            className="fixed top-0 left-0 z-50 pointer-events-none text-2xl bg-yellow-400/90 border border-slate-900 rounded-full p-2 shadow-2xl"
+          >
+            {f.emoji}
+          </motion.div>
+        ))}
+      </AnimatePresence>
 
       {/* 6. Mobile Floating Sticky Cart Bar (Swiggy / Blinkit style) */}
       {totalCartCount > 0 && (

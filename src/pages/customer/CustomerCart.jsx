@@ -390,6 +390,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
           color: '#0c831f'
         },
         handler: function (response) {
+          if (!response || !response.razorpay_payment_id) {
+            setPlacingOrder(false);
+            showToast('❌ Invalid Payment Response from Razorpay. Transaction failed.', true);
+            return;
+          }
           executeOrderPlacement({
             paymentStatus: 'paid',
             paymentId: response.razorpay_payment_id,
@@ -420,11 +425,32 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     }
   };
 
+  // Window anti-exit listener during payment execution
+  useEffect(() => {
+    if (placingOrder) {
+      const handleBeforeUnload = (e) => {
+        e.preventDefault();
+        e.returnValue = 'Payment is processing. Closing this page will interrupt your transaction!';
+        return e.returnValue;
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }
+  }, [placingOrder]);
+
+  const handleSafeClose = () => {
+    if (placingOrder) {
+      showToast('⚠️ Payment is in progress. Please complete or cancel the payment window first!', true);
+      return;
+    }
+    onClose();
+  };
+
   const isProfileSaved = Boolean(profile?.full_name && profile?.phone);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs animate-fade-in text-slate-900">
-      <div className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs animate-fade-in text-slate-900" onClick={handleSafeClose}>
+      <div className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
         
         {/* Cart Header */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
@@ -432,7 +458,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
             <span className="text-xl">🛒</span>
             <h2 className="text-base font-black tracking-tight">Your Order Cart ({cart.length})</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300">
+          <button onClick={handleSafeClose} className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300">
             <X className="w-5 h-5" />
           </button>
         </div>
