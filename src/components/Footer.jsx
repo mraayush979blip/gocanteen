@@ -144,9 +144,9 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
                     if (onOpenStaffAuth) onOpenStaffAuth();
                     navigate('/staff');
                   }}
-                  className="text-emerald-400 hover:text-emerald-300 font-extrabold flex items-center gap-1.5 bg-emerald-400/10 hover:bg-emerald-400/20 px-3.5 py-2 rounded-xl border border-emerald-400/20 transition-all cursor-pointer text-xs tracking-wider uppercase shrink-0"
+                  className="group flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold tracking-wider uppercase text-slate-400 hover:text-emerald-450 bg-slate-950/50 hover:bg-slate-900/80 border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 shadow-2xs hover:shadow-md hover:shadow-emerald-500/5 cursor-pointer shrink-0"
                 >
-                  <ChefHat className="w-4 h-4 text-emerald-400" />
+                  <ChefHat className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition-colors shrink-0" />
                   <span>Staff Portal</span>
                 </button>
                 <button
@@ -154,9 +154,9 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
                     if (onOpenAdminAuth) onOpenAdminAuth();
                     navigate('/admin');
                   }}
-                  className="text-amber-400 hover:text-amber-300 font-extrabold flex items-center gap-1.5 bg-amber-400/10 hover:bg-amber-400/20 px-3.5 py-2 rounded-xl border border-amber-400/20 transition-all cursor-pointer text-xs tracking-wider uppercase shrink-0"
+                  className="group flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold tracking-wider uppercase text-slate-400 hover:text-amber-450 bg-slate-950/50 hover:bg-slate-900/80 border border-slate-800 hover:border-amber-500/30 transition-all duration-300 shadow-2xs hover:shadow-md hover:shadow-amber-500/5 cursor-pointer shrink-0"
                 >
-                  <Shield className="w-4 h-4 text-amber-400" />
+                  <Shield className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 transition-colors shrink-0" />
                   <span>Admin Portal</span>
                 </button>
               </div>
