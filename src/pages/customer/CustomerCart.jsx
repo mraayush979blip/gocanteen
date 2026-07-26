@@ -566,7 +566,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         currency: orderData.currency,
         name: 'Go Canteen',
         description: `Food Order (${cart.length} items)`,
-        image: 'https://cdn-icons-png.flaticon.com/512/3081/3081559.png',
+        image: window.location.origin + '/logo.png',
         order_id: orderData.order_id,
         prefill: {
           name: customerName,
@@ -578,7 +578,8 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
           flow: 'intent'
         },
         theme: {
-          color: '#0c831f'
+          color: '#059669', // Emerald brand theme color
+          backdrop_color: '#f8fafc' // Slate-50 background shade
         },
         handler: async function (response) {
           if (!response || !response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
@@ -619,6 +620,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
           }
         },
         modal: {
+          backdropclose: true,
           ondismiss: function () {
             setPlacingOrder(false);
             showToast('Payment window closed. Order was not placed.');
