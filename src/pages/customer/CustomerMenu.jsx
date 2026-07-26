@@ -8,7 +8,7 @@ import { MenuGridSkeleton } from '../../components/SkeletonLoader';
 import { 
   Search, Flame, Plus, Minus, Loader2, ShoppingCart, 
   ArrowRight, Sparkles, Filter, Check, LayoutGrid, List,
-  Clock, ShieldCheck, Zap, UtensilsCrossed, Award, ChevronRight
+  Clock, ShieldCheck, Zap, UtensilsCrossed, Award, ChevronRight, ChevronUp
 } from 'lucide-react';
 
 export default function CustomerMenu({ onOpenCart }) {
