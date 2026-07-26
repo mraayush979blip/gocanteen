@@ -45,7 +45,13 @@ export default function AdminOrders() {
       })
       .subscribe();
 
-    return () => supabase.removeChannel(channel);
+    // � udd04 Backup polling fallback every 25 seconds in case WebSocket drops
+    const pollInterval = setInterval(() => fetchOrders(), 25000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
+    };
   }, []);
 
   const fetchOrders = async () => {
@@ -176,6 +182,26 @@ export default function AdminOrders() {
     }
   };
 
+  // � udcb8 Mark a refund as processed by the admin
+  const handleMarkRefunded = async (orderId) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          refund_status: 'refunded',
+          handled_by_name: `${adminIdentifier} (ADMIN)`,
+          handled_by_email: session?.user?.email || profile?.email || ''
+        })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      showToast('✓ Refund marked as processed and cleared from queue � udcb8');
+      fetchOrders();
+    } catch (err) {
+      showToast('Failed to process refund: ' + err.message, true);
+    }
+  };
+
   const setPresetDate = (preset) => {
     const today = new Date();
     if (preset === 'today') {
@@ -203,9 +229,25 @@ export default function AdminOrders() {
   };
 
   // Filter Logic
+  // 🔍 When a search query is active, it overrides ALL other filters
+  // and searches across the full unfiltered orders list.
   const filteredOrders = orders.filter(order => {
-    const orderDateStr = order.created_at ? order.created_at.split('T')[0] : '';
+    const q = searchQuery.trim().toLowerCase();
 
+    if (q) {
+      // Search overrides all filters — find in any field across all orders
+      const nameMatch = order.customer_name?.toLowerCase().includes(q);
+      const phoneMatch = order.phone?.includes(q);
+      const tokenMatch = order.token_number?.toString().includes(q);
+      const orderIdMatch = getOrderId(order).toLowerCase().includes(q) || order.id?.toLowerCase().includes(q);
+      const pinMatch = getOrderPin(order).includes(q);
+      const promoMatch = order.promo_code?.toLowerCase().includes(q);
+      const statusMatch = order.status?.toLowerCase().includes(q);
+      return nameMatch || phoneMatch || tokenMatch || orderIdMatch || pinMatch || promoMatch || statusMatch;
+    }
+
+    // No search query — apply all regular filters normally
+    const orderDateStr = order.created_at ? order.created_at.split('T')[0] : '';
     if (startDate && orderDateStr < startDate) return false;
     if (endDate && orderDateStr > endDate) return false;
 
@@ -224,17 +266,6 @@ export default function AdminOrders() {
       if (!(order.refund_status === 'requested' || (order.status === 'cancelled' && order.payment_status === 'paid'))) return false;
     } else if (statusFilter !== 'all' && order.status !== statusFilter) {
       return false;
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const nameMatch = order.customer_name?.toLowerCase().includes(q);
-      const phoneMatch = order.phone?.includes(q);
-      const tokenMatch = order.token_number?.toString().includes(q);
-      const orderIdMatch = getOrderId(order).toLowerCase().includes(q) || order.id?.toLowerCase().includes(q);
-      const pinMatch = getOrderPin(order).includes(q);
-      const promoMatch = order.promo_code?.toLowerCase().includes(q);
-      if (!nameMatch && !phoneMatch && !tokenMatch && !orderIdMatch && !pinMatch && !promoMatch) return false;
     }
 
     return true;
@@ -671,6 +702,35 @@ export default function AdminOrders() {
                         <p className="text-[11px] text-slate-900">
                           Reason: <b>{order.cancellation_reason || 'Out of stock or customer cancellation'}</b>
                         </p>
+                      </div>
+                    )}
+
+                    {/* � udcb8 Refund Action Banner — shown for paid & cancelled orders awaiting refund processing */}
+                    {(order.refund_status === 'requested' ||
+                      (order.status === 'cancelled' && order.payment_status === 'paid' && order.refund_status !== 'refunded')) && (
+                      <div className="bg-amber-50 border-2 border-amber-400 p-3 rounded-2xl text-xs space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">� udcb8</span>
+                          <div>
+                            <p className="font-extrabold text-amber-900">Refund Requested</p>
+                            <p className="text-[11px] text-amber-700 font-medium">
+                              Customer paid ₹{order.total_amount || order.amount} via {(order.payment_method || 'UPI').toUpperCase()} and this order was cancelled. Please process the refund.
+                            </p>
+                          </div>
+                        </div>
+                        {order.refund_status !== 'refunded' ? (
+                          <button
+                            onClick={() => handleMarkRefunded(order.id)}
+                            className="w-full py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            Mark Refund as Processed � udcb8
+                          </button>
+                        ) : (
+                          <div className="text-center text-emerald-700 font-extrabold text-xs py-1">
+                            ✅ Refund already processed
+                          </div>
+                        )}
                       </div>
                     )}
 

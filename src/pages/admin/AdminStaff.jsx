@@ -111,9 +111,8 @@ export default function AdminStaff() {
     setSaving(true);
     try {
       if (editingStaff) {
-        // UPDATE Existing Staff Profile
+        // UPDATE Existing Staff Profile — email is READ-ONLY, cannot be changed here
         const updatePayload = {
-          email: email.trim(),
           full_name: fullName.trim(),
           role: staffRole,
           is_temporary: isTemporary,
@@ -122,7 +121,18 @@ export default function AdminStaff() {
         };
 
         if (password) {
+          // Store plaintext assigned_password reference in profiles
           updatePayload.assigned_password = password;
+
+          // ✅ SYNC PASSWORD INTO SUPABASE AUTH (auth.users) via secure RPC
+          const { error: rpcError } = await supabase.rpc('admin_update_user_password', {
+            target_user_id: editingStaff.id,
+            new_password: password
+          });
+          if (rpcError) {
+            console.error('RPC password sync error:', rpcError);
+            showToast('⚠️ Profile saved, but auth password sync failed: ' + rpcError.message, true);
+          }
         }
 
         const { error } = await supabase
@@ -131,7 +141,7 @@ export default function AdminStaff() {
           .eq('id', editingStaff.id);
 
         if (error) throw error;
-        showToast(`✓ Staff member "${fullName}" updated successfully!`);
+        showToast(`✓ Staff member "${fullName}" updated successfully!${password ? ' Password synced to login.' : ''}`);
       } else {
         // CREATE New Staff Profile
         if (!password) {
@@ -418,16 +428,26 @@ export default function AdminStaff() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Official Email Address</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Official Email Address
+                  {editingStaff && (
+                    <span className="ml-2 text-[10px] font-semibold text-slate-400 normal-case">(read-only — cannot be changed)</span>
+                  )}
+                </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                   <input
                     type="email"
                     required
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => !editingStaff && setEmail(e.target.value)}
                     placeholder="staff@gocanteen.com"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-purple-600 font-medium"
+                    disabled={!!editingStaff}
+                    className={`w-full pl-9 pr-3 py-2 border rounded-xl text-slate-900 text-xs focus:outline-none font-medium ${
+                      editingStaff
+                        ? 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed'
+                        : 'bg-slate-50 border-slate-200 focus:border-purple-600'
+                    }`}
                   />
                 </div>
               </div>
@@ -468,9 +488,9 @@ export default function AdminStaff() {
                 {editingStaff ? (
                   <p className="text-[10px] text-slate-500 font-medium mt-1">
                     {password ? (
-                      '💡 Click the eye icon to view the assigned password, or type a new one to change it.'
+                      '🔐 Type a new password above and click Save to update their login credentials immediately.'
                     ) : (
-                      '⚠️ Password was set prior to column creation. Type a new password above and click Save to store it!'
+                      '💡 Leave blank to keep the current password. Enter a new password to update their login.'
                     )}
                   </p>
                 ) : null}

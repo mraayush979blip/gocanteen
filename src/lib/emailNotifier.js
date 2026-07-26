@@ -57,15 +57,18 @@ export async function sendOrderReadyEmail(order) {
 export async function sendRefundNotificationEmail(order, cancellationReason) {
   try {
     let customerEmail = order.customer_email;
+    let customerName = order.customer_name;
 
+    // Fallback: fetch from profiles table if not on the order object
     if (!customerEmail && order.customer_id) {
       const { data: prof } = await supabase
         .from('profiles')
-        .select('email')
+        .select('email, full_name')
         .eq('id', order.customer_id)
         .maybeSingle();
 
       if (prof?.email) customerEmail = prof.email;
+      if (prof?.full_name && !customerName) customerName = prof.full_name;
     }
 
     if (!customerEmail) {
@@ -74,34 +77,42 @@ export async function sendRefundNotificationEmail(order, cancellationReason) {
     }
 
     const orderIdStr = getOrderId(order);
+    const tokenNum = order.token_number || order.id.slice(0, 4);
+    const refundAmount = order.total_amount
+      ? `₹${order.total_amount}`
+      : order.amount
+        ? `₹${order.amount}`
+        : 'your paid amount';
+    const cancelReason = cancellationReason || 'Kitchen out of stock or staff cancellation';
+    const payMethod = (order.payment_method || 'UPI').toUpperCase();
+    const safeCustomerName = customerName || 'Valued Customer';
 
-    // Trigger Supabase SMTP for refund notification using Reset Password template
-    const { error: smtpError } = await supabase.auth.resetPasswordForEmail(customerEmail, {
-      redirectTo: `${window.location.origin}/#/orders`,
-      options: {
-        data: {
-          order_id: orderIdStr,
-          token_number: order.token_number || order.id.slice(0, 4),
-          cancellation_reason: cancellationReason || 'Kitchen out of stock or staff cancellation',
-          customer_name: order.customer_name || 'Valued Customer',
-          amount_paid: `₹${order.total_amount || 0}`,
-           admin_contact: '+91 9244217287',
-           admin_email: 'refund@gocanteen.in',
-           pickup_code: `CANCELLED: ${cancellationReason || 'Refund Application Sent'}`
-        }
-      }
+    // POST to Vercel API route which uses service_role key server-side (safe)
+    const response = await fetch('/api/send-refund-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerEmail,
+        customerName: safeCustomerName,
+        tokenNumber: tokenNum,
+        orderId: orderIdStr,
+        refundAmount,
+        paymentMethod: payMethod,
+        cancellationReason: cancelReason
+      })
     });
 
-    if (smtpError) {
-      console.warn('Supabase SMTP refund trigger notice:', smtpError.message);
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.warn('Refund email API error:', result.error);
     } else {
-      console.log('✅ Supabase SMTP refund email sent successfully via Reset Password template to:', customerEmail);
+      console.log('✅ Refund email sent to:', customerEmail, '| Token:', tokenNum, '| Amount:', refundAmount);
     }
 
-    return { success: true, email: customerEmail };
+    return { success: response.ok, email: customerEmail };
   } catch (err) {
     console.error('Error sending refund notification:', err);
     return { success: false, error: err.message };
   }
 }
-

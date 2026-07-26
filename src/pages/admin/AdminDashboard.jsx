@@ -32,7 +32,13 @@ export default function AdminDashboard() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => fetchDashboard())
       .subscribe();
 
-    return () => supabase.removeChannel(channel);
+    // 🔄 Backup polling fallback every 45 seconds in case WebSocket drops
+    const pollInterval = setInterval(() => fetchDashboard(), 45000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
+    };
   }, []);
 
   const fetchDashboard = async () => {

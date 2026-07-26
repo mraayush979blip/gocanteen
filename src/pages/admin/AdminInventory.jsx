@@ -84,6 +84,12 @@ export default function AdminInventory() {
       return;
     }
 
+    // ✅ Price must be a positive number greater than zero
+    if (Number(formData.price) <= 0) {
+      showToast('⚠️ Item price must be greater than ₹0. Please enter a valid price.', true);
+      return;
+    }
+
     setSaving(true);
     const payload = {
       name: formData.name.trim(),
