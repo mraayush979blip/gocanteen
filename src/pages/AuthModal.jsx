@@ -172,16 +172,26 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
         {/* Modal Title & Icon Header */}
         <div className="text-center">
           {selectedRole === 'admin' ? (
-            <div className="w-11 h-11 rounded-2xl bg-purple-100 border border-purple-200 text-purple-600 flex items-center justify-center mx-auto mb-2">
-              <Shield className="w-6 h-6" />
+            <div className="relative w-16 h-16 mx-auto mb-3 shrink-0">
+              <div className="w-full h-full rounded-2xl bg-white border border-slate-200/90 overflow-hidden flex items-center justify-center shadow-xs p-1">
+                <img src="/app-icon.png" alt="Go Canteen Admin Logo" className="w-full h-full object-contain rounded-xl" />
+              </div>
+              <span className="absolute -bottom-1 -right-1 bg-purple-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded-md border border-white shadow-2xs uppercase tracking-wider">
+                Admin
+              </span>
             </div>
           ) : selectedRole === 'staff' ? (
-            <div className="w-11 h-11 rounded-2xl bg-emerald-100 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto mb-2">
-              <ChefHat className="w-6 h-6" />
+            <div className="relative w-16 h-16 mx-auto mb-3 shrink-0">
+              <div className="w-full h-full rounded-2xl bg-white border border-slate-200/90 overflow-hidden flex items-center justify-center shadow-xs p-1">
+                <img src="/app-icon.png" alt="Go Canteen Staff Logo" className="w-full h-full object-contain rounded-xl" />
+              </div>
+              <span className="absolute -bottom-1 -right-1 bg-emerald-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded-md border border-white shadow-2xs uppercase tracking-wider">
+                Staff
+              </span>
             </div>
           ) : (
-            <div className="w-11 h-11 rounded-2xl bg-emerald-100 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto mb-2">
-              <UtensilsCrossed className="w-6 h-6" />
+            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200/90 overflow-hidden flex items-center justify-center shadow-xs mx-auto mb-3 p-1 shrink-0">
+              <img src="/app-icon.png" alt="Go Canteen Logo" className="w-full h-full object-contain rounded-xl" />
             </div>
           )}
 
@@ -246,32 +256,32 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
 
         {/* ADMIN UNLOCK CODE GATE: If Admin selected and not yet unlocked */}
         {selectedRole === 'admin' && !isAdminUnlocked ? (
-          <form onSubmit={handleVerifyAdminPasscode} className="space-y-3 pt-1">
-            <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center space-y-1">
-              <KeyRound className="w-6 h-6 text-purple-600 mx-auto" />
-              <h4 className="text-xs font-extrabold text-purple-900">Admin Security Passcode Gate</h4>
-              <p className="text-[11px] text-purple-700 font-medium">
-                Enter the Admin Unlock Passcode to unlock login credentials
+          <form onSubmit={handleVerifyAdminPasscode} className="space-y-4 pt-1">
+            <div className="bg-purple-50/50 border border-purple-200/60 rounded-2xl p-4 text-center space-y-1.5 animate-fade-in">
+              <KeyRound className="w-5 h-5 text-purple-600 mx-auto" />
+              <h4 className="text-xs font-black text-purple-900">Admin Security Passcode Gate</h4>
+              <p className="text-[11px] text-purple-600 font-semibold leading-relaxed">
+                Enter the secret passcode to unlock official credentials.
               </p>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Admin Unlock Passcode</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700">Admin Unlock Passcode</label>
               <input
                 type="password"
                 required
                 autoFocus
                 value={adminPasscodeInput}
                 onChange={(e) => setAdminPasscodeInput(e.target.value)}
-                placeholder="Enter 6-digit passcode"
-                className="w-full text-center text-lg font-black tracking-widest px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-purple-600"
+                placeholder="Enter passcode"
+                className="w-full text-center text-lg font-black tracking-widest px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-purple-600 shadow-2xs"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-sm transition-all disabled:opacity-50 cursor-pointer"
+              className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-md transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
             >
               {loading ? 'Verifying Code...' : 'Unlock Admin Credentials Gate →'}
             </button>
