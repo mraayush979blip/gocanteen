@@ -134,20 +134,23 @@ export default function CustomerMenu({ onOpenCart }) {
   // Framer-motion Flying Add-to-Cart Particles State
   const [flyingItems, setFlyingItems] = useState([]);
 
-  const handleAddToCartWithAnim = (e, item) => {
-    addToCart({ id: item.id, name: item.name, price: Number(item.price), emoji: item.emoji || '🍽️' });
-
+  const triggerFlyingAnimation = (e, emoji) => {
     // Calculate start position from button click
     const rect = e.currentTarget.getBoundingClientRect();
     const startX = rect.left + rect.width / 2;
     const startY = rect.top + rect.height / 2;
 
     const animId = Date.now() + Math.random();
-    setFlyingItems(prev => [...prev, { id: animId, emoji: item.emoji || '🍽️', startX, startY }]);
+    setFlyingItems(prev => [...prev, { id: animId, emoji: emoji || '🍽️', startX, startY }]);
 
     setTimeout(() => {
       setFlyingItems(prev => prev.filter(f => f.id !== animId));
     }, 750);
+  };
+
+  const handleAddToCartWithAnim = (e, item) => {
+    addToCart({ id: item.id, name: item.name, price: Number(item.price), emoji: item.emoji || '🍽️' });
+    triggerFlyingAnimation(e, item.emoji);
   };
 
   useEffect(() => {
@@ -690,7 +693,7 @@ export default function CustomerMenu({ onOpenCart }) {
                             <button
                               onClick={(e) => {
                                 updateCartQty(item.id, 1);
-                                handleAddToCartWithAnim(e, item);
+                                triggerFlyingAnimation(e, item.emoji);
                               }}
                               className="hover:opacity-85 p-0.5 cursor-pointer"
                             >
