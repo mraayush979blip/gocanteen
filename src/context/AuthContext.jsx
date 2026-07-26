@@ -95,48 +95,47 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let mounted = true;
+    let authChangeInitialized = false;
 
-    async function initAuth() {
-      try {
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        if (error) {
-          if (error.message?.includes('fetch') || error.message?.includes('NetworkError') || error.name === 'AuthRetryableFetchError') {
-            setConnectionError(true);
-          }
-        }
-        if (mounted) {
-          setSession(initialSession);
-          if (initialSession?.user) {
-            const prof = await fetchProfile(initialSession.user.id, initialSession.user.email);
+    const handleSessionChange = async (newSession) => {
+      if (!mounted) return;
+      setSession(newSession);
+      
+      if (newSession?.user) {
+        try {
+          const prof = await fetchProfile(newSession.user.id, newSession.user.email);
+          if (mounted) {
             resolveActivePortalOnLogin(prof);
           }
-          setLoading(false);
+        } catch (e) {
+          console.error("Error setting profile on session change:", e);
         }
-      } catch (err) {
-        console.error('Supabase connection check error:', err);
-        setConnectionError(true);
+      } else {
+        setProfile(null);
+        setActivePortal('customer');
+      }
+      
+      if (mounted) {
         setLoading(false);
       }
-    }
-
-    initAuth();
+    };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      if (mounted) {
-        setSession(newSession);
-        if (newSession?.user) {
-          const prof = await fetchProfile(newSession.user.id, newSession.user.email);
-          resolveActivePortalOnLogin(prof);
-        } else {
-          setProfile(null);
-          setActivePortal('customer');
-        }
+      authChangeInitialized = true;
+      await handleSessionChange(newSession);
+    });
+
+    // Safety fallback: if no event fires within 1.5 seconds, force loading to false to prevent getting stuck
+    const fallbackTimeout = setTimeout(() => {
+      if (mounted && !authChangeInitialized) {
+        console.warn("Auth initialization fallback triggered.");
         setLoading(false);
       }
-    });
+    }, 1500);
 
     return () => {
       mounted = false;
+      clearTimeout(fallbackTimeout);
       subscription?.unsubscribe();
     };
   }, []);
