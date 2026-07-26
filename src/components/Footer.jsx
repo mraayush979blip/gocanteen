@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UtensilsCrossed, ShieldCheck, Mail, Phone, Shield, ChefHat, ChevronDown, ChevronUp } from 'lucide-react';
+import { UtensilsCrossed, ShieldCheck, Mail, Phone, Shield, ChefHat, ChevronDown, ChevronUp, Instagram } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportBug, onOpenAboutDev }) {
@@ -130,6 +130,12 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
                     <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
                     <a href="tel:+919244217287" className="hover:text-white transition-colors">
                       +91 9244217287
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Instagram className="w-4 h-4 text-pink-500 shrink-0" />
+                    <a href="https://www.instagram.com/gocanteen.in/" target="_blank" rel="noopener noreferrer" className="hover:text-pink-400 transition-colors font-bold">
+                      Instagram (@gocanteen.in)
                     </a>
                   </li>
                 </ul>

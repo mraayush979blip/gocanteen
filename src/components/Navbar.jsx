@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles
+  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram
 } from 'lucide-react';
 
 export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpenAboutDev }) {
@@ -380,6 +380,17 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
 
                 {/* Section 3: Support & Developer Credits */}
                 <div className="pt-2 border-t border-slate-100 space-y-0.5">
+                  <a
+                    href="https://www.instagram.com/gocanteen.in/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:translate-x-1 flex items-center gap-2.5 transition-all"
+                  >
+                    <Instagram className="w-4 h-4 text-pink-500" />
+                    <span>Instagram (@gocanteen.in)</span>
+                  </a>
+
                   <button
                     onClick={() => { onOpenReportBug?.(); setMobileMenuOpen(false); }}
                     className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:translate-x-1 flex items-center gap-2.5 transition-all"
