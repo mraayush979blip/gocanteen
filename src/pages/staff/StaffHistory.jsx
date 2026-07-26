@@ -249,6 +249,16 @@ export default function StaffHistory() {
                       ❌ Cancel Reason: {order.cancellation_reason}
                     </div>
                   )}
+                  {/* Refund status badge */}
+                  {order.status === 'cancelled' && order.payment_status === 'paid' && (
+                    <div className={`text-[10px] font-extrabold px-2 py-1 rounded border w-fit ${
+                      order.refund_status === 'refunded'
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                        : 'bg-amber-50 text-amber-800 border-amber-300'
+                    }`}>
+                      {order.refund_status === 'refunded' ? '✅ Refund Processed' : '💸 Refund Pending'}
+                    </div>
+                  )}
 
                   {/* Card Footer: Amount, Paid Status, and Handler */}
                   <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs">

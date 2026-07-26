@@ -627,6 +627,17 @@ export default function AdminOrders() {
                         🔑 {pin}
                       </span>
                     )}
+
+                    {/* Refund status badge — visible on the card row without expanding */}
+                    {order.status === 'cancelled' && order.payment_status === 'paid' && (
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                        order.refund_status === 'refunded'
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                          : 'bg-amber-100 text-amber-800 border-amber-300'
+                      }`}>
+                        {order.refund_status === 'refunded' ? '✅ REFUNDED' : '💸 REFUND PENDING'}
+                      </span>
+                    )}
                   </div>
 
                   {/* Customer Name & Phone */}

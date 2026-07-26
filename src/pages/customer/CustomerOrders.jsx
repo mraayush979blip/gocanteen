@@ -422,14 +422,25 @@ export default function CustomerOrders({ onOpenAuth }) {
                           Reason: {cancellationReasonText}
                         </p>
 
-                        <div className="mt-2 p-2.5 bg-white border border-red-200 rounded-xl text-[11px] text-slate-700 space-y-1">
-                          <span className="font-black text-red-800 block">📞 Refund & Admin Support:</span>
-                          <p className="leading-relaxed">
-                            For refund queries or support, please call/WhatsApp Canteen Admin at{' '}
-                            <a href="tel:+919244217287" className="font-extrabold text-indigo-600 hover:underline">+91 9244217287</a>{' '}
-                            with your <b>Order ID ({orderIdStr})</b> & Token #{order.token_number || order.id.slice(0, 4)}.
-                          </p>
-                        </div>
+                        {order.refund_status === 'refunded' ? (
+                          // ✅ Refund has been processed — show confirmation
+                          <div className="mt-1 p-2.5 bg-emerald-50 border border-emerald-300 rounded-xl text-[11px] space-y-1">
+                            <span className="font-black text-emerald-800 block">✅ Refund Processed</span>
+                            <p className="text-emerald-700 leading-relaxed">
+                              Your refund has been processed by the canteen admin. The amount will reflect in your original payment method within <b>5–7 working days</b>.
+                            </p>
+                          </div>
+                        ) : order.payment_status === 'paid' ? (
+                          // 💸 Paid but not yet refunded — show support contact
+                          <div className="mt-2 p-2.5 bg-white border border-red-200 rounded-xl text-[11px] text-slate-700 space-y-1">
+                            <span className="font-black text-amber-800 block">💸 Refund Requested — Pending Admin Processing</span>
+                            <p className="leading-relaxed">
+                              For refund queries or support, please call/WhatsApp Canteen Admin at{' '}
+                              <a href="tel:+919244217287" className="font-extrabold text-indigo-600 hover:underline">+91 92442 17287</a>{' '}
+                              with your <b>Order ID ({orderIdStr})</b> &amp; Token #{order.token_number || order.id.slice(0, 4)}.
+                            </p>
+                          </div>
+                        ) : null}
                       </div>
                     )}
 
