@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { staffTranslations } from '../lib/translations';
 
@@ -49,12 +49,19 @@ export const AuthProvider = ({ children }) => {
 
   // Global Toast
   const [toast, setToast] = useState({ show: false, message: '', isError: false });
-
-  const showToast = (message, isError = false) => {
+  const toastTimeoutRef = useRef(null);
+  
+  const showToast = (message, isError = false, duration = 3500) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    
     setToast({ show: true, message, isError });
-    setTimeout(() => {
+    
+    toastTimeoutRef.current = setTimeout(() => {
       setToast(prev => ({ ...prev, show: false }));
-    }, 3500);
+      toastTimeoutRef.current = null;
+    }, duration);
   };
 
   const fetchProfile = async (userId, userEmail) => {
@@ -155,7 +162,7 @@ export const AuthProvider = ({ children }) => {
       }
       return [...prev, { ...item, qty: 1 }];
     });
-    showToast(`Added ${item.name} to cart 🛒`);
+    showToast(`Added ${item.name} to cart 🛒`, false, 1000);
   };
 
   const updateCartQty = (id, delta) => {
