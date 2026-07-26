@@ -86,8 +86,8 @@ export default function KitchenQueue() {
   };
 
   const updateStatus = async (order, newStatus) => {
-    // ENFORCE PAYMENT VERIFICATION VIA CUSTOM CENTERED MODAL FOR UNPAID ORDERS
-    if (newStatus !== 'cancelled' && order.payment_status !== 'paid') {
+    // ENFORCE PAYMENT VERIFICATION VIA CUSTOM CENTERED MODAL FOR UNPAID ORDERS (ONLY ON READY/COMPLETED STATUS)
+    if (newStatus !== 'cancelled' && newStatus !== 'preparing' && order.payment_status !== 'paid') {
       setPayModalOrder(order);
       setPayModalTargetStatus(newStatus);
       return;

@@ -22,7 +22,15 @@ export default function StaffHistory() {
       })
       .subscribe();
 
-    return () => supabase.removeChannel(channel);
+    // Backup polling fallback every 30 seconds for the history dashboard logs
+    const backupPoll = setInterval(() => {
+      fetchHistory();
+    }, 30000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(backupPoll);
+    };
   }, []);
 
   const fetchHistory = async () => {
