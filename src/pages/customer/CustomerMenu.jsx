@@ -12,20 +12,45 @@ import {
 } from 'lucide-react';
 
 export default function CustomerMenu({ onOpenCart }) {
-  const { cart, addToCart, updateCartQty } = useAuth();
+  const { cart, addToCart, updateCartQty, triggerHaptic } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlQuery = searchParams.get('q') || '';
   const urlCat = searchParams.get('category') || 'all';
 
-  const [categories, setCategories] = useState([]);
-  const [inventory, setInventory] = useState([]);
-  const [offers, setOffers] = useState([]);
+  const [categories, setCategories] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cg-cache-categories') || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+  const [inventory, setInventory] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cg-cache-inventory') || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+  const [offers, setOffers] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cg-cache-offers') || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
   const [activeCategory, setActiveCategory] = useState(urlCat);
   const [searchQuery, setSearchQuery] = useState(urlQuery);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'price-low' | 'price-high'
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cachedInv = localStorage.getItem('cg-cache-inventory');
+      return !cachedInv || JSON.parse(cachedInv).length === 0;
+    } catch (e) {
+      return true;
+    }
+  });
 
   // Sync state when URL params change externally
   useEffect(() => {
@@ -46,6 +71,7 @@ export default function CustomerMenu({ onOpenCart }) {
   };
 
   const handleCategoryChange = (catId) => {
+    triggerHaptic?.(12);
     setActiveCategory(catId);
     const params = new URLSearchParams(searchParams);
     if (catId && catId !== 'all') {
@@ -109,9 +135,17 @@ export default function CustomerMenu({ onOpenCart }) {
         supabase.from('offers').select('*').eq('is_active', true).order('created_at', { ascending: false })
       ]);
 
-      setCategories(catRes.data || []);
-      setInventory(invRes.data || []);
-      setOffers(offRes.data || []);
+      const catData = catRes.data || [];
+      const invData = invRes.data || [];
+      const offData = offRes.data || [];
+
+      setCategories(catData);
+      setInventory(invData);
+      setOffers(offData);
+
+      localStorage.setItem('cg-cache-categories', JSON.stringify(catData));
+      localStorage.setItem('cg-cache-inventory', JSON.stringify(invData));
+      localStorage.setItem('cg-cache-offers', JSON.stringify(offData));
     } catch (err) {
       console.error('Error fetching menu:', err);
     } finally {
@@ -479,13 +513,16 @@ export default function CustomerMenu({ onOpenCart }) {
                 ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5"
                 : "grid grid-cols-1 gap-3"
             }>
-              {filteredInventory.map(item => {
+              {filteredInventory.map((item, idx) => {
                 const qty = getItemCartQty(item.id);
 
                 if (viewMode === 'list') {
                   return (
-                    <div
+                    <motion.div
                       key={item.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.02, 0.25) }}
                       className="bg-white border border-slate-200/90 rounded-2xl p-4 flex items-center justify-between gap-4 hover:shadow-md transition-all shadow-2xs"
                     >
                       <div className="flex items-center gap-4">
@@ -529,7 +566,7 @@ export default function CustomerMenu({ onOpenCart }) {
                           + ADD
                         </button>
                       )}
-                    </div>
+                    </motion.div>
                   );
                 }
 
@@ -537,6 +574,9 @@ export default function CustomerMenu({ onOpenCart }) {
                   /* Premium Bento Box Grid Card Layout with framer-motion */
                   <motion.div
                     key={item.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }}
                     whileHover={{ scale: 1.015 }}
                     whileTap={{ scale: 0.98 }}
                     className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 shadow-2xs group relative overflow-hidden"

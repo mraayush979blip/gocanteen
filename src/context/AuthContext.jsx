@@ -154,7 +154,16 @@ export const AuthProvider = ({ children }) => {
     }
   }, [session]);
 
+  const triggerHaptic = (ms = 15) => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try {
+        navigator.vibrate(ms);
+      } catch (e) {}
+    }
+  };
+
   const addToCart = (item) => {
+    triggerHaptic(15);
     setCart(prev => {
       const exists = prev.find(i => i.id === item.id);
       if (exists) {
@@ -166,6 +175,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateCartQty = (id, delta) => {
+    triggerHaptic(15);
     setCart(prev => {
       return prev
         .map(i => {
@@ -244,6 +254,7 @@ export const AuthProvider = ({ children }) => {
         setAppliedPromo,
         toast,
         showToast,
+        triggerHaptic,
         logout,
         fetchProfile: () => profile && fetchProfile(profile.id, profile.email)
       }}
