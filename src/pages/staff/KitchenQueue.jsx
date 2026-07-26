@@ -372,8 +372,16 @@ export default function KitchenQueue() {
                       </div>
 
 
-                      <div className="flex items-center gap-2 mt-1.5">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
                         <h3 className="text-xs font-black text-slate-900">{order.customer_name || 'Walk-in Customer'}</h3>
+                        {order.phone && (
+                          <>
+                            <span className="text-[10px] text-slate-400 font-bold">•</span>
+                            <a href={`tel:${order.phone}`} className="text-xs font-extrabold text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-0.5">
+                              📞 {order.phone}
+                            </a>
+                          </>
+                        )}
                         <span className="text-[10px] text-slate-400 font-bold">•</span>
                         <span className="text-[11px] text-slate-500 font-bold flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5 text-slate-400" /> {getTimeAgo(order.created_at)}

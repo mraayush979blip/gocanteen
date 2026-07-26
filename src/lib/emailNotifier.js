@@ -85,9 +85,9 @@ export async function sendRefundNotificationEmail(order, cancellationReason) {
           cancellation_reason: cancellationReason || 'Kitchen out of stock or staff cancellation',
           customer_name: order.customer_name || 'Valued Customer',
           amount_paid: `₹${order.total_amount || 0}`,
-          admin_contact: '+91 9244217287',
-          admin_email: 'gocanteen8@gmail.com',
-          pickup_code: `CANCELLED: ${cancellationReason || 'Refund Application Sent'}`
+           admin_contact: '+91 9244217287',
+           admin_email: 'refund@gocanteen.in',
+           pickup_code: `CANCELLED: ${cancellationReason || 'Refund Application Sent'}`
         }
       }
     });

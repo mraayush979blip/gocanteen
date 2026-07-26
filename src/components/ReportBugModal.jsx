@@ -12,7 +12,7 @@ export default function ReportBugModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const developerEmails = ['gocanteen8@gmail.com', 'mraayush979@gmail.com'];
+  const developerEmails = ['mail@gocanteen.in', 'developer@gocanteen.in'];
 
   const handleSendEmail = (e) => {
     e.preventDefault();
@@ -37,7 +37,7 @@ export default function ReportBugModal({ isOpen, onClose }) {
     window.location.href = mailtoUrl;
 
     setSubmitted(true);
-    showToast('📧 Email client opened for gocanteen8@gmail.com & mraayush979@gmail.com!');
+    showToast('📧 Email client opened for mail@gocanteen.in & developer@gocanteen.in!');
   };
 
   const handleReset = () => {
@@ -75,7 +75,7 @@ export default function ReportBugModal({ isOpen, onClose }) {
             <div className="space-y-1">
               <h4 className="text-lg font-black text-slate-900">Thank You for Your Feedback!</h4>
               <p className="text-xs text-slate-500 max-w-xs mx-auto font-medium">
-                Your report has been prepared for <b>gocanteen8@gmail.com</b> and <b>mraayush979@gmail.com</b>.
+                Your report has been prepared for <b>mail@gocanteen.in</b> and <b>developer@gocanteen.in</b>.
               </p>
             </div>
             <button
@@ -140,8 +140,8 @@ export default function ReportBugModal({ isOpen, onClose }) {
                 <span>Sends directly to Developer Inboxes:</span>
               </div>
               <div className="flex flex-wrap gap-1.5 pt-0.5 font-mono text-[11px] font-extrabold">
-                <span className="bg-white px-2.5 py-0.5 rounded-lg border border-amber-300">gocanteen8@gmail.com</span>
-                <span className="bg-white px-2.5 py-0.5 rounded-lg border border-amber-300">mraayush979@gmail.com</span>
+                <span className="bg-white px-2.5 py-0.5 rounded-lg border border-amber-300">mail@gocanteen.in</span>
+                <span className="bg-white px-2.5 py-0.5 rounded-lg border border-amber-300">developer@gocanteen.in</span>
               </div>
             </div>
 

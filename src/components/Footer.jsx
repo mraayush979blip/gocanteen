@@ -116,14 +116,14 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
                 <ul className="space-y-3 font-medium text-slate-400">
                   <li className="flex items-center gap-2.5">
                     <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <a href="mailto:gocanteen8@gmail.com" className="hover:text-white transition-colors">
-                      gocanteen8@gmail.com
+                    <a href="mailto:mail@gocanteen.in" className="hover:text-white transition-colors">
+                      mail@gocanteen.in
                     </a>
                   </li>
                   <li className="flex items-center gap-2.5">
                     <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
-                    <a href="mailto:mraayush979@gmail.com" className="hover:text-white transition-colors font-semibold text-indigo-300 font-['Plus_Jakarta_Sans',sans-serif]">
-                      mraayush979@gmail.com (Dev)
+                    <a href="mailto:developer@gocanteen.in" className="hover:text-white transition-colors font-semibold text-indigo-300 font-['Plus_Jakarta_Sans',sans-serif]">
+                      developer@gocanteen.in (Dev)
                     </a>
                   </li>
                   <li className="flex items-center gap-2.5">

@@ -221,9 +221,8 @@ export default function StaffHistory() {
                     </span>
                   </div>
 
-                  {/* Customer & Timestamp */}
                   <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
-                    <span>👤 {order.customer_name || 'Walk-in'}</span>
+                    <span>👤 {order.customer_name || 'Walk-in'} {order.phone && `(${order.phone})`}</span>
                     <span>🕒 {new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</span>
                   </div>
 
@@ -325,7 +324,14 @@ export default function StaffHistory() {
                             </span>
                           )}
                         </td>
-                        <td className="p-3.5 font-bold text-slate-900">{order.customer_name || 'Walk-in'}</td>
+                        <td className="p-3.5 font-bold text-slate-900">
+                          <div>{order.customer_name || 'Walk-in'}</div>
+                          {order.phone && (
+                            <a href={`tel:${order.phone}`} className="text-[11px] text-slate-500 hover:text-emerald-600 hover:underline block mt-0.5">
+                              📞 {order.phone}
+                            </a>
+                          )}
+                        </td>
                         <td className="p-3.5">
                           <div className="flex flex-wrap gap-1 max-w-xs">
                             {order.order_items?.map((item, idx) => (

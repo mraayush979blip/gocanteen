@@ -125,7 +125,7 @@ export default function PolicyPage({ initialPolicy = 'contact', onBackToMenu }) 
                 <div>
                   <span className="text-[11px] font-extrabold uppercase text-slate-400 tracking-wider">Support Email</span>
                   <p className="text-sm font-black text-slate-900 mt-0.5">
-                    <a href="mailto:gocanteen8@gmail.com" className="hover:underline text-emerald-700">gocanteen8@gmail.com</a>
+                    <a href="mailto:mail@gocanteen.in" className="hover:underline text-emerald-700">mail@gocanteen.in</a>
                   </p>
                   <p className="text-[11px] text-slate-500 mt-1">Direct support channel for payment and order queries.</p>
                 </div>
@@ -251,7 +251,7 @@ export default function PolicyPage({ initialPolicy = 'contact', onBackToMenu }) 
                 <p>
                   If you have any questions or concerns regarding your personal data, please contact our Privacy Coordinator at:
                   <br />
-                  📧 <b>Email:</b> <a href="mailto:gocanteen8@gmail.com" className="text-emerald-700 underline">gocanteen8@gmail.com</a>
+                  📧 <b>Email:</b> <a href="mailto:mail@gocanteen.in" className="text-emerald-700 underline">mail@gocanteen.in</a>
                   <br />
                   📞 <b>Phone:</b> +91 9244217287
                 </p>
@@ -298,7 +298,7 @@ export default function PolicyPage({ initialPolicy = 'contact', onBackToMenu }) 
               <section className="space-y-1">
                 <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">2. Quality or Order Discrepancy</h3>
                 <p>
-                  If an item received is missing or unsatisfactory, please notify the canteen counter staff immediately or contact support at <b>gocanteen8@gmail.com</b> / <b>+91 9244217287</b> for a replacement or counter refund.
+                  If an item received is missing or unsatisfactory, please notify the canteen counter staff immediately or contact support at <b>refund@gocanteen.in</b> / <b>+91 9244217287</b> for a replacement or counter refund.
                 </p>
               </section>
             </div>
