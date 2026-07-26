@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles
 } from 'lucide-react';
@@ -179,233 +180,252 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
               {/* 3-Bar Menu Toggle Button (Desktop & Mobile) */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-2 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+                className={`p-2.5 rounded-xl border transition-all cursor-pointer shadow-2xs relative w-10 h-10 flex items-center justify-center ${
                   mobileMenuOpen 
                     ? 'bg-slate-900 text-white border-slate-900' 
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
                 }`}
                 title="More Options & Menu"
               >
-                {mobileMenuOpen ? <X className="w-5 h-5 font-bold" /> : <MenuIcon className="w-5 h-5 font-bold" />}
+                <div className="flex flex-col gap-1 w-5 h-3.5 justify-between items-center relative">
+                  <span className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform origin-center ${mobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+                  <span className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
+                  <span className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform origin-center ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+                </div>
               </button>
             </div>
 
           </div>
         </div>
 
-        {/* Backdrop overlay to close menu on outside click (starts below header to prevent blurring it) */}
-        {mobileMenuOpen && (
-          <div className="fixed top-16 sm:top-[72px] inset-x-0 bottom-0 z-40 bg-slate-900/20 backdrop-blur-xs animate-fade-in" onClick={() => setMobileMenuOpen(false)} />
-        )}
+        {/* Backdrop overlay to close menu on outside click */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="fixed top-16 sm:top-[72px] inset-x-0 bottom-0 z-40 bg-slate-900/10 backdrop-blur-xs"
+                onClick={() => setMobileMenuOpen(false)}
+              />
 
-        {/* Standard Professional 3-Bar Floating Popover Menu */}
-        {mobileMenuOpen && (
-          <div className="absolute right-4 sm:right-6 top-[68px] sm:top-[76px] z-50 w-72 sm:w-80 rounded-2xl bg-white border border-slate-200/90 shadow-2xl p-2 font-medium animate-fade-in text-slate-900 space-y-1">
-            
-            {/* User Profile Header if signed in */}
-            {session && (
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3 mb-1">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-sm uppercase shrink-0">
-                  {profile?.full_name?.charAt(0) || session.user.email?.charAt(0) || 'U'}
-                </div>
-                <div className="truncate">
-                  <div className="text-xs font-black text-slate-900 truncate">
-                    {profile?.full_name || 'Logged In User'}
+              {/* Standard Professional 3-Bar Floating Popover Menu */}
+              <motion.div
+                initial={{ opacity: 0, y: -12, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -12, scale: 0.95 }}
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute right-4 sm:right-6 top-[68px] sm:top-[76px] z-50 w-72 sm:w-80 rounded-2xl bg-white border border-slate-200/90 shadow-2xl p-2.5 text-slate-900 space-y-1 origin-top-right"
+              >
+                
+                {/* User Profile Header if signed in */}
+                {session && (
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3 mb-1">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-sm uppercase shrink-0">
+                      {profile?.full_name?.charAt(0) || session.user.email?.charAt(0) || 'U'}
+                    </div>
+                    <div className="truncate">
+                      <div className="text-xs font-black text-slate-900 truncate">
+                        {profile?.full_name || 'Logged In User'}
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-medium truncate">{session.user.email}</div>
+                    </div>
                   </div>
-                  <div className="text-[10px] text-slate-500 font-medium truncate">{session.user.email}</div>
+                )}
+
+                {/* Section 1: Navigation Links */}
+                <div className="px-2 pt-1 pb-0.5 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  Navigation
                 </div>
-              </div>
-            )}
 
-            {/* Section 1: Navigation Links */}
-            <div className="px-2 pt-1 pb-0.5 text-[10px] font-black uppercase tracking-wider text-slate-400">
-              Navigation
-            </div>
+                <div className="space-y-0.5">
+                  {activePortal === 'customer' && (
+                    <>
+                      <button
+                        onClick={() => { navigate('/menu'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/' || pathname === '/menu' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>🍽️</span>
+                        <span>Explore Menu</span>
+                      </button>
 
-            <div className="space-y-0.5">
-              {activePortal === 'customer' && (
-                <>
-                  <button
-                    onClick={() => { navigate('/menu'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/' || pathname === '/menu' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>🍽️</span>
-                    <span>Explore Menu</span>
-                  </button>
+                      <button
+                        onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/orders' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>📦</span>
+                        <span>My Orders & Live Tokens</span>
+                      </button>
 
-                  <button
-                    onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/orders' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>📦</span>
-                    <span>My Orders & Live Tokens</span>
-                  </button>
-
-                  <button
-                    onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/profile' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>👤</span>
-                    <span>My Profile</span>
-                  </button>
-                </>
-              )}
-
-              {activePortal === 'staff' && (
-                <>
-                  <button
-                    onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/staff' || pathname === '/staff/kds' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>👨‍🍳</span>
-                    <span>Live Kitchen Queue (KDS)</span>
-                  </button>
-                  <button
-                    onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/staff/stock' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>📦</span>
-                    <span>Quick Stock Availability</span>
-                  </button>
-                  <button
-                    onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/staff/history' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>📋</span>
-                    <span>Order History Log</span>
-                  </button>
-                </>
-              )}
-
-              {activePortal === 'admin' && (
-                <>
-                  <button
-                    onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/admin' || pathname === '/admin/dashboard' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>📊</span>
-                    <span>Executive Dashboard</span>
-                  </button>
-                  <button
-                    onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/admin/orders' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>💵</span>
-                    <span>Sales Controls & Refunds</span>
-                  </button>
-                  <button
-                    onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/admin/inventory' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>🍱</span>
-                    <span>Menu Inventory</span>
-                  </button>
-                  <button
-                    onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 transition-all ${
-                      pathname === '/admin/promos' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>🎟️</span>
-                    <span>Coupon Codes</span>
-                  </button>
-                  <button
-                    onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }}
-                    className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold text-purple-700 bg-purple-50 hover:bg-purple-100 flex items-center gap-2.5 transition-all"
-                  >
-                    <KeyRound className="w-4 h-4 text-purple-600" />
-                    <span>Change Admin Passcode</span>
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* Section 2: Quick Cart Action */}
-            {activePortal === 'customer' && (
-              <div className="pt-2 border-t border-slate-100 space-y-0.5">
-                <button
-                  onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
-                  className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 flex items-center justify-between transition-colors border border-emerald-200/60"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <ShoppingCart className="w-4 h-4 text-emerald-600" />
-                    <span>View Order Cart</span>
-                  </div>
-                  {cartCount > 0 ? (
-                    <span className="bg-emerald-600 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
-                      {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-emerald-600 font-bold">Empty</span>
+                      <button
+                        onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/profile' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>👤</span>
+                        <span>My Profile</span>
+                      </button>
+                    </>
                   )}
-                </button>
-              </div>
-            )}
 
-            {/* Section 3: Support & Developer Credits */}
-            <div className="pt-2 border-t border-slate-100 space-y-0.5">
-              <button
-                onClick={() => { onOpenReportBug?.(); setMobileMenuOpen(false); }}
-                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
-              >
-                <Bug className="w-4 h-4 text-amber-600" />
-                <span>Report Bug / Suggestions</span>
-              </button>
+                  {activePortal === 'staff' && (
+                    <>
+                      <button
+                        onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/staff' || pathname === '/staff/kds' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>👨‍🍳</span>
+                        <span>Live Kitchen Queue (KDS)</span>
+                      </button>
+                      <button
+                        onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/staff/stock' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>📦</span>
+                        <span>Quick Stock Availability</span>
+                      </button>
+                      <button
+                        onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/staff/history' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>📋</span>
+                        <span>Order History Log</span>
+                      </button>
+                    </>
+                  )}
 
-              <button
-                onClick={() => { onOpenAboutDev?.(); setMobileMenuOpen(false); }}
-                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center gap-2.5 transition-colors"
-              >
-                <Code className="w-4 h-4 text-indigo-600" />
-                <span>About Developer (Aayush Sharma)</span>
-              </button>
-            </div>
+                  {activePortal === 'admin' && (
+                    <>
+                      <button
+                        onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/admin' || pathname === '/admin/dashboard' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>📊</span>
+                        <span>Executive Dashboard</span>
+                      </button>
+                      <button
+                        onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/admin/orders' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>💵</span>
+                        <span>Sales Controls & Refunds</span>
+                      </button>
+                      <button
+                        onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/admin/inventory' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>🍱</span>
+                        <span>Menu Inventory</span>
+                      </button>
+                      <button
+                        onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
+                          pathname === '/admin/promos' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>🎟️</span>
+                        <span>Coupon Codes</span>
+                      </button>
+                      <button
+                        onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }}
+                        className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold text-purple-700 bg-purple-50 hover:bg-purple-100 hover:translate-x-1 flex items-center gap-2.5 transition-all"
+                      >
+                        <KeyRound className="w-4 h-4 text-purple-600" />
+                        <span>Change Admin Passcode</span>
+                      </button>
+                    </>
+                  )}
+                </div>
 
-            {/* Section 4: Account Actions */}
-            <div className="pt-2 border-t border-slate-100">
-              {session ? (
-                <button
-                  onClick={() => { logout(); setMobileMenuOpen(false); }}
-                  className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-red-50 hover:bg-red-100 text-red-700 flex items-center justify-between transition-colors"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <LogOut className="w-4 h-4 text-red-600" />
-                    <span>Sign Out</span>
+                {/* Section 2: Quick Cart Action */}
+                {activePortal === 'customer' && (
+                  <div className="pt-2 border-t border-slate-100 space-y-0.5">
+                    <button
+                      onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
+                      className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:translate-x-1 flex items-center justify-between transition-all border border-emerald-200/60"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <ShoppingCart className="w-4 h-4 text-emerald-600" />
+                        <span>View Order Cart</span>
+                      </div>
+                      {cartCount > 0 ? (
+                        <span className="bg-emerald-600 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
+                          {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-emerald-600 font-bold">Empty</span>
+                      )}
+                    </button>
                   </div>
-                </button>
-              ) : (
-                <button
-                  onClick={() => { onOpenAuth?.('customer'); setMobileMenuOpen(false); }}
-                  className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white rounded-xl flex items-center justify-between transition-colors"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <LogIn className="w-4 h-4 text-emerald-400" />
-                    <span>Sign In / Register</span>
-                  </div>
-                </button>
-              )}
-            </div>
+                )}
 
-          </div>
-        )}
+                {/* Section 3: Support & Developer Credits */}
+                <div className="pt-2 border-t border-slate-100 space-y-0.5">
+                  <button
+                    onClick={() => { onOpenReportBug?.(); setMobileMenuOpen(false); }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:translate-x-1 flex items-center gap-2.5 transition-all"
+                  >
+                    <Bug className="w-4 h-4 text-amber-600" />
+                    <span>Report Bug / Suggestions</span>
+                  </button>
+
+                  <button
+                    onClick={() => { onOpenAboutDev?.(); setMobileMenuOpen(false); }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:translate-x-1 flex items-center gap-2.5 transition-all"
+                  >
+                    <Code className="w-4 h-4 text-indigo-600" />
+                    <span>About Developer (Aayush Sharma)</span>
+                  </button>
+                </div>
+
+                {/* Section 4: Account Actions */}
+                <div className="pt-2 border-t border-slate-100">
+                  {session ? (
+                    <button
+                      onClick={() => { logout(); setMobileMenuOpen(false); }}
+                      className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-red-50 hover:bg-red-100 hover:translate-x-1 text-red-700 flex items-center justify-between transition-all"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <LogOut className="w-4 h-4 text-red-600" />
+                        <span>Sign Out</span>
+                      </div>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { onOpenAuth?.('customer'); setMobileMenuOpen(false); }}
+                      className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 hover:translate-x-1 text-white rounded-xl flex items-center justify-between transition-all"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <LogIn className="w-4 h-4 text-emerald-400" />
+                        <span>Sign In / Register</span>
+                      </div>
+                    </button>
+                  )}
+                </div>
+
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Change Admin Unlock Passcode Modal */}
