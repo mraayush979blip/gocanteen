@@ -421,6 +421,13 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   };
 
   const handlePlaceOrder = async () => {
+    // Force login before placing order
+    if (!session?.user) {
+      showToast('🔑 Please sign in to place your order!', true);
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
+
     // Check pending order limit before proceeding to payment
     if (session?.user?.id) {
       try {
@@ -847,75 +854,98 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
                   {/* Customer Details Form */}
                   <div className="space-y-3 pt-3 border-t border-slate-100">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Contact & Delivery Info</h3>
-                    </div>
+                    {!session ? (
+                      <div className="bg-amber-50/50 border border-amber-200/80 rounded-2xl p-4 text-center space-y-3 shadow-2xs my-1">
+                        <LogIn className="w-5.5 h-5.5 text-amber-600 mx-auto" />
+                        <div className="space-y-1">
+                          <h4 className="text-xs font-black text-amber-900">Sign In Required to Checkout</h4>
+                          <p className="text-[11px] text-amber-700 font-semibold leading-relaxed">
+                            Please sign in with your campus Google account to place this order and track your token.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (onOpenAuth) onOpenAuth();
+                          }}
+                          className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+                        >
+                          <LogIn className="w-3.5 h-3.5" /> Sign In with Google
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Contact & Delivery Info</h3>
+                        </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Full Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={customerName}
-                        onChange={(e) => {
-                          setCustomerName(e.target.value);
-                          if (e.target.value.trim()) setNameError('');
-                        }}
-                        placeholder="Enter your full name"
-                        className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-slate-900 text-xs focus:outline-none transition-all ${
-                          nameError ? 'border-red-500 bg-red-50/20' : 'border-slate-200 focus:border-emerald-600'
-                        }`}
-                      />
-                      {nameError && <span className="text-[10px] text-red-500 font-bold block mt-1">{nameError}</span>}
-                    </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            Full Name <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={customerName}
+                            onChange={(e) => {
+                              setCustomerName(e.target.value);
+                              if (e.target.value.trim()) setNameError('');
+                            }}
+                            placeholder="Enter your full name"
+                            className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-slate-900 text-xs focus:outline-none transition-all ${
+                              nameError ? 'border-red-500 bg-red-50/20' : 'border-slate-200 focus:border-emerald-600'
+                            }`}
+                          />
+                          {nameError && <span className="text-[10px] text-red-500 font-bold block mt-1">{nameError}</span>}
+                        </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Mobile Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        required
-                        value={phone}
-                        onChange={(e) => {
-                          setPhone(e.target.value);
-                          if (e.target.value.trim()) setPhoneError('');
-                        }}
-                        placeholder="Enter mobile number (+91...)"
-                        className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-slate-900 text-xs focus:outline-none transition-all ${
-                          phoneError ? 'border-red-500 bg-red-50/20' : 'border-slate-200 focus:border-emerald-600'
-                        }`}
-                      />
-                      {phoneError && <span className="text-[10px] text-red-500 font-bold block mt-1">{phoneError}</span>}
-                    </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            Mobile Phone Number <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="tel"
+                            required
+                            value={phone}
+                            onChange={(e) => {
+                              setPhone(e.target.value);
+                              if (e.target.value.trim()) setPhoneError('');
+                            }}
+                            placeholder="Enter mobile number (+91...)"
+                            className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-slate-900 text-xs focus:outline-none transition-all ${
+                              phoneError ? 'border-red-500 bg-red-50/20' : 'border-slate-200 focus:border-emerald-600'
+                            }`}
+                          />
+                          {phoneError && <span className="text-[10px] text-red-500 font-bold block mt-1">{phoneError}</span>}
+                        </div>
 
-                    {/* Auto-Save to Profile Checkbox - Only shown if contact details NOT saved in profile yet */}
-                    {!isProfileSaved && session && (
-                      <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 pt-0.5">
-                        <input
-                          type="checkbox"
-                          checked={saveToProfileOption}
-                          onChange={(e) => setSaveToProfileOption(e.target.checked)}
-                          className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300"
-                        />
-                        <span>💾 Save name & phone to my profile for 1-tap future checkouts</span>
-                      </label>
+                        {/* Auto-Save to Profile Checkbox - Only shown if contact details NOT saved in profile yet */}
+                        {!isProfileSaved && (
+                          <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 pt-0.5">
+                            <input
+                              type="checkbox"
+                              checked={saveToProfileOption}
+                              onChange={(e) => setSaveToProfileOption(e.target.checked)}
+                              className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300"
+                            />
+                            <span>💾 Save name & phone to my profile for 1-tap future checkouts</span>
+                          </label>
+                        )}
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            Special Instructions <span className="text-slate-400 font-normal">(Optional)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            placeholder="e.g. Extra spicy, less sugar"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-emerald-600"
+                          />
+                        </div>
+                      </>
                     )}
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Special Instructions <span className="text-slate-400 font-normal">(Optional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="e.g. Extra spicy, less sugar"
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-emerald-600"
-                      />
-                    </div>
                   </div>
 
                   {/* Payment Method Selector */}
@@ -999,9 +1029,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
                 <button
                   onClick={handlePlaceOrder}
-                  disabled={placingOrder || pendingOrdersCount >= 3}
+                  disabled={placingOrder}
                   className={`w-full py-4 font-black text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 ${
-                    pendingOrdersCount >= 3 
+                    !session
+                      ? 'bg-slate-900 hover:bg-slate-800 text-white cursor-pointer active:scale-[0.99]'
+                      : pendingOrdersCount >= 3 
                       ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none border border-slate-200' 
                       : 'bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.99]'
                   }`}
@@ -1010,6 +1042,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
                       <span>Processing Order...</span>
+                    </>
+                  ) : !session ? (
+                    <>
+                      <LogIn className="w-5 h-5" />
+                      <span>SIGN IN TO PLACE ORDER</span>
                     </>
                   ) : pendingOrdersCount >= 3 ? (
                     <span>LIMIT REACHED (3 PENDING ORDERS)</span>
