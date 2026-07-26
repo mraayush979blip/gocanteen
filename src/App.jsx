@@ -113,6 +113,41 @@ function MainContent() {
   const handleSplashFinish = useCallback(() => {
     setShowSplash(false);
   }, []);
+
+  // Initialize Lenis Smooth Scrolling on Mount
+  useEffect(() => {
+    let lenisInstance = null;
+    let animationFrameId = null;
+
+    // Dynamically import Lenis to prevent bundle bloat and ensure fast client-side hydration
+    import('lenis').then(({ default: Lenis }) => {
+      lenisInstance = new Lenis({
+        duration: 1.1,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Silky exponential inertia glide
+        smoothWheel: true,
+        smoothTouch: false, // Keep native touch velocity on mobile for optimal responsiveness
+      });
+
+      function raf(time) {
+        lenisInstance?.raf(time);
+        animationFrameId = requestAnimationFrame(raf);
+      }
+
+      animationFrameId = requestAnimationFrame(raf);
+    }).catch(err => {
+      console.warn("Could not load Lenis smooth scrolling library:", err);
+    });
+
+    return () => {
+      if (lenisInstance) {
+        lenisInstance.destroy();
+      }
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, []);
+
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalRole, setAuthModalRole] = useState('customer');
   const [cartOpen, setCartOpen] = useState(false);
