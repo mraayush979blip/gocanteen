@@ -26,6 +26,12 @@ export default function KitchenQueue() {
   // Cancellation Modal state
   const [cancelModalOrder, setCancelModalOrder] = useState(null);
 
+  // Expanded cards state for clean mobile layout
+  const [expandedCards, setExpandedCards] = useState({});
+  const toggleCard = (orderId) => {
+    setExpandedCards(prev => ({ ...prev, [orderId]: !prev[orderId] }));
+  };
+
   const staffIdentifier = profile?.full_name && !profile.full_name.includes('@') ? profile.full_name : 'Kitchen Staff';
 
 
@@ -353,7 +359,7 @@ export default function KitchenQueue() {
                         </span>
 
                         {orderIdStr && (
-                          <span className="text-xs font-extrabold text-indigo-900 bg-indigo-50 px-2.5 py-1 rounded-xl border border-indigo-200 font-mono shadow-2xs">
+                          <span className="hidden sm:inline-block text-xs font-extrabold text-indigo-900 bg-indigo-50 px-2.5 py-1 rounded-xl border border-indigo-200 font-mono shadow-2xs">
                             🆔 {orderIdStr}
                           </span>
                         )}
@@ -430,37 +436,60 @@ export default function KitchenQueue() {
 
                 {/* Footer Controls & Financial Details */}
                 <div className="space-y-2.5 pt-3 border-t border-slate-100">
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 space-y-1 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400 uppercase font-extrabold">Payment Status</span>
-                      <span className={`font-black text-xs ${order.payment_status === 'paid' ? 'text-emerald-700' : 'text-red-600'}`}>
-                        {order.payment_status === 'paid' ? 'PAID ✓' : 'UNPAID ✕'} ({order.payment_method?.toUpperCase() || 'CASH'})
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-slate-700 font-bold pt-1 border-t border-slate-200/60">
-                      <span>Food Amount</span>
-                      <span>₹{financials.foodSalesAmount}</span>
-                    </div>
-
-                    {financials.platformFee > 0 && (
-                      <div className="flex items-center justify-between text-amber-900 font-extrabold text-[11px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                        <span>⚡ Platform Fee (UPI/Online)</span>
-                        <span>+₹{financials.platformFee}</span>
+                  <div className="space-y-2">
+                    {order.payment_status === 'paid' ? (
+                      <div className="bg-emerald-50 text-emerald-800 text-xs p-2.5 rounded-xl font-bold flex items-center justify-between border border-emerald-200/65 shadow-2xs">
+                        <span className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>PAID ({order.payment_method?.toUpperCase() || 'UPI'}) ✓</span>
+                        </span>
+                        <span className="font-extrabold text-sm text-emerald-700">₹{financials.customerPaid}</span>
+                      </div>
+                    ) : (
+                      <div className="bg-red-50 text-red-900 text-xs p-2.5 rounded-xl font-bold flex items-center justify-between border border-red-200/70 shadow-2xs">
+                        <span className="flex items-center gap-1.5 animate-pulse">
+                          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                          <span>UNPAID • COLLECT CASH ✕</span>
+                        </span>
+                        <span className="font-extrabold text-sm text-red-700">₹{financials.finalAmount}</span>
                       </div>
                     )}
 
-                    {paymentId && (
-                      <div className="flex items-center justify-between text-purple-900 font-bold text-[10px] bg-purple-50 px-2 py-0.5 rounded border border-purple-200 font-mono">
-                        <span>💳 Payment ID</span>
-                        <span className="truncate max-w-[150px]">{paymentId}</span>
+                    {/* Collapsible Details Button */}
+                    <button
+                      onClick={() => toggleCard(order.id)}
+                      className="w-full py-1 text-[10px] text-slate-400 font-extrabold tracking-wider uppercase flex items-center justify-center gap-1 hover:text-slate-600 cursor-pointer transition-colors"
+                    >
+                      <span>{expandedCards[order.id] ? 'Hide Details ▲' : 'Show Details ▼'}</span>
+                    </button>
+
+                    {/* Detailed financials shown only when expanded */}
+                    {expandedCards[order.id] && (
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 space-y-1 text-xs text-slate-600 animate-slide-down">
+                        <div className="flex items-center justify-between">
+                          <span>Food Amount</span>
+                          <span>₹{financials.foodSalesAmount}</span>
+                        </div>
+                        {financials.platformFee > 0 && (
+                          <div className="flex items-center justify-between text-amber-900 font-extrabold">
+                            <span>Platform Fee</span>
+                            <span>+₹{financials.platformFee}</span>
+                          </div>
+                        )}
+                        {paymentId && (
+                          <div className="flex items-center justify-between text-purple-900 font-mono text-[9px]">
+                            <span>Payment ID</span>
+                            <span className="truncate max-w-[120px]">{paymentId}</span>
+                          </div>
+                        )}
+                        {orderIdStr && (
+                          <div className="flex items-center justify-between text-slate-400 font-mono text-[9px]">
+                            <span>Order UUID</span>
+                            <span className="truncate max-w-[120px]">{orderIdStr}</span>
+                          </div>
+                        )}
                       </div>
                     )}
-
-                    <div className="flex items-center justify-between text-xs font-black text-slate-900 pt-1 border-t border-slate-200/80">
-                      <span>Total Paid</span>
-                      <span className="text-emerald-700">₹{financials.customerPaid}</span>
-                    </div>
                   </div>
 
                   {/* 1-TAP BIG ACTION BUTTONS */}

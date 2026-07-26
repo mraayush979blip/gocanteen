@@ -178,125 +178,221 @@ export default function StaffHistory() {
           </p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
-                <tr>
-                  <th className="p-3.5">Token / ID</th>
-                  <th className="p-3.5">Customer</th>
-                  <th className="p-3.5">Items</th>
-                  <th className="p-3.5">Total Amount</th>
-                  <th className="p-3.5">Discount</th>
-                  <th className="p-3.5">Payment</th>
-                  <th className="p-3.5">Status</th>
-                  <th className="p-3.5">{staffT.processedBy}</th>
-                  <th className="p-3.5">Time</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filtered.map(order => {
-                  const isCancelled = (order.status || '').toLowerCase().includes('cancel');
-                  const { subtotal, discount, finalAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
-                  const pin = getOrderPin(order);
+        <div className="space-y-4">
+          
+          {/* Mobile View: Stacked Card List */}
+          <div className="block md:hidden space-y-3.5">
+            {filtered.map(order => {
+              const isCancelled = (order.status || '').toLowerCase().includes('cancel');
+              const { subtotal, discount, finalAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
+              const pin = getOrderPin(order);
+              let attributionText = order.handled_by_name || '';
+              if (attributionText.toLowerCase().includes('customer') || attributionText.toLowerCase().includes('student')) {
+                attributionText = 'Customer';
+              }
 
-                  let attributionText = order.handled_by_name || '';
-                  if (attributionText.toLowerCase().includes('customer') || attributionText.toLowerCase().includes('student')) {
-                    attributionText = 'Customer';
-                  }
-
-                  return (
-                    <tr
-                      key={order.id}
-                      className={`transition-colors ${
+              return (
+                <div
+                  key={order.id}
+                  className={`bg-white border rounded-2xl p-4 space-y-3 shadow-2xs transition-all ${
+                    isCancelled ? 'border-red-200 bg-red-50/20' : 'border-slate-200 bg-white'
+                  }`}
+                >
+                  {/* Card Header: Token & Status */}
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200 font-mono">
+                        Token #{order.token_number || order.id.slice(0, 4)}
+                      </span>
+                      {pin && (
+                        <span className="text-[10px] font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 font-mono">
+                          🔑 PIN: {pin}
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border capitalize ${
                         isCancelled
-                          ? 'bg-red-50/70 hover:bg-red-100/70 border-l-4 border-l-red-500'
-                          : 'hover:bg-slate-50/80'
+                          ? 'bg-red-100 text-red-800 border-red-300'
+                          : 'bg-emerald-100 text-emerald-800 border-emerald-300'
                       }`}
                     >
+                      {staffT[order.status] || order.status}
+                    </span>
+                  </div>
 
-                      <td className="p-3.5 font-black text-slate-900">
-                        <div>#{order.token_number || order.id.slice(0, 6)}</div>
-                        {pin && (
-                          <span className="text-[10px] font-extrabold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 block w-fit mt-0.5 font-mono">
-                            🔑 {staffT.pin}: {pin}
-                          </span>
-                        )}
-                        {order.cancellation_reason && (
-                          <span className="text-[10px] font-extrabold text-red-800 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 block w-fit mt-0.5">
-                            ❌ Reason: {order.cancellation_reason}
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-3.5 font-bold text-slate-900">{order.customer_name || 'Walk-in'}</td>
-                      <td className="p-3.5">
-                        <div className="flex flex-wrap gap-1 max-w-xs">
-                          {order.order_items?.map((item, idx) => (
-                            <span key={idx} className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-semibold text-slate-800">
-                              {item.quantity}x {item.inventory?.emoji || '🍽️'} {item.inventory?.name || item.item_name}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="p-3.5 font-black text-slate-900">
-                        <div>₹{finalAmount}</div>
-                        {platformFee > 0 && (
-                          <span className="text-[10px] text-amber-800 font-extrabold block bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 w-fit mt-0.5">
-                            + ₹{platformFee} (Fee)
-                          </span>
-                        )}
+                  {/* Customer & Timestamp */}
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+                    <span>👤 {order.customer_name || 'Walk-in'}</span>
+                    <span>🕒 {new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</span>
+                  </div>
+
+                  {/* Items List */}
+                  <div className="flex flex-wrap gap-1">
+                    {order.order_items?.map((item, idx) => (
+                      <span key={idx} className="bg-slate-100 border border-slate-200/80 px-2 py-0.5 rounded text-[10px] font-semibold text-slate-800">
+                        {item.quantity}x {item.inventory?.emoji || '🍽️'} {item.inventory?.name || item.item_name}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Special notes if cancelled */}
+                  {order.cancellation_reason && (
+                    <div className="text-[10px] font-extrabold text-red-800 bg-red-50 px-2 py-1 rounded border border-red-200 w-fit">
+                      ❌ Cancel Reason: {order.cancellation_reason}
+                    </div>
+                  )}
+
+                  {/* Card Footer: Amount, Paid Status, and Handler */}
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs">
+                    <div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-black text-slate-900">₹{finalAmount}</span>
                         {discount > 0 && (
-                          <span className="text-[10px] text-slate-400 line-through font-medium block">₹{subtotal}</span>
+                          <span className="text-[10px] text-slate-400 line-through">₹{subtotal}</span>
                         )}
-                      </td>
-                      <td className="p-3.5">
-                        {discount > 0 ? (
-                          <span className="inline-flex items-center gap-1 font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg text-[11px] shrink-0 whitespace-nowrap">
-                            <Ticket className="w-3 h-3 text-emerald-600 shrink-0" />
-                            -₹{discount} {couponCode ? `(${couponCode})` : ''}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 font-medium text-[11px]">-</span>
-                        )}
-                      </td>
-                      <td className="p-3.5 uppercase text-[11px] font-semibold text-slate-500">
-                        {order.payment_method || 'CASH'} ({order.payment_status === 'paid' ? staffT.paid : staffT.unpaid})
-                      </td>
-                      <td className="p-3.5">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border capitalize ${
-                            isCancelled
-                              ? 'bg-red-100 text-red-800 border-red-300'
-                              : 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                          }`}
-                        >
-                          {staffT[order.status] || order.status}
+                      </div>
+                      <span className="text-[9px] uppercase font-bold text-slate-400 block mt-0.5">
+                        {order.payment_method || 'CASH'} • {order.payment_status === 'paid' ? staffT.paid : staffT.unpaid}
+                      </span>
+                    </div>
+
+                    <div>
+                      {attributionText ? (
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border flex items-center gap-1 ${
+                          isCancelled ? 'bg-red-50 text-red-900 border-red-200' : 'bg-purple-50 text-purple-900 border-purple-200'
+                        }`}>
+                          👤 {isCancelled ? `By ${attributionText}` : `By ${attributionText}`}
                         </span>
-                      </td>
+                      ) : (
+                        <span className="text-slate-400 font-medium text-[10px] italic">System</span>
+                      )}
+                    </div>
+                  </div>
 
-                      {/* Staff Audit Attribution Column */}
-                      <td className="p-3.5">
-                        {attributionText ? (
-                          <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1 w-fit border ${
-                            isCancelled ? 'bg-red-50 text-red-900 border-red-200' : 'bg-purple-50 text-purple-900 border-purple-200'
-                          }`}>
-                            <User className="w-3.5 h-3.5 shrink-0" />
-                            {isCancelled ? `Cancelled by ${attributionText}` : `Done by ${attributionText}`}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 font-medium text-[11px] italic">System / Unassigned</span>
-                        )}
-                      </td>
-
-                      <td className="p-3.5 text-slate-500 font-medium">
-                        {new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                </div>
+              );
+            })}
           </div>
+
+          {/* Desktop View: Full Audit Table */}
+          <div className="hidden md:block bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-700">
+                <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
+                  <tr>
+                    <th className="p-3.5">Token / ID</th>
+                    <th className="p-3.5">Customer</th>
+                    <th className="p-3.5">Items</th>
+                    <th className="p-3.5">Total Amount</th>
+                    <th className="p-3.5">Discount</th>
+                    <th className="p-3.5">Payment</th>
+                    <th className="p-3.5">Status</th>
+                    <th className="p-3.5">{staffT.processedBy}</th>
+                    <th className="p-3.5">Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filtered.map(order => {
+                    const isCancelled = (order.status || '').toLowerCase().includes('cancel');
+                    const { subtotal, discount, finalAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
+                    const pin = getOrderPin(order);
+
+                    let attributionText = order.handled_by_name || '';
+                    if (attributionText.toLowerCase().includes('customer') || attributionText.toLowerCase().includes('student')) {
+                      attributionText = 'Customer';
+                    }
+
+                    return (
+                      <tr
+                        key={order.id}
+                        className={`transition-colors ${
+                          isCancelled
+                            ? 'bg-red-50/70 hover:bg-red-100/70 border-l-4 border-l-red-500'
+                            : 'hover:bg-slate-50/80'
+                        }`}
+                      >
+                        <td className="p-3.5 font-black text-slate-900">
+                          <div>#{order.token_number || order.id.slice(0, 6)}</div>
+                          {pin && (
+                            <span className="text-[10px] font-extrabold text-purple-800 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200 block w-fit mt-0.5 font-mono">
+                              🔑 {staffT.pin}: {pin}
+                            </span>
+                          )}
+                          {order.cancellation_reason && (
+                            <span className="text-[10px] font-extrabold text-red-800 bg-red-50 px-1.5 py-0.5 rounded border border-red-200 block w-fit mt-0.5">
+                              ❌ Reason: {order.cancellation_reason}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-3.5 font-bold text-slate-900">{order.customer_name || 'Walk-in'}</td>
+                        <td className="p-3.5">
+                          <div className="flex flex-wrap gap-1 max-w-xs">
+                            {order.order_items?.map((item, idx) => (
+                              <span key={idx} className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-semibold text-slate-800">
+                                {item.quantity}x {item.inventory?.emoji || '🍽️'} {item.inventory?.name || item.item_name}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="p-3.5 font-black text-slate-900">
+                          <div>₹{finalAmount}</div>
+                          {platformFee > 0 && (
+                            <span className="text-[10px] text-amber-800 font-extrabold block bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 w-fit mt-0.5">
+                              + ₹{platformFee} (Fee)
+                            </span>
+                          )}
+                          {discount > 0 && (
+                            <span className="text-[10px] text-slate-400 line-through font-medium block">₹{subtotal}</span>
+                          )}
+                        </td>
+                        <td className="p-3.5">
+                          {discount > 0 ? (
+                            <span className="inline-flex items-center gap-1 font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg text-[11px] shrink-0 whitespace-nowrap">
+                              <Ticket className="w-3 h-3 text-emerald-600 shrink-0" />
+                              -₹{discount} {couponCode ? `(${couponCode})` : ''}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 font-medium text-[11px]">-</span>
+                          )}
+                        </td>
+                        <td className="p-3.5 uppercase text-[11px] font-semibold text-slate-500">
+                          {order.payment_method || 'CASH'} ({order.payment_status === 'paid' ? staffT.paid : staffT.unpaid})
+                        </td>
+                        <td className="p-3.5">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border capitalize ${
+                              isCancelled
+                                ? 'bg-red-100 text-red-800 border-red-300'
+                                : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                            }`}
+                          >
+                            {staffT[order.status] || order.status}
+                          </span>
+                        </td>
+                        <td className="p-3.5">
+                          {attributionText ? (
+                            <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1 w-fit border ${
+                              isCancelled ? 'bg-red-50 text-red-900 border-red-200' : 'bg-purple-50 text-purple-900 border-purple-200'
+                            }`}>
+                              <User className="w-3.5 h-3.5 shrink-0" />
+                              {isCancelled ? `Cancelled by ${attributionText}` : `Done by ${attributionText}`}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 font-medium text-[11px] italic">System / Unassigned</span>
+                          )}
+                        </td>
+                        <td className="p-3.5 text-slate-500 font-medium">
+                          {new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       )}
     </div>

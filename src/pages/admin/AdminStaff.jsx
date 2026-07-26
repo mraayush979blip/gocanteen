@@ -213,8 +213,90 @@ export default function AdminStaff() {
         </button>
       </div>
 
-      {/* Staff Table */}
-      <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xs">
+      {/* Mobile View: Stacked Card List */}
+      <div className="block md:hidden space-y-3">
+        {staffOnlyUsers.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center text-slate-400 font-bold">
+            No staff members created yet. Click "+ Add New Staff Member" above to create one.
+          </div>
+        ) : (
+          staffOnlyUsers.map(user => {
+            const isTempExpired = user.is_temporary && user.valid_till && new Date(user.valid_till) < new Date();
+
+            return (
+              <div
+                key={user.id}
+                className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3.5 shadow-2xs"
+              >
+                <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                  <div className="flex items-center gap-2 font-extrabold text-slate-900 text-sm">
+                    {user.role === 'admin' ? (
+                      <Shield className="w-4 h-4 text-purple-600 shrink-0" />
+                    ) : (
+                      <ChefHat className="w-4 h-4 text-emerald-600 shrink-0" />
+                    )}
+                    {user.full_name || 'Staff Member'}
+                  </div>
+
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
+                      user.role === 'admin'
+                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    }`}
+                  >
+                    {user.role}
+                  </span>
+                </div>
+
+                <div className="text-xs text-slate-600 font-semibold">
+                  📧 {user.email}
+                </div>
+
+                <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                  <div>
+                    {user.is_temporary ? (
+                      isTempExpired ? (
+                        <span className="bg-red-100 text-red-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-red-300">
+                          ⌛ Expired
+                        </span>
+                      ) : (
+                        <span className="bg-amber-50 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-amber-200 flex items-center gap-1 w-fit">
+                          <Clock className="w-3.5 h-3.5 text-amber-600" />
+                          Till: {new Date(user.valid_till).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        </span>
+                      )
+                    ) : (
+                      <span className="text-slate-400 font-semibold text-[10px]">♾️ Permanent</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={() => handleOpenEdit(user)}
+                      className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer flex items-center gap-1 text-[11px] font-bold"
+                      title="Edit Staff"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" /> Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteStaff(user)}
+                      className="p-1.5 rounded-lg bg-slate-100 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                      title="Delete Staff"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop View: Staff Table */}
+      <div className="hidden md:block bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-700">
             <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
@@ -267,7 +349,7 @@ export default function AdminStaff() {
                             </span>
                           ) : (
                             <span className="bg-amber-50 text-amber-900 text-[11px] font-bold px-2.5 py-1 rounded-xl border border-amber-200 flex items-center gap-1 w-fit">
-                              <Clock className="w-3 h-3 text-amber-600" />
+                              <Clock className="w-3.5 h-3.5 text-amber-600" />
                               Valid: {user.valid_from ? new Date(user.valid_from).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Now'} - {new Date(user.valid_till).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </span>
                           )
@@ -280,7 +362,7 @@ export default function AdminStaff() {
                           {/* Edit Button */}
                           <button
                             onClick={() => handleOpenEdit(user)}
-                            className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-colors flex items-center gap-1"
+                            className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
                             title="Edit Staff & View/Change Password"
                           >
                             <Edit3 className="w-4 h-4" />
@@ -290,7 +372,7 @@ export default function AdminStaff() {
                           {/* Delete Button */}
                           <button
                             onClick={() => handleDeleteStaff(user)}
-                            className="p-2 rounded-xl bg-slate-100 text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                            className="p-2 rounded-xl bg-slate-100 text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
                             title="Delete Staff Member"
                           >
                             <Trash2 className="w-4 h-4" />

@@ -339,24 +339,26 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
             </div>
 
             {/* Section 2: Quick Cart Action */}
-            <div className="pt-2 border-t border-slate-100 space-y-0.5">
-              <button
-                onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
-                className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 flex items-center justify-between transition-colors border border-emerald-200/60"
-              >
-                <div className="flex items-center gap-2.5">
-                  <ShoppingCart className="w-4 h-4 text-emerald-600" />
-                  <span>View Order Cart</span>
-                </div>
-                {cartCount > 0 ? (
-                  <span className="bg-emerald-600 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
-                    {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
-                  </span>
-                ) : (
-                  <span className="text-[10px] text-emerald-600 font-bold">Empty</span>
-                )}
-              </button>
-            </div>
+            {activePortal === 'customer' && (
+              <div className="pt-2 border-t border-slate-100 space-y-0.5">
+                <button
+                  onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 flex items-center justify-between transition-colors border border-emerald-200/60"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <ShoppingCart className="w-4 h-4 text-emerald-600" />
+                    <span>View Order Cart</span>
+                  </div>
+                  {cartCount > 0 ? (
+                    <span className="bg-emerald-600 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
+                      {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-emerald-600 font-bold">Empty</span>
+                  )}
+                </button>
+              </div>
+            )}
 
             {/* Section 3: Support & Developer Credits */}
             <div className="pt-2 border-t border-slate-100 space-y-0.5">

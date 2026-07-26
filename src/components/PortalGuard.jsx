@@ -3,7 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import { Clock } from 'lucide-react';
 
 export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
-  const { session, userRole, profile, isAdminUnlocked } = useAuth();
+  const { session, userRole, profile, isAdminUnlocked, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
+        <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+        <span className="text-[10px] uppercase font-black tracking-wider text-slate-400">Verifying session...</span>
+      </div>
+    );
+  }
 
   const isAuthorized =
     requiredRole === 'staff'
