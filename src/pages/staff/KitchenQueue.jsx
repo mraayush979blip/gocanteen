@@ -56,7 +56,15 @@ export default function KitchenQueue() {
       })
       .subscribe();
 
-    return () => supabase.removeChannel(channel);
+    // Backup polling fallback every 20 seconds in case websocket goes to standby mode
+    const backupPoll = setInterval(() => {
+      fetchOrders();
+    }, 20000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(backupPoll);
+    };
   }, []);
 
   const fetchOrders = async () => {

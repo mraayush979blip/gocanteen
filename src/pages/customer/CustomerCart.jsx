@@ -2,17 +2,31 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { 
-  X, Trash2, Plus, Minus, Ticket, Smartphone, DollarSign, ArrowRight, Loader2, Sparkles, CheckCircle2, LogIn, KeyRound, CreditCard, ShieldCheck, Save, Bookmark, Info, Calendar, ChevronRight, AlertCircle, Copy, Tag, Check, Gift
+  X, Trash2, Plus, Minus, Ticket, Smartphone, DollarSign, ArrowRight, Loader2, Sparkles, CheckCircle2, LogIn, KeyRound, CreditCard, ShieldCheck, Save, Bookmark, Info, Calendar, ChevronRight, AlertCircle, Copy, Tag, Check, Gift, Clock
 } from 'lucide-react';
 
 export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlaced }) {
-  const { cart, updateCartQty, removeFromCart, clearCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo } = useAuth();
+  const { cart, updateCartQty, removeFromCart, clearCart, setCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo } = useAuth();
 
   const [customerName, setCustomerName] = useState('');
   const [phone, setPhone] = useState('');
   const [nameError, setNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [saveToProfileOption, setSaveToProfileOption] = useState(true);
+
+  const isCanteenOpen = () => {
+    try {
+      const now = new Date();
+      const options = { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: 'numeric', hour12: false };
+      const formatter = new Intl.DateTimeFormat('en-US', options);
+      const timeStr = formatter.format(now);
+      const [hour] = timeStr.split(':').map(Number);
+      return hour >= 8 && hour < 17;
+    } catch (e) {
+      const hour = new Date().getHours();
+      return hour >= 8 && hour < 17;
+    }
+  };
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' | 'cash'
@@ -393,7 +407,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
       const { data: invItems, error } = await supabase
         .from('inventory')
-        .select('id, name, is_available, is_active')
+        .select('id, name, price, is_available, is_active')
         .in('id', inventoryIds);
 
       if (error) {
@@ -402,15 +416,39 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       }
 
       const outOfStockNames = [];
-      invItems?.forEach(dbItem => {
-        if (dbItem.is_available === false || dbItem.is_active === false) {
-          outOfStockNames.push(dbItem.name);
-          updateCartQty(dbItem.id, -999);
+      let priceChanged = false;
+
+      const updatedCart = cart.map(cartItem => {
+        const dbItem = invItems?.find(db => db.id === cartItem.id);
+        if (dbItem) {
+          // Check stock
+          if (dbItem.is_available === false || dbItem.is_active === false) {
+            outOfStockNames.push(dbItem.name);
+            return null; // Will be filtered out
+          }
+          // Check price
+          const dbPrice = Number(dbItem.price);
+          const cartPrice = Number(cartItem.price);
+          if (dbPrice !== cartPrice) {
+            priceChanged = true;
+            showToast(`💰 Price Updated: "${dbItem.name}" changed from ₹${cartPrice} to ₹${dbPrice}.`, true);
+            return { ...cartItem, price: dbPrice };
+          }
         }
-      });
+        return cartItem;
+      }).filter(Boolean);
 
       if (outOfStockNames.length > 0) {
+        outOfStockNames.forEach(name => {
+          const item = cart.find(i => i.name === name);
+          if (item) updateCartQty(item.id, -999);
+        });
         return { ok: false, outOfStockNames };
+      }
+
+      if (priceChanged) {
+        setCart(updatedCart);
+        return { ok: false, priceUpdated: true };
       }
 
       return { ok: true };
@@ -421,6 +459,12 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   };
 
   const handlePlaceOrder = async () => {
+    // Time-gated ordering (8 AM to 5 PM IST)
+    if (!isCanteenOpen()) {
+      showToast('⏰ Canteen is currently closed. Orders can only be placed between 8:00 AM and 5:00 PM IST.', true);
+      return;
+    }
+
     // Force login before placing order
     if (!session?.user) {
       showToast('🔑 Please sign in to place your order!', true);
@@ -467,8 +511,12 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     const stockCheck = await verifyStockAvailability();
     if (!stockCheck.ok) {
       setPlacingOrder(false);
-      const itemNames = stockCheck.outOfStockNames.join(', ');
-      showToast(`⚠️ Out of Stock Alert: [${itemNames}] became unavailable in database! It has been removed from your cart.`, true);
+      if (stockCheck.priceUpdated) {
+        showToast(`⚠️ Order Total Updated: Some menu item prices changed to match the latest menu. Please review and place your order again!`, true);
+      } else {
+        const itemNames = stockCheck.outOfStockNames.join(', ');
+        showToast(`⚠️ Out of Stock Alert: [${itemNames}] became unavailable in database! It has been removed from your cart.`, true);
+      }
       return;
     }
 
@@ -989,12 +1037,27 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
             {cart.length > 0 && (
               <div className="p-4 border-t border-slate-100 bg-white space-y-3 shadow-lg">
                 
+                {/* Canteen Closed Alert Callout */}
+                {!isCanteenOpen() && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-start gap-2.5 text-amber-900 shadow-2xs">
+                    <Clock className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="space-y-0.5 text-left">
+                      <span className="text-xs font-black uppercase tracking-wider block text-amber-755">
+                        Ordering Closed
+                      </span>
+                      <p className="text-[11px] font-bold text-amber-900 leading-snug">
+                        Orders are only accepted between 8:00 AM and 5:00 PM (IST). Online checkout is locked.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Pending Orders Warning Callout */}
-                {pendingOrdersCount >= 3 && (
+                {pendingOrdersCount >= 3 && isCanteenOpen() && (
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-start gap-2.5 text-amber-900 shadow-2xs">
                     <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
                     <div className="space-y-0.5 text-left">
-                      <span className="text-xs font-black uppercase tracking-wider block text-amber-700">
+                      <span className="text-xs font-black uppercase tracking-wider block text-amber-705">
                         Order Limit Reached
                       </span>
                       <p className="text-[11px] font-bold text-amber-900 leading-snug">
@@ -1029,10 +1092,12 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
                 <button
                   onClick={handlePlaceOrder}
-                  disabled={placingOrder}
+                  disabled={placingOrder || (session && !isCanteenOpen())}
                   className={`w-full py-4 font-black text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 ${
                     !session
                       ? 'bg-slate-900 hover:bg-slate-800 text-white cursor-pointer active:scale-[0.99]'
+                      : !isCanteenOpen()
+                      ? 'bg-slate-200 text-slate-400 border border-slate-350 cursor-not-allowed shadow-none'
                       : pendingOrdersCount >= 3 
                       ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none border border-slate-200' 
                       : 'bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.99]'
@@ -1047,6 +1112,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                     <>
                       <LogIn className="w-5 h-5" />
                       <span>SIGN IN TO PLACE ORDER</span>
+                    </>
+                  ) : !isCanteenOpen() ? (
+                    <>
+                      <Clock className="w-5 h-5 text-slate-400" />
+                      <span>CANTEEN CLOSED (8AM - 5PM)</span>
                     </>
                   ) : pendingOrdersCount >= 3 ? (
                     <span>LIMIT REACHED (3 PENDING ORDERS)</span>

@@ -249,6 +249,7 @@ export const AuthProvider = ({ children }) => {
         updateCartQty,
         removeFromCart,
         clearCart,
+        setCart,
         appliedPromo,
         setAppliedPromo,
         toast,
