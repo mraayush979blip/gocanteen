@@ -12,7 +12,7 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showCustomerEmailForm, setShowCustomerEmailForm] = useState(false);
+
 
   // Admin Unlock Code Gate State
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
@@ -22,7 +22,6 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
   useEffect(() => {
     if (isOpen) {
       setSelectedRole(initialRole || activePortal || 'customer');
-      setShowCustomerEmailForm(false);
       if (initialRole === 'admin') {
         setIsAdminUnlocked(false);
         setAdminPasscodeInput('');
@@ -34,7 +33,6 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
-    setShowCustomerEmailForm(false);
     if (role === 'admin') {
       setIsAdminUnlocked(false);
       setAdminPasscodeInput('');
@@ -286,7 +284,7 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
               ← Back to Customer / Staff Login
             </button>
           </form>
-        ) : (selectedRole === 'customer' && !showCustomerEmailForm) ? (
+        ) : selectedRole === 'customer' ? (
           /* CUSTOMER: Google Sign In */
           <div className="space-y-3 text-center py-2">
             <button
@@ -302,22 +300,13 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
               </svg>
               Sign In with Google
             </button>
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setShowCustomerEmailForm(true)}
-                className="text-xs text-slate-500 hover:text-slate-800 font-bold transition-colors underline"
-              >
-                Sign In with Test Account (Verification)
-              </button>
-            </div>
           </div>
         ) : (
-          /* STAFF, UNLOCKED ADMIN, or CUSTOMER (Email login): Credentials Form */
+          /* STAFF or UNLOCKED ADMIN: Credentials Form */
           <form onSubmit={handleAuth} className="space-y-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                {selectedRole === 'customer' ? 'Test Account Email' : `Official ${selectedRole.toUpperCase()} Email`}
+                {`Official ${selectedRole.toUpperCase()} Email`}
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -326,7 +315,7 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={selectedRole === 'customer' ? 'test@gocanteen.in' : `${selectedRole}@gocanteen.com`}
+                  placeholder={`${selectedRole}@gocanteen.com`}
                   className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-emerald-600 font-medium"
                 />
               </div>
@@ -359,18 +348,8 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
               disabled={loading}
               className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition-all disabled:opacity-50"
             >
-              {loading ? 'Please wait...' : selectedRole === 'customer' ? 'Sign In' : `Sign In as ${selectedRole.toUpperCase()}`}
+              {loading ? 'Please wait...' : `Sign In as ${selectedRole.toUpperCase()}`}
             </button>
-
-            {selectedRole === 'customer' && (
-              <button
-                type="button"
-                onClick={() => setShowCustomerEmailForm(false)}
-                className="w-full text-center text-xs text-slate-500 hover:text-slate-800 font-bold pt-1 transition-colors"
-              >
-                ← Back to Google Sign In
-              </button>
-            )}
           </form>
         )}
       </div>
