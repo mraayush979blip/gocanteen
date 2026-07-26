@@ -88,6 +88,65 @@
         "deliveryMethod": [
           "http://purl.org/goodrelations/v1#DeliveryModePickUp"
         ]
+      },
+      "hasMenu": {
+        "@type": "FoodMenu",
+        "name": "Go Canteen Menu",
+        "offersPreservesAndConserves": "true",
+        "hasMenuSection": [
+          {
+            "@type": "MenuSection",
+            "name": "Hot Pizzas",
+            "hasMenuItem": [
+              {
+                "@type": "MenuItem",
+                "name": "Cheese Pizza",
+                "description": "Delicious pizza topped with rich mozzarella cheese and fresh herbs.",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "149.00",
+                  "priceCurrency": "INR"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "Paneer Tikka Pizza",
+                "description": "Topped with spiced paneer tikka cubes, onions, capsicum, and cheese.",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "199.00",
+                  "priceCurrency": "INR"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "MenuSection",
+            "name": "Campus Favorites",
+            "hasMenuItem": [
+              {
+                "@type": "MenuItem",
+                "name": "Veg Burger",
+                "description": "Crispy vegetable patty burger with fresh lettuce, mayo, and tomato slices.",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "79.00",
+                  "priceCurrency": "INR"
+                }
+              },
+              {
+                "@type": "MenuItem",
+                "name": "Masala Fries",
+                "description": "Golden crispy french fries tossed in hot Indian spices.",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "69.00",
+                  "priceCurrency": "INR"
+                }
+              }
+            ]
+          }
+        ]
       }
     }
     </script>
@@ -113,6 +172,39 @@
         },
         "query-input": "required name=search_term_string"
       }
+    }
+    </script>
+
+    <!-- Google Site Navigation Schema for Premium Sitelinks -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SiteNavigationElement",
+          "@id": "https://www.gocanteen.in/#menu",
+          "name": "Food Menu",
+          "url": "https://www.gocanteen.in/#/menu"
+        },
+        {
+          "@type": "SiteNavigationElement",
+          "@id": "https://www.gocanteen.in/#orders",
+          "name": "Track Orders",
+          "url": "https://www.gocanteen.in/#/orders"
+        },
+        {
+          "@type": "SiteNavigationElement",
+          "@id": "https://www.gocanteen.in/#cart",
+          "name": "My Cart",
+          "url": "https://www.gocanteen.in/#/cart"
+        },
+        {
+          "@type": "SiteNavigationElement",
+          "@id": "https://www.gocanteen.in/#developer",
+          "name": "About Developer",
+          "url": "https://itsaayushsharma.vercel.app"
+        }
+      ]
     }
     </script>
 
