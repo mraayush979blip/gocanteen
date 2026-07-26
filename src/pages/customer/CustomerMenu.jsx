@@ -52,6 +52,34 @@ export default function CustomerMenu({ onOpenCart }) {
     }
   });
 
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY;
+      const height = document.documentElement.scrollHeight - window.innerHeight;
+      
+      if (scrolled > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+      
+      if (height > 0) {
+        setScrollProgress((scrolled / height) * 100);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    triggerHaptic?.(10);
+  };
+
   // Sync state when URL params change externally
   useEffect(() => {
     setSearchQuery(searchParams.get('q') || '');
@@ -323,21 +351,28 @@ export default function CustomerMenu({ onOpenCart }) {
         </form>
 
         {/* 3. Sleek Horizontal Category Bar (SEO Accessible Navigation) */}
-        <nav aria-label="Food Categories" className="pt-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <nav aria-label="Food Categories" className="pt-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none relative">
           
           {/* All Category Pill */}
           <button
             type="button"
             onClick={() => handleCategoryChange('all')}
             aria-selected={activeCategory === 'all'}
-            className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
               activeCategory === 'all'
-                ? 'bg-slate-900 text-white shadow-md'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                ? 'border-transparent text-white'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
             }`}
           >
-            <span>🍽️ All Items</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${activeCategory === 'all' ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'}`}>
+            {activeCategory === 'all' && (
+              <motion.div
+                layoutId="activeCategoryBg"
+                className="absolute inset-0 bg-slate-900 rounded-xl z-0"
+                transition={{ type: "spring", stiffness: 350, damping: 28 }}
+              />
+            )}
+            <span className="relative z-10">🍽️ All Items</span>
+            <span className={`relative z-10 text-[10px] px-1.5 py-0.2 rounded-full font-black ${activeCategory === 'all' ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'}`}>
               {inventory.length}
             </span>
           </button>
@@ -348,14 +383,21 @@ export default function CustomerMenu({ onOpenCart }) {
               type="button"
               onClick={() => handleCategoryChange('offers')}
               aria-selected={activeCategory === 'offers'}
-              className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
                 activeCategory === 'offers'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
+                  ? 'border-transparent text-slate-950'
+                  : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-amber-200'
               }`}
             >
-              <span className="animate-pulse">🔥 Special Offers</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-200 text-amber-950 font-black">
+              {activeCategory === 'offers' && (
+                <motion.div
+                  layoutId="activeCategoryBg"
+                  className="absolute inset-0 bg-amber-500 rounded-xl z-0"
+                  transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                />
+              )}
+              <span className="relative z-10 animate-pulse">🔥 Special Offers</span>
+              <span className={`relative z-10 text-[10px] px-1.5 py-0.2 rounded-full font-black ${activeCategory === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-100 text-amber-900'}`}>
                 {offers.length}
               </span>
             </button>
@@ -371,14 +413,21 @@ export default function CustomerMenu({ onOpenCart }) {
                 type="button"
                 onClick={() => handleCategoryChange(cat.id)}
                 aria-selected={isSel}
-                className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
                   isSel
-                    ? 'bg-emerald-600 text-white shadow-md'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                    ? 'border-transparent text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
                 }`}
               >
-                <span>{cat.emoji || '🍽️'} {cat.name}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${isSel ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'}`}>
+                {isSel && (
+                  <motion.div
+                    layoutId="activeCategoryBg"
+                    className="absolute inset-0 bg-emerald-600 rounded-xl z-0"
+                    transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                  />
+                )}
+                <span className="relative z-10">{cat.emoji || '🍽️'} {cat.name}</span>
+                <span className={`relative z-10 text-[10px] px-1.5 py-0.2 rounded-full font-black ${isSel ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'}`}>
                   {count}
                 </span>
               </button>
@@ -548,24 +597,30 @@ export default function CustomerMenu({ onOpenCart }) {
                         </div>
                       </div>
 
-                      {qty > 0 ? (
-                        <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md">
-                          <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-80 p-0.5">
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="text-xs font-black px-1">{qty}</span>
-                          <button onClick={() => updateCartQty(item.id, 1)} className="hover:opacity-80 p-0.5">
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={(e) => handleAddToCartWithAnim(e, item)}
-                          className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95"
-                        >
-                          + ADD
-                        </button>
-                      )}
+                      <motion.div layout className="flex items-center">
+                        {qty > 0 ? (
+                          <motion.div
+                            layoutId={`stepper-list-${item.id}`}
+                            className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md"
+                          >
+                            <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer">
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="text-xs font-black px-1">{qty}</span>
+                            <button onClick={() => updateCartQty(item.id, 1)} className="hover:opacity-85 p-0.5 cursor-pointer">
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </motion.div>
+                        ) : (
+                          <motion.button
+                            layoutId={`stepper-list-${item.id}`}
+                            onClick={(e) => handleAddToCartWithAnim(e, item)}
+                            className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          >
+                            + ADD
+                          </motion.button>
+                        )}
+                      </motion.div>
                     </motion.div>
                   );
                 }
@@ -632,30 +687,36 @@ export default function CustomerMenu({ onOpenCart }) {
                         </span>
                       </div>
 
-                      {qty > 0 ? (
-                        <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-2.5 py-1.5 font-bold text-xs shadow-md">
-                          <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-80 p-0.5">
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="text-xs font-black px-1">{qty}</span>
-                          <button
-                            onClick={(e) => {
-                              updateCartQty(item.id, 1);
-                              handleAddToCartWithAnim(e, item);
-                            }}
-                            className="hover:opacity-80 p-0.5"
+                      <motion.div layout className="flex items-center">
+                        {qty > 0 ? (
+                          <motion.div
+                            layoutId={`stepper-grid-${item.id}`}
+                            className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-2.5 py-1.5 font-bold text-xs shadow-md"
                           >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={(e) => handleAddToCartWithAnim(e, item)}
-                          className="px-4 py-1.5 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95"
-                        >
-                          + ADD
-                        </button>
-                      )}
+                            <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer">
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="text-xs font-black px-1">{qty}</span>
+                            <button
+                              onClick={(e) => {
+                                updateCartQty(item.id, 1);
+                                handleAddToCartWithAnim(e, item);
+                              }}
+                              className="hover:opacity-85 p-0.5 cursor-pointer"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </motion.div>
+                        ) : (
+                          <motion.button
+                            layoutId={`stepper-grid-${item.id}`}
+                            onClick={(e) => handleAddToCartWithAnim(e, item)}
+                            className="px-4 py-1.5 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          >
+                            + ADD
+                          </motion.button>
+                        )}
+                      </motion.div>
                     </div>
                   </motion.div>
                 );
@@ -727,33 +788,76 @@ export default function CustomerMenu({ onOpenCart }) {
       </AnimatePresence>
 
       {/* 6. Mobile Floating Sticky Cart Bar (Swiggy / Blinkit style) */}
-      {totalCartCount > 0 && (
-        <div className="fixed bottom-4 left-3 right-3 z-40 sm:hidden animate-fade-in">
-          <div
-            onClick={onOpenCart}
-            className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer border border-emerald-500/40 active:scale-[0.99] transition-transform"
+      <AnimatePresence>
+        {totalCartCount > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 30, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 420, damping: 28 }}
+            className="fixed bottom-4 left-3 right-3 z-40 sm:hidden"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-yellow-400 text-slate-950 flex items-center justify-center font-black shadow-xs">
-                <ShoppingCart className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-xs font-black tracking-wide flex items-center gap-1.5">
-                  <span>{totalCartCount} {totalCartCount === 1 ? 'ITEM' : 'ITEMS'}</span>
-                  <span className="text-emerald-300">•</span>
-                  <span className="text-yellow-300 text-sm font-black">₹{totalCartPrice}</span>
+            <div
+              onClick={onOpenCart}
+              className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer border border-emerald-500/40 active:scale-[0.99] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-yellow-400 text-slate-950 flex items-center justify-center font-black shadow-xs">
+                  <ShoppingCart className="w-5 h-5" />
                 </div>
-                <div className="text-[10px] text-emerald-200 font-medium">Tap to review cart & checkout</div>
+                <div>
+                  <div className="text-xs font-black tracking-wide flex items-center gap-1.5">
+                    <span>{totalCartCount} {totalCartCount === 1 ? 'ITEM' : 'ITEMS'}</span>
+                    <span className="text-emerald-300">•</span>
+                    <span className="text-yellow-300 text-sm font-black">₹{totalCartPrice}</span>
+                  </div>
+                  <div className="text-[10px] text-emerald-200 font-medium">Tap to review cart & checkout</div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1 text-xs font-black bg-yellow-400 text-slate-950 px-3.5 py-1.5 rounded-xl shadow-xs">
+                <span>View Cart</span>
+                <ArrowRight className="w-4 h-4" />
               </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            <div className="flex items-center gap-1 text-xs font-black bg-yellow-400 text-slate-950 px-3.5 py-1.5 rounded-xl shadow-xs">
-              <span>View Cart</span>
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 7. Scroll to Top FAB with Progress Ring */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            onClick={scrollToTop}
+            className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 w-11 h-11 rounded-full bg-slate-900 text-emerald-450 border border-slate-800 shadow-2xl flex items-center justify-center cursor-pointer hover:bg-slate-800 active:scale-90 transition-transform"
+          >
+            {/* SVG Progress Circle */}
+            <svg className="absolute inset-0 w-full h-full -rotate-90">
+              <circle
+                cx="22"
+                cy="22"
+                r="19"
+                className="stroke-slate-800 fill-none"
+                strokeWidth="2.5"
+              />
+              <circle
+                cx="22"
+                cy="22"
+                r="19"
+                className="stroke-emerald-500 fill-none transition-all duration-75"
+                strokeWidth="2.5"
+                strokeDasharray={119.38}
+                strokeDashoffset={119.38 - (119.38 * scrollProgress) / 100}
+                strokeLinecap="round"
+              />
+            </svg>
+            <ChevronUp className="w-5 h-5 relative z-10 text-white" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
     </div>
   );

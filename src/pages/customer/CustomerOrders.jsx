@@ -109,20 +109,56 @@ export default function CustomerOrders({ onOpenAuth }) {
 
 
 
-  const getStatusBadge = (status) => {
+  const renderStatusBadge = (status) => {
     switch (status) {
       case 'pending':
-        return { label: '⏳ Pending', bg: 'bg-amber-100 text-amber-800 border-amber-300' };
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border bg-amber-50 text-amber-800 border-amber-200">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+            </span>
+            <span>Pending</span>
+          </span>
+        );
       case 'preparing':
-        return { label: '👨‍🍳 Preparing', bg: 'bg-blue-100 text-blue-800 border-blue-300' };
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border bg-blue-50 text-blue-800 border-blue-200">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
+            </span>
+            <span>Preparing 👨‍🍳</span>
+          </span>
+        );
       case 'ready':
-        return { label: '✅ Ready for Pickup', bg: 'bg-emerald-100 text-emerald-800 border-emerald-400 font-extrabold animate-pulse' };
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black border bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-600"></span>
+            </span>
+            <span>Ready for Pickup ✅</span>
+          </span>
+        );
       case 'completed':
-        return { label: '🎉 Handover Complete', bg: 'bg-slate-100 text-slate-700 border-slate-300' };
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border bg-slate-50 text-slate-600 border-slate-200">
+            <span>Handover Complete 🎉</span>
+          </span>
+        );
       case 'cancelled':
-        return { label: '✕ Cancelled', bg: 'bg-red-100 text-red-800 border-red-300' };
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border bg-red-50 text-red-800 border-red-200">
+            <span>Cancelled ✕</span>
+          </span>
+        );
       default:
-        return { label: status, bg: 'bg-slate-100 text-slate-800 border-slate-300' };
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border bg-slate-50 text-slate-600 border-slate-200">
+            <span>{status}</span>
+          </span>
+        );
     }
   };
 
@@ -264,7 +300,6 @@ export default function CustomerOrders({ onOpenAuth }) {
         <div className="space-y-3">
           {filteredOrders.map(order => {
             const isExpanded = expandedOrderId === order.id;
-            const badge = getStatusBadge(order.status);
             const orderIsToday = isToday(order.created_at);
             const { subtotal, discount, foodSalesAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
 
@@ -309,9 +344,7 @@ export default function CustomerOrders({ onOpenAuth }) {
                         </span>
                       )}
 
-                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${badge.bg}`}>
-                        {badge.label}
-                      </span>
+                      {renderStatusBadge(order.status)}
                     </div>
 
                     {/* Right: Price & Expand Arrow */}
