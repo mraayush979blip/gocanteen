@@ -6,14 +6,14 @@
 
   <!-- Homepage & Main Menu -->
   <url>
-    <loc>https://www.gocanteen.in/</loc>
+    <loc>https://gocanteen.in/</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://www.gocanteen.in/#/menu</loc>
+    <loc>https://gocanteen.in/#/menu</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -21,7 +21,7 @@
 
   <!-- My Orders -->
   <url>
-    <loc>https://www.gocanteen.in/#/orders</loc>
+    <loc>https://gocanteen.in/#/orders</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -29,7 +29,7 @@
 
   <!-- Cart -->
   <url>
-    <loc>https://www.gocanteen.in/#/cart</loc>
+    <loc>https://gocanteen.in/#/cart</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -37,7 +37,7 @@
 
   <!-- Policies & Terms -->
   <url>
-    <loc>https://www.gocanteen.in/#/policies</loc>
+    <loc>https://gocanteen.in/#/policies</loc>
     <lastmod>2026-07-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

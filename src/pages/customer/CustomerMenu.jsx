@@ -244,7 +244,7 @@ export default function CustomerMenu({ onOpenCart }) {
                 "@type": "MenuItem",
                 "name": item.name,
                 "description": item.description || `Fresh ${item.name} at Go Canteen`,
-                "image": item.image_url || "https://www.gocanteen.in/aayush-profile.jpg",
+                "image": item.image_url || "https://gocanteen.in/aayush-profile.jpg",
                 "offers": {
                   "@type": "Offer",
                   "price": item.price,
