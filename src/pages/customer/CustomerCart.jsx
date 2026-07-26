@@ -499,6 +499,9 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     if (!phone.trim()) {
       setPhoneError('Mobile phone number is strictly required');
       hasErr = true;
+    } else if (phone.trim().length !== 10) {
+      setPhoneError('Mobile number must be exactly 10 digits');
+      hasErr = true;
     }
 
     if (hasErr) {
@@ -956,10 +959,15 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                             required
                             value={phone}
                             onChange={(e) => {
-                              setPhone(e.target.value);
-                              if (e.target.value.trim()) setPhoneError('');
+                              const cleanValue = e.target.value.replace(/\D/g, '').slice(0, 10);
+                              setPhone(cleanValue);
+                              if (cleanValue.length === 10) {
+                                setPhoneError('');
+                              } else if (cleanValue.length > 0 && cleanValue.length < 10) {
+                                setPhoneError('Mobile number must be exactly 10 digits');
+                              }
                             }}
-                            placeholder="Enter mobile number (+91...)"
+                            placeholder="Enter 10-digit mobile number"
                             className={`w-full px-3 py-2 bg-slate-50 border rounded-xl text-slate-900 text-xs focus:outline-none transition-all ${
                               phoneError ? 'border-red-500 bg-red-50/20' : 'border-slate-200 focus:border-emerald-600'
                             }`}

@@ -41,8 +41,16 @@ export default function CustomerProfile({ onOpenAuth }) {
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    if (!fullName.trim() || !phone.trim()) {
-      showToast('Please fill in both name and phone number', true);
+    if (!fullName.trim()) {
+      showToast('Please enter your full name', true);
+      return;
+    }
+    if (!phone.trim()) {
+      showToast('Please enter your mobile phone number', true);
+      return;
+    }
+    if (phone.trim().length !== 10) {
+      showToast('Mobile number must be exactly 10 digits', true);
       return;
     }
 
@@ -152,8 +160,11 @@ export default function CustomerProfile({ onOpenAuth }) {
                 type="tel"
                 required
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Enter your phone number"
+                onChange={(e) => {
+                  const clean = e.target.value.replace(/\D/g, '').slice(0, 10);
+                  setPhone(clean);
+                }}
+                placeholder="Enter 10-digit mobile number"
                 className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-emerald-600 font-medium"
               />
             </div>
