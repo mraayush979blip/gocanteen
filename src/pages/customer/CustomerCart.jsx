@@ -748,6 +748,16 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
               <p className="text-[11px] text-slate-500 font-medium pt-1">Show this PIN at the counter during pickup</p>
             </div>
 
+            {paymentMethod === 'cash' && (
+              <div className="bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded-2xl w-full max-w-xs text-left shadow-2xs flex items-start gap-2.5 mx-auto">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-[11px] font-bold leading-tight">
+                  <span className="block text-xs font-black text-amber-800 mb-0.5">Action Required!</span>
+                  Please pay cash at the counter to start preparation. Staff will only begin making your order after successful payment.
+                </p>
+              </div>
+            )}
+
             <button
               onClick={() => {
                 setConfirmedToken(null);
