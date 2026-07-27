@@ -23,6 +23,7 @@ export function getOrderFinancials(order) {
   let platformFee = Number(order.platform_fee || order.gateway_fee || 0);
   let couponCode = order.coupon_code || order.promo_code || '';
   let rawTotalAmount = Number(order.total_amount || 0);
+  let parcelCharge = Number(order.parcel_charge || 0);
 
   // 3. Fallback: Parse metadata embedded in special_instructions if DB columns were empty
   if (order.special_instructions) {
@@ -54,28 +55,29 @@ export function getOrderFinancials(order) {
     }
   }
 
-  // 5. Calculate Food Net Sales Amount (EXCLUDING Platform Fee)
+  // 5. Calculate Food Net Sales Amount (EXCLUDING Platform Fee and Parcel Charge)
   const foodSalesAmount = Math.max(0, subtotal - discount);
 
   // 6. Platform Fee calculation if online payment was used and platformFee wasn't parsed
   const isOnline = order.payment_method === 'razorpay' || order.payment_method === 'razorpay_upi' || order.payment_method === 'online';
   if (isOnline && platformFee <= 0 && foodSalesAmount > 0) {
-    if (rawTotalAmount > foodSalesAmount) {
-      platformFee = Number((rawTotalAmount - foodSalesAmount).toFixed(2));
+    if (rawTotalAmount > (foodSalesAmount + parcelCharge)) {
+      platformFee = Number((rawTotalAmount - (foodSalesAmount + parcelCharge)).toFixed(2));
     } else {
-      platformFee = Number((foodSalesAmount * 0.0236).toFixed(2));
+      platformFee = Number(((foodSalesAmount + parcelCharge) * 0.0236).toFixed(2));
     }
   }
 
   // 7. Customer Total Paid
-  const customerPaid = Number((foodSalesAmount + platformFee).toFixed(2));
+  const customerPaid = Number((foodSalesAmount + parcelCharge + platformFee).toFixed(2));
 
   return {
     subtotal: Math.round(subtotal),
     discount: Math.round(discount),
     foodSalesAmount: Math.round(foodSalesAmount), // PURE CANTEEN SALES (No tax/fee)
+    parcelCharge: Math.round(parcelCharge),
     platformFee: platformFee, // ONLINE TAX / PLATFORM FEE
-    finalAmount: Math.round(foodSalesAmount), // FOR SALES REVENUE CALCULATION: EXCLUDES PLATFORM FEE
+    finalAmount: Math.round(foodSalesAmount + parcelCharge), // EXCLUDES PLATFORM FEE
     customerPaid: customerPaid, // TOTAL COST PAID BY CUSTOMER
     couponCode: couponCode ? couponCode.toUpperCase() : ''
   };

@@ -31,6 +31,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
   const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' | 'cash'
   const [notes, setNotes] = useState('');
+  const [isParcel, setIsParcel] = useState(false);
 
   const [promoCodeInput, setPromoCodeInput] = useState('');
   const [promoError, setPromoError] = useState('');
@@ -146,9 +147,14 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   }
   const discountAmt = Math.round((subtotal * discountPercent) / 100);
   const amountAfterDiscount = Math.max(0, subtotal - discountAmt);
+  
+  const totalPackagableItems = cart.reduce((sum, item) => item.has_packaging_charge ? sum + (Number(item.qty) || 1) : sum, 0);
+  const parcelCharge = isParcel ? (10 * totalPackagableItems) : 0;
+  
+  const baseAmountForFee = amountAfterDiscount + parcelCharge;
   const isOnlinePayment = paymentMethod === 'razorpay';
-  const platformFee = isOnlinePayment ? Number((amountAfterDiscount * 0.0236).toFixed(2)) : 0;
-  const finalPayableAmount = Number((amountAfterDiscount + platformFee).toFixed(2));
+  const platformFee = isOnlinePayment ? Number((baseAmountForFee * 0.0236).toFixed(2)) : 0;
+  const finalPayableAmount = Number((baseAmountForFee + platformFee).toFixed(2));
 
   const handleApplyPromo = async (e) => {
     if (e) e.preventDefault();
@@ -337,7 +343,9 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         discount_amount: discountAmt,
         coupon_code: appliedPromo ? appliedPromo.code : '',
         payment_id: paymentId || '',
-        razorpay_payment_id: paymentId || ''
+        razorpay_payment_id: paymentId || '',
+        is_parcel: isParcel,
+        parcel_charge: parcelCharge
       };
 
 
@@ -1013,6 +1021,26 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                             className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-emerald-600"
                           />
                         </div>
+
+                        {/* Parcel Toggle */}
+                        <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 flex items-center justify-between shadow-2xs mt-3">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">📦</span>
+                            <div>
+                              <h4 className="text-xs font-black text-orange-900">Need Packaging?</h4>
+                              <p className="text-[10px] text-orange-700 font-semibold leading-tight mt-0.5">Parcel charges will be calculated at ₹10/item for applicable categories.</p>
+                            </div>
+                          </div>
+                          <label className="flex items-center cursor-pointer group">
+                            <input
+                              type="checkbox"
+                              checked={isParcel}
+                              onChange={(e) => setIsParcel(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-10 h-5.5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-orange-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4.5 after:w-4.5 after:transition-all relative shadow-inner border border-slate-300 peer-checked:border-orange-600"></div>
+                          </label>
+                        </div>
                       </>
                     )}
                   </div>
@@ -1097,6 +1125,12 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                     <div className="flex justify-between text-emerald-700 font-bold">
                       <span>Coupon ({appliedPromo.code})</span>
                       <span>-₹{discountAmt}</span>
+                    </div>
+                  )}
+                  {isParcel && parcelCharge > 0 && (
+                    <div className="flex justify-between text-orange-700 font-bold">
+                      <span>Packaging Charge</span>
+                      <span>+₹{parcelCharge}</span>
                     </div>
                   )}
                   {isOnlinePayment && platformFee > 0 && (

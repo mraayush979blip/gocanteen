@@ -654,7 +654,7 @@ export default function AdminOrders() {
       ) : (
         <div className="space-y-2.5">
           {filteredOrders.map(order => {
-            const { subtotal, discount, foodSalesAmount, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
+            const { subtotal, discount, foodSalesAmount, parcelCharge, platformFee, customerPaid, couponCode } = getOrderFinancials(order);
             const pin = getOrderPin(order);
             const paymentId = getPaymentId(order);
             const orderIdStr = getOrderId(order);
@@ -672,6 +672,8 @@ export default function AdminOrders() {
                 className={`border rounded-2xl transition-all shadow-2xs overflow-hidden ${
                   order.status === 'cancelled'
                     ? 'border-red-300 bg-red-50/70 border-l-4 border-l-red-500'
+                    : order.is_parcel
+                    ? 'border-orange-200 bg-orange-50/30'
                     : 'bg-white border-slate-200'
                 }`}
               >
@@ -696,6 +698,12 @@ export default function AdminOrders() {
                     {pin && (
                       <span className="text-[11px] font-black text-purple-900 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 font-mono">
                         🔑 {pin}
+                      </span>
+                    )}
+
+                    {order.is_parcel && (
+                      <span className="text-[11px] font-black text-orange-900 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200 font-mono">
+                        📦 PARCEL
                       </span>
                     )}
 
@@ -868,6 +876,13 @@ export default function AdminOrders() {
                             <span>Net Food Revenue</span>
                             <span className="text-emerald-700 text-base">₹{foodSalesAmount}</span>
                           </div>
+
+                          {parcelCharge > 0 && (
+                            <div className="flex justify-between text-orange-900 font-extrabold bg-orange-100/80 px-2 py-1 rounded-lg border border-orange-300">
+                              <span>📦 Packaging Charge</span>
+                              <span>+₹{parcelCharge}</span>
+                            </div>
+                          )}
 
                           {platformFee > 0 && (
                             <div className="flex justify-between text-amber-900 font-extrabold bg-amber-100/80 px-2 py-1 rounded-lg border border-amber-300">

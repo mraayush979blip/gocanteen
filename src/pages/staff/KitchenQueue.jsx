@@ -377,6 +377,8 @@ export default function KitchenQueue() {
                 className={`bg-white border-2 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-2xs relative flex flex-col justify-between transition-all ${
                   isUnpaid
                     ? 'border-red-400 bg-red-50/20'
+                    : order.is_parcel
+                    ? 'border-orange-400 bg-orange-50/20'
                     : order.status === 'pending'
                     ? 'border-amber-300 bg-amber-50/20'
                     : order.status === 'preparing'
@@ -402,6 +404,12 @@ export default function KitchenQueue() {
                         {pin && (
                           <span className="text-xs font-black text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl border border-purple-300 tracking-wider font-mono shadow-2xs">
                             🔑 PIN: {pin}
+                          </span>
+                        )}
+
+                        {order.is_parcel && (
+                          <span className="text-xs font-black text-orange-900 bg-orange-100 px-2.5 py-1 rounded-xl border border-orange-300 tracking-wider shadow-2xs flex items-center gap-1">
+                            📦 PARCEL
                           </span>
                         )}
                       </div>
@@ -513,6 +521,12 @@ export default function KitchenQueue() {
                           <span>Food Amount</span>
                           <span>₹{financials.foodSalesAmount}</span>
                         </div>
+                        {financials.parcelCharge > 0 && (
+                          <div className="flex items-center justify-between text-orange-900 font-extrabold">
+                            <span>Packaging Charge</span>
+                            <span>+₹{financials.parcelCharge}</span>
+                          </div>
+                        )}
                         {financials.platformFee > 0 && (
                           <div className="flex items-center justify-between text-amber-900 font-extrabold">
                             <span>Platform Fee</span>

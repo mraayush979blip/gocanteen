@@ -195,7 +195,14 @@ export default function CustomerMenu({ onOpenCart }) {
   };
 
   const handleAddToCartWithAnim = (e, item) => {
-    addToCart({ id: item.id, name: item.name, price: Number(item.price), emoji: item.emoji || '🍽️' });
+    const cat = categories.find(c => c.id === item.category_id);
+    addToCart({ 
+      id: item.id, 
+      name: item.name, 
+      price: Number(item.price), 
+      emoji: item.emoji || '🍽️',
+      has_packaging_charge: cat ? cat.has_packaging_charge : false
+    });
     triggerFlyingAnimation(e, item.emoji);
   };
 
@@ -662,7 +669,7 @@ export default function CustomerMenu({ onOpenCart }) {
                       </div>
                     ) : (
                       <button
-                        onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥' })}
+                        onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥', has_packaging_charge: true })}
                         className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0"
                       >
                         + ADD
@@ -803,7 +810,7 @@ export default function CustomerMenu({ onOpenCart }) {
                                 <button onClick={() => updateCartQty(offer.id, 1)} className="hover:opacity-80 p-0.5"><Plus className="w-3.5 h-3.5" /></button>
                               </div>
                             ) : (
-                              <button onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥' })} className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0">+ ADD</button>
+                              <button onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥', has_packaging_charge: true })} className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0">+ ADD</button>
                             )}
                           </div>
                         </div>
