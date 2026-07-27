@@ -17,7 +17,8 @@ export default function AdminPromoCodes() {
     min_order_amount: '',
     max_uses: '',
     valid_till: '',
-    description: ''
+    description: '',
+    is_secret: false
   });
 
   useEffect(() => {
@@ -97,7 +98,8 @@ export default function AdminPromoCodes() {
         discount_percent: Number(formData.discount_percent),
         min_order_amount: formData.min_order_amount ? Number(formData.min_order_amount) : 0,
         max_uses: formData.max_uses ? Number(formData.max_uses) : null,
-        is_active: true
+        is_active: true,
+        is_secret: formData.is_secret === true
       };
 
       if (formData.valid_till) {
@@ -118,7 +120,8 @@ export default function AdminPromoCodes() {
         min_order_amount: '',
         max_uses: '',
         valid_till: '',
-        description: ''
+        description: '',
+        is_secret: false
       });
       fetchPromos();
     } catch (err) {
@@ -180,7 +183,7 @@ export default function AdminPromoCodes() {
               }`}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-base font-black text-emerald-700 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200 uppercase tracking-wide">
                     🎟️ {promo.code}
                   </span>
@@ -191,6 +194,11 @@ export default function AdminPromoCodes() {
                   ) : (
                     <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">
                       ACTIVE ✓
+                    </span>
+                  )}
+                  {promo.is_secret && (
+                    <span className="text-[10px] font-bold bg-slate-800 text-white px-2 py-0.5 rounded-full border border-slate-600">
+                      🔒 SECRET YOGLE
                     </span>
                   )}
                 </div>
@@ -310,6 +318,25 @@ export default function AdminPromoCodes() {
                   placeholder="e.g. 10% OFF on orders above ₹100"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-purple-600"
                 />
+              </div>
+
+              {/* Secret Yogle Toggle */}
+              <div className="flex items-center justify-between bg-slate-900 border border-slate-700 rounded-2xl p-3.5">
+                <div>
+                  <p className="text-xs font-extrabold text-white">🔒 Secret Yogle Coupon</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Hidden from customer dashboard & cart. Only works when typed manually.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, is_secret: !formData.is_secret })}
+                  className={`relative w-10 h-5.5 rounded-full transition-colors shrink-0 ${
+                    formData.is_secret ? 'bg-purple-600' : 'bg-slate-600'
+                  }`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                    formData.is_secret ? 'translate-x-5' : 'translate-x-0.5'
+                  }`} />
+                </button>
               </div>
 
               <button

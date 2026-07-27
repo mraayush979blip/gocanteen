@@ -68,7 +68,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     }
   }, [isOpen, session]);
 
-  // Fetch active available coupons
+  // Fetch active available coupons — secret (Yogle) coupons are excluded from this list
   const fetchAvailableCoupons = async () => {
     setLoadingCoupons(true);
     try {
@@ -79,7 +79,9 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        setAvailableCoupons(data);
+        // Filter out secret Yogle coupons — they are invisible to customers
+        // but can still be applied if the customer types the code manually
+        setAvailableCoupons(data.filter(c => !c.is_secret));
       }
     } catch (err) {
       console.error('Error fetching available coupons:', err);
