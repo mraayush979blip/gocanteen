@@ -173,7 +173,9 @@ export default function AdminPromoCodes() {
       {/* Coupons List Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {promos.map(promo => {
-          const isExpired = promo.valid_till && new Date(promo.valid_till) < new Date();
+          const isExpired = 
+            (promo.valid_till && new Date(promo.valid_till) < new Date()) ||
+            (promo.max_uses && (promo.calculated_uses ?? promo.current_uses ?? 0) >= promo.max_uses);
 
           return (
             <div

@@ -79,9 +79,13 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        // Filter out secret Yogle coupons — they are invisible to customers
-        // but can still be applied if the customer types the code manually
-        setAvailableCoupons(data.filter(c => !c.is_secret));
+        setAvailableCoupons(data.filter(c => {
+          if (c.is_secret) return false;
+          const isExpired = 
+            (c.valid_till && new Date(c.valid_till) < new Date()) ||
+            (c.max_uses && c.current_uses >= c.max_uses);
+          return !isExpired;
+        }));
       }
     } catch (err) {
       console.error('Error fetching available coupons:', err);
@@ -1217,7 +1221,9 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                   const discountPercent = Number(coupon.discount_percent || 0);
                   const calculatedSavings = Math.round((subtotal * discountPercent) / 100);
                   const isApplied = appliedPromo?.id === coupon.id || appliedPromo?.code === coupon.code;
-                  const isExpired = coupon.valid_till && new Date(coupon.valid_till) < new Date();
+                  const isExpired = 
+                    (coupon.valid_till && new Date(coupon.valid_till) < new Date()) ||
+                    (coupon.max_uses && coupon.current_uses >= coupon.max_uses);
 
                   return (
                     <div

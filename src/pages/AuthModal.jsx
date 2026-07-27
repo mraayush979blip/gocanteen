@@ -81,13 +81,18 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
         // Fetch database profile role to ensure strict enforcement
         const { data: dbProfile, error: profileError } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, is_temporary, valid_till')
           .eq('id', data.user.id)
           .single();
 
         let actualRole = 'customer';
         if (!profileError && dbProfile) {
           actualRole = dbProfile.role || 'customer';
+
+          if (dbProfile.is_temporary && dbProfile.valid_till && new Date(dbProfile.valid_till) < new Date()) {
+            await supabase.auth.signOut();
+            throw new Error(`Access Denied: Your temporary access expired on ${new Date(dbProfile.valid_till).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}. Please contact the administrator.`);
+          }
         }
 
         // Strict role validation: user cannot sign in as a different role
