@@ -182,7 +182,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       }
 
       if (data.max_uses && (data.current_uses || 0) >= data.max_uses) {
-        setPromoError('Coupon code usage limit reached');
+        setPromoError('This coupon code has expired (usage limit reached)');
         return;
       }
 
@@ -212,7 +212,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     }
 
     if (coupon.max_uses && (coupon.current_uses || 0) >= coupon.max_uses) {
-      showToast(`Coupon ${coupon.code} usage limit reached`, true);
+      showToast(`Coupon ${coupon.code} has expired (usage limit reached)`, true);
       return;
     }
 
