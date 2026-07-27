@@ -181,7 +181,17 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         return;
       }
 
-      if (data.max_uses && (data.current_uses || 0) >= data.max_uses) {
+      let actualUses = data.current_uses || 0;
+      if (data.max_uses) {
+        const { count } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .ilike('coupon_code', data.code);
+        
+        actualUses = Math.max(actualUses, count || 0);
+      }
+
+      if (data.max_uses && actualUses >= data.max_uses) {
         setPromoError('This coupon code has expired (usage limit reached)');
         return;
       }
@@ -209,6 +219,22 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       const diff = minOrder - subtotal;
       showToast(`Add items worth ₹${diff} more to apply ${coupon.code}`, true);
       return;
+    }
+
+    if (coupon.max_uses) {
+      // Async check needed for actual uses
+      supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .ilike('coupon_code', coupon.code)
+        .then(({ count }) => {
+          const actualUses = Math.max(coupon.current_uses || 0, count || 0);
+          if (actualUses >= coupon.max_uses) {
+            showToast(`Coupon ${coupon.code} has expired (usage limit reached)`, true);
+            setAppliedPromo(null);
+            setPromoCodeInput('');
+          }
+        });
     }
 
     if (coupon.max_uses && (coupon.current_uses || 0) >= coupon.max_uses) {
