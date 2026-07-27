@@ -83,7 +83,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
           if (c.is_secret) return false;
           const isExpired = 
             (c.valid_till && new Date(c.valid_till) < new Date()) ||
-            (c.max_uses && c.current_uses >= c.max_uses);
+            (c.max_uses && (c.current_uses || 0) >= c.max_uses);
           return !isExpired;
         }));
       }
@@ -181,7 +181,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         return;
       }
 
-      if (data.max_uses && data.current_uses >= data.max_uses) {
+      if (data.max_uses && (data.current_uses || 0) >= data.max_uses) {
         setPromoError('Coupon code usage limit reached');
         return;
       }
@@ -211,7 +211,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       return;
     }
 
-    if (coupon.max_uses && coupon.current_uses >= coupon.max_uses) {
+    if (coupon.max_uses && (coupon.current_uses || 0) >= coupon.max_uses) {
       showToast(`Coupon ${coupon.code} usage limit reached`, true);
       return;
     }
