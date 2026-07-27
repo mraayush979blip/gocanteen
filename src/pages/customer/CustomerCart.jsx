@@ -961,7 +961,13 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                             required
                             value={phone}
                             onChange={(e) => {
-                              const cleanValue = e.target.value.replace(/\D/g, '').slice(0, 10);
+                              let val = e.target.value.replace(/\D/g, '');
+                              if (val.length > 10 && val.startsWith('91')) {
+                                val = val.slice(2);
+                              } else if (val.length === 11 && val.startsWith('0')) {
+                                val = val.slice(1);
+                              }
+                              const cleanValue = val.slice(0, 10);
                               setPhone(cleanValue);
                               if (cleanValue.length === 10) {
                                 setPhoneError('');

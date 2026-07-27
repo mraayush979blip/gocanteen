@@ -161,8 +161,13 @@ export default function CustomerProfile({ onOpenAuth }) {
                 required
                 value={phone}
                 onChange={(e) => {
-                  const clean = e.target.value.replace(/\D/g, '').slice(0, 10);
-                  setPhone(clean);
+                  let val = e.target.value.replace(/\D/g, '');
+                  if (val.length > 10 && val.startsWith('91')) {
+                    val = val.slice(2);
+                  } else if (val.length === 11 && val.startsWith('0')) {
+                    val = val.slice(1);
+                  }
+                  setPhone(val.slice(0, 10));
                 }}
                 placeholder="Enter 10-digit mobile number"
                 className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-emerald-600 font-medium"
