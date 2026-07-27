@@ -8,7 +8,7 @@ import { MenuGridSkeleton } from '../../components/SkeletonLoader';
 import { 
   Search, Flame, Plus, Minus, Loader2, ShoppingCart, 
   ArrowRight, Sparkles, Filter, Check, LayoutGrid, List,
-  Clock, ShieldCheck, Zap, UtensilsCrossed, Award, ChevronRight, ChevronUp
+  Clock, ShieldCheck, Zap, UtensilsCrossed, Award, ChevronRight, ChevronUp, ChevronLeft
 } from 'lucide-react';
 
 export default function CustomerMenu({ onOpenCart }) {
@@ -730,7 +730,6 @@ export default function CustomerMenu({ onOpenCart }) {
                 <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
                   {inventory
                     .filter(i => i.is_popular)
-                    .slice(0, 2)
                     .map((item, idx) => {
                     const qty = getItemCartQty(item.id);
                     return (
@@ -820,7 +819,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   key={cat.id}
                   data-cat-id={cat.id}
                   ref={el => { sectionRefs.current[cat.id] = el; }}
-                  style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 500px' }}
+                  style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 300px' }}
                 >
                   {/* Sticky section header */}
                   <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm py-2 mb-4 border-b border-slate-100 flex items-center justify-between">
@@ -828,12 +827,23 @@ export default function CustomerMenu({ onOpenCart }) {
                       <span className="text-xl">{cat.emoji || '🍽️'}</span>
                       <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">{cat.name}</h2>
                     </div>
-                    <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">{cat.items.length} items</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">{cat.items.length} items</span>
+                      <button 
+                        onClick={() => {
+                          setActiveCategory(cat.id);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className="text-[11px] font-black text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded-lg transition-colors cursor-pointer"
+                      >
+                        View All
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Items grid (Accordion Logic) */}
-                  <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4' : 'grid grid-cols-1 gap-3'}>
-                    {cat.items.slice(0, expandedSections.has(cat.id) ? undefined : 3).map((item, idx) => {
+                  {/* Items horizontal strip */}
+                  <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+                    {cat.items.map((item) => {
                       const qty = getItemCartQty(item.id);
                       
                       const renderTag = (tag) => {
@@ -848,39 +858,10 @@ export default function CustomerMenu({ onOpenCart }) {
                         return <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-md shadow-2xs ${colorClass}`}>{tag}</span>;
                       };
 
-                      if (viewMode === 'list') {
-                        return (
-                          <div key={item.id} className="bg-white border border-slate-200/90 rounded-2xl p-3 flex items-center justify-between gap-3 hover:shadow-md transition-all shadow-2xs group relative overflow-hidden">
-                            <div className="flex items-center gap-3 overflow-hidden">
-                              <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">{item.emoji || '🍽️'}</div>
-                              <div className="flex flex-col gap-0.5 overflow-hidden">
-                                <div className="flex items-center gap-1.5">
-                                  <div className={`w-2.5 h-2.5 rounded-xs border bg-white flex items-center justify-center p-0.5 ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
-                                  <h3 className="text-sm font-black text-slate-900 truncate">{item.name}</h3>
-                                  {renderTag(item.tag)}
-                                </div>
-                                <span className="text-[11px] font-black text-slate-700 block">₹{item.price}</span>
-                              </div>
-                            </div>
-                            {qty > 0 ? (
-                              <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-2.5 py-1.5 font-bold shadow-sm shrink-0">
-                                <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3.5 h-3.5" /></button>
-                                <span className="text-xs font-black px-1">{qty}</span>
-                                <button onClick={() => updateCartQty(item.id, 1)} className="hover:opacity-85 p-0.5"><Plus className="w-3.5 h-3.5" /></button>
-                              </div>
-                            ) : (
-                              <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs active:scale-95 transition-transform shadow-2xs shrink-0">+ ADD</button>
-                            )}
-                          </div>
-                        );
-                      }
                       return (
-                        <motion.div
+                        <div
                           key={item.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: Math.min(idx * 0.02, 0.2) }}
-                          className="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:shadow-md transition-all shadow-2xs group relative"
+                          className="shrink-0 w-64 snap-start bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:shadow-md transition-all shadow-2xs group relative"
                         >
                           <div className="space-y-2">
                             <div className="h-28 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center relative overflow-hidden group-hover:bg-emerald-50/50 transition-colors">
@@ -905,43 +886,10 @@ export default function CustomerMenu({ onOpenCart }) {
                               <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-[11px] active:scale-95 transition-transform shadow-2xs">+ ADD</button>
                             )}
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
-                  
-                  {/* Accordion Show More Button */}
-                  {cat.items.length > 3 && !expandedSections.has(cat.id) && (
-                    <div className="mt-3 text-center">
-                      <button 
-                        onClick={() => setExpandedSections(prev => new Set([...prev, cat.id]))}
-                        className="inline-flex items-center gap-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full transition-colors active:scale-95"
-                      >
-                        Show More ({cat.items.length - 3}) <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
-                  {cat.items.length > 3 && expandedSections.has(cat.id) && (
-                    <div className="mt-3 text-center">
-                      <button 
-                        onClick={() => {
-                          const newSet = new Set([...expandedSections]);
-                          newSet.delete(cat.id);
-                          setExpandedSections(newSet);
-                          
-                          // Optional: scroll back to section top
-                          const el = sectionRefs.current[cat.id];
-                          if (el) {
-                            const top = el.getBoundingClientRect().top + window.scrollY - 72;
-                            window.scrollTo({ top, behavior: 'smooth' });
-                          }
-                        }}
-                        className="inline-flex items-center gap-1 px-4 py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-full transition-colors active:scale-95"
-                      >
-                        Show Less <ChevronUp className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -951,8 +899,22 @@ export default function CustomerMenu({ onOpenCart }) {
             <>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
-                  <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase">Results</h2>
+                  {activeCategory !== 'all' && !searchQuery && activeCategory !== 'offers' ? (
+                    <>
+                      <button onClick={() => setActiveCategory('all')} className="p-1 -ml-1 rounded-full hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer" title="Back to All Menu">
+                        <ChevronLeft className="w-6 h-6" />
+                      </button>
+                      <span className="text-xl ml-1">{categories.find(c => c.id === activeCategory)?.emoji}</span>
+                      <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase">
+                        {categories.find(c => c.id === activeCategory)?.name || 'Category'}
+                      </h2>
+                    </>
+                  ) : (
+                    <>
+                      <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
+                      <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase">Results</h2>
+                    </>
+                  )}
                 </div>
                 <span className="text-xs font-bold text-slate-500">Showing {filteredInventory.length} items</span>
               </div>
