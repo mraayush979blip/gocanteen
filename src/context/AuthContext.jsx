@@ -189,10 +189,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const removeFromCart = (id) => {
+    triggerHaptic([20, 10, 20]);
     setCart(prev => prev.filter(i => i.id !== id));
   };
 
   const clearCart = () => {
+    triggerHaptic([30, 20, 30]);
     setCart([]);
     setAppliedPromo(null);
   };

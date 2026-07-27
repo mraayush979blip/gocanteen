@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export default function CustomerMenu({ onOpenCart }) {
-  const { cart, addToCart, updateCartQty, triggerHaptic } = useAuth();
+  const { cart, addToCart, updateCartQty, triggerHaptic, session } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlQuery = searchParams.get('q') || '';
@@ -54,6 +54,15 @@ export default function CustomerMenu({ onOpenCart }) {
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeSectionId, setActiveSectionId] = useState(null);
+  const [menuModalOpen, setMenuModalOpen] = useState(false);
+  
+  // New features state
+  const [expandedSections, setExpandedSections] = useState(new Set());
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [featuredFilter, setFeaturedFilter] = useState(''); // 'popular' | 'new' | 'under99' | ''
+
+  const sectionRefs = useRef({});
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,6 +87,26 @@ export default function CustomerMenu({ onOpenCart }) {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Scrollspy — auto-highlight the category pill matching the visible section
+  useEffect(() => {
+    if (activeCategory !== 'all' || searchQuery.trim()) {
+      setActiveSectionId(null);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) setActiveSectionId(e.target.dataset.catId);
+        });
+      },
+      { rootMargin: '-10% 0px -60% 0px', threshold: 0 }
+    );
+    const timer = setTimeout(() => {
+      Object.values(sectionRefs.current).filter(Boolean).forEach(el => obs.observe(el));
+    }, 80);
+    return () => { clearTimeout(timer); obs.disconnect(); };
+  }, [activeCategory, searchQuery, categories, inventory]);
 
   const scrollToTop = () => {
     try {
@@ -108,6 +137,23 @@ export default function CustomerMenu({ onOpenCart }) {
 
   const handleCategoryChange = (catId) => {
     triggerHaptic?.(12);
+    const isGroupedMode = activeCategory === 'all' && !searchQuery.trim();
+
+    // In grouped mode: pills scroll to sections instead of filtering
+    if (isGroupedMode && catId !== 'all' && catId !== 'offers') {
+      const el = sectionRefs.current[catId];
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - 72;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+      return;
+    }
+
+    if (catId === 'all') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setActiveSectionId(null);
+    }
+
     setActiveCategory(catId);
     const params = new URLSearchParams(searchParams);
     if (catId && catId !== 'all') {
@@ -192,18 +238,128 @@ export default function CustomerMenu({ onOpenCart }) {
     }
   };
 
+  useEffect(() => {
+    const fetchRecentOrders = async () => {
+      if (!session?.user?.id) return;
+      try {
+        const { data: ordersData, error } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('customer_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+          
+        if (error || !ordersData?.length) return;
+        
+        const orderIds = ordersData.map(o => o.id);
+        const { data: itemsData } = await supabase
+          .from('order_items')
+          .select('inventory_id, item_name, inventory(name, emoji, price)')
+          .in('order_id', orderIds);
+          
+        if (itemsData) {
+          // Get unique items
+          const uniqueItems = [];
+          const seenIds = new Set();
+          itemsData.forEach(item => {
+            if (item.inventory_id && !seenIds.has(item.inventory_id)) {
+              seenIds.add(item.inventory_id);
+              // Find matching inventory item
+              const invItem = inventory.find(i => i.id === item.inventory_id);
+              if (invItem) uniqueItems.push(invItem);
+            }
+          });
+          setRecentOrders(uniqueItems.slice(0, 5)); // Top 5 recent unique items
+        }
+      } catch (err) {
+        console.error('Error fetching recent orders:', err);
+      }
+    };
+    
+    if (inventory.length > 0) {
+      fetchRecentOrders();
+    }
+  }, [session?.user?.id, inventory]);
+
+  // Fuzzy matching score calculator for canteen search queries
+  const getFuzzyScore = (text, query) => {
+    const cleanText = text.toLowerCase();
+    const cleanQuery = query.toLowerCase().trim();
+    if (!cleanQuery) return 1;
+    if (cleanText.includes(cleanQuery)) return 10; // Exact substring match is highest score
+    
+    // Levenshtein / Token Distance calculation for typo correction
+    let score = 0;
+    const queryWords = cleanQuery.split(/\s+/);
+    const textWords = cleanText.split(/\s+/);
+    
+    queryWords.forEach(qw => {
+      textWords.forEach(tw => {
+        if (tw.startsWith(qw)) score += 5; // Prefix match
+        else if (tw.includes(qw)) score += 3; // Partial match
+      });
+    });
+    return score;
+  };
+
+  const checkFeaturedFilter = (item) => {
+    if (!featuredFilter) return true;
+    const lowerTag = (item.tag || '').toLowerCase();
+    switch (featuredFilter) {
+      case 'popular':
+        return lowerTag.includes('popular') || lowerTag.includes('bestseller') || lowerTag.includes('trending');
+      case 'bestseller':
+        return lowerTag.includes('bestseller');
+      case 'new':
+        return lowerTag.includes('new');
+      case 'under99':
+        return Number(item.price) < 99;
+      default:
+        return true;
+    }
+  };
+
   const filteredInventory = inventory
     .filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      if (!checkFeaturedFilter(item)) return false;
+
+      if (!searchQuery.trim()) {
+        return activeCategory === 'all' || item.category_id === activeCategory;
+      }
+      // Apply fuzzy matching score thresholds (matches must score > 0)
+      const nameScore = getFuzzyScore(item.name, searchQuery);
+      const descScore = item.description ? getFuzzyScore(item.description, searchQuery) : 0;
+      const tagScore = item.tag ? getFuzzyScore(item.tag, searchQuery) : 0;
+      
+      const matchesSearch = (nameScore + descScore + tagScore) > 0;
       const matchesCategory = activeCategory === 'all' || item.category_id === activeCategory;
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
+      // If a search query is active, sort primary results by fuzzy match score
+      if (searchQuery.trim()) {
+        const scoreA = getFuzzyScore(a.name, searchQuery) + (a.tag ? getFuzzyScore(a.tag, searchQuery) : 0);
+        const scoreB = getFuzzyScore(b.name, searchQuery) + (b.tag ? getFuzzyScore(b.tag, searchQuery) : 0);
+        if (scoreA !== scoreB) return scoreB - scoreA;
+      }
       if (sortBy === 'price-low') return Number(a.price) - Number(b.price);
       if (sortBy === 'price-high') return Number(b.price) - Number(a.price);
       return 0;
     });
+
+  // Grouped view: all items organised by category (Swiggy-style anchor sections)
+  const groupedByCategory = categories.map(cat => ({
+    ...cat,
+    items: inventory
+      .filter(i => i.category_id === cat.id && checkFeaturedFilter(i))
+      .sort((a, b) => {
+        if (sortBy === 'price-low') return Number(a.price) - Number(b.price);
+        if (sortBy === 'price-high') return Number(b.price) - Number(a.price);
+        return 0;
+      })
+  })).filter(g => g.items.length > 0);
+
+  const isGroupedMode = activeCategory === 'all' && !searchQuery.trim();
 
   const getItemCartQty = (id) => {
     const item = cart.find(c => c.id === id);
@@ -326,7 +482,6 @@ export default function CustomerMenu({ onOpenCart }) {
 
           {/* Filter Controls Row */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none shrink-0">
-            
             {/* Sort Dropdown */}
             <select
               value={sortBy}
@@ -338,13 +493,12 @@ export default function CustomerMenu({ onOpenCart }) {
               <option value="price-high">💎 Price: High to Low</option>
             </select>
 
-            {/* View Mode Toggle (Grid vs Compact List) */}
+            {/* View Mode Toggle */}
             <div className="hidden sm:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-400 hover:text-slate-700'}`}
-                title="Grid View"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
@@ -352,72 +506,78 @@ export default function CustomerMenu({ onOpenCart }) {
                 type="button"
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-400 hover:text-slate-700'}`}
-                title="List View"
               >
                 <List className="w-4 h-4" />
               </button>
             </div>
-
           </div>
         </form>
 
-        {/* 3. Sleek Horizontal Category Bar (SEO Accessible Navigation) */}
+
+
+        {/* 3. Sticky Scrollspy Category Bar */}
         <nav aria-label="Food Categories" className="pt-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none relative">
-          
-          {/* All Category Pill */}
+
+          {/* All Items pill — active when in grouped mode with no section highlighted */}
           <button
             type="button"
             onClick={() => handleCategoryChange('all')}
             aria-selected={activeCategory === 'all'}
             className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
-              activeCategory === 'all'
+              activeCategory === 'all' && !activeSectionId
                 ? 'bg-slate-900 text-white border-transparent shadow-md'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
             }`}
           >
             <span className="relative z-10">🍽️ All Items</span>
-            <span className={`relative z-10 text-[10px] px-1.5 py-0.2 rounded-full font-black ${activeCategory === 'all' ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'}`}>
+            <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+              activeCategory === 'all' && !activeSectionId ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
+            }`}>
               {inventory.length}
             </span>
           </button>
 
-          {/* Hot Deals Category Pill */}
+          {/* Special Offers pill */}
           {offers.length > 0 && (
             <button
               type="button"
               onClick={() => handleCategoryChange('offers')}
-              aria-selected={activeCategory === 'offers'}
+              aria-selected={activeCategory === 'offers' || activeSectionId === 'offers'}
               className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
-                activeCategory === 'offers'
-                  ? 'bg-amber-500 text-slate-950 border-transparent shadow-md font-black'
+                activeCategory === 'offers' || activeSectionId === 'offers'
+                  ? 'bg-amber-500 text-slate-950 border-transparent shadow-md'
                   : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-amber-200'
               }`}
             >
               <span className="relative z-10 animate-pulse">🔥 Special Offers</span>
-              <span className={`relative z-10 text-[10px] px-1.5 py-0.2 rounded-full font-black ${activeCategory === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-105 text-amber-900'}`}>
+              <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                activeCategory === 'offers' || activeSectionId === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-100 text-amber-900'
+              }`}>
                 {offers.length}
               </span>
             </button>
           )}
 
-          {/* Dynamic Categories */}
+          {/* Dynamic Category pills — scroll anchors in grouped mode, filters otherwise */}
           {categories.map(cat => {
-            const isSel = activeCategory === cat.id;
             const count = inventory.filter(i => i.category_id === cat.id).length;
+            const isActive = isGroupedMode ? activeSectionId === cat.id : activeCategory === cat.id;
             return (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => handleCategoryChange(cat.id)}
-                aria-selected={isSel}
+                aria-selected={isActive}
                 className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
-                  isSel
+                  isActive
                     ? 'bg-emerald-600 text-white border-transparent shadow-md'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
                 }`}
               >
                 <span className="relative z-10">{cat.emoji || '🍽️'} {cat.name}</span>
-                <span className={`relative z-10 text-[10px] px-1.5 py-0.2 rounded-full font-black ${isSel ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'}`}>
+                <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                  isActive ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
+                }`}>
                   {count}
                 </span>
               </button>
@@ -516,206 +676,361 @@ export default function CustomerMenu({ onOpenCart }) {
         </div>
       )}
 
-      {/* 5. Main Canteen Menu Items Section (Blinkit Desktop & Mobile Grid) */}
+      {/* 5. Main Canteen Menu Items Section */}
       {activeCategory !== 'offers' && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
-              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase">
-                {activeCategory === 'all' ? 'CANTEEN MENU ITEMS' : 'CATEGORY ITEMS'}
-              </h2>
-            </div>
-            <span className="text-xs font-bold text-slate-500">
-              Showing {filteredInventory.length} fresh items
-            </span>
-          </div>
 
-          {filteredInventory.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 space-y-3 shadow-2xs">
-              <span className="text-4xl">🍽️</span>
-              <h3 className="text-sm font-extrabold text-slate-900">No items match your filter</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Try searching for a different dish or reset your Veg/Category filters.
-              </p>
-              <button
-                onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-extrabold text-xs shadow-sm hover:bg-emerald-700 transition-colors"
-              >
-                Reset All Filters
-              </button>
-            </div>
-          ) : (
-            /* Responsive Grid: 2 Columns on Mobile, 3 Columns on Tablet, 4 Columns on Laptop */
-            <div className={
-              viewMode === 'grid'
-                ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5"
-                : "grid grid-cols-1 gap-3"
-            }>
-              {filteredInventory.map((item, idx) => {
-                const qty = getItemCartQty(item.id);
+          {/* ── GROUPED MODE (All + no search): Swiggy-style anchor sections ── */}
+          {isGroupedMode ? (
+            <div className="space-y-10">
 
-                if (viewMode === 'list') {
-                  return (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.02, 0.25) }}
-                      className="bg-white border border-slate-200/90 rounded-2xl p-4 flex items-center justify-between gap-4 hover:shadow-md transition-all shadow-2xs"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center text-3xl shrink-0">
-                          {item.emoji || '🍽️'}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <div className={`w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-2xs ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}>
-                              <div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} />
+              {/* Order Again Strip */}
+              {recentOrders.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <span className="text-xl">🔄</span>
+                    <h2 className="text-base font-black text-slate-900 tracking-tight">Order Again</h2>
+                  </div>
+                  <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+                    {recentOrders.map((item, idx) => {
+                      const qty = getItemCartQty(item.id);
+                      return (
+                        <div key={`recent-${item.id}`} className="snap-start shrink-0 w-40 bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between shadow-xs relative overflow-hidden">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0">{item.emoji || '🍽️'}</div>
+                            <div className="flex flex-col">
+                              <h3 className="text-xs font-black text-slate-900 line-clamp-1">{item.name}</h3>
+                              <span className="text-xs font-black text-slate-700">₹{item.price}</span>
                             </div>
-                            <h3 className="text-sm font-black text-slate-900">{item.name}</h3>
-                            {item.tag && (
-                              <span className="text-[9px] uppercase font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
-                                {item.tag}
-                              </span>
+                          </div>
+                          {qty > 0 ? (
+                            <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1 font-bold shadow-sm justify-center mt-1">
+                              <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
+                              <span className="text-[10px] font-black px-1">{qty}</span>
+                              <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
+                            </div>
+                          ) : (
+                            <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="w-full px-2 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 bg-emerald-50 font-black text-[10px] active:scale-95 mt-1 transition-transform">
+                              + ADD
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Popular Today Strip */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-2 px-1">
+                  <span className="text-xl">⭐</span>
+                  <h2 className="text-base font-black text-slate-900 tracking-tight">Popular Today</h2>
+                </div>
+                <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+                  {inventory
+                    .filter(i => i.is_popular)
+                    .slice(0, 2)
+                    .map((item, idx) => {
+                    const qty = getItemCartQty(item.id);
+                    return (
+                      <div key={`popular-${item.id}`} className="snap-start shrink-0 w-64 bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col shadow-xs group">
+                        <div className="h-28 rounded-xl bg-gradient-to-br from-amber-500/10 via-slate-50 to-orange-500/10 flex items-center justify-center relative mb-3 group-hover:bg-amber-100/30 transition-colors">
+                          <span className="text-4xl group-hover:scale-110 transition-transform">{item.emoji || '🍽️'}</span>
+                          <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-amber-900 bg-amber-200 px-2 py-0.5 rounded shadow-2xs">Bestseller</span>
+                        </div>
+                        <h3 className="text-sm font-black text-slate-900 line-clamp-1">{item.name}</h3>
+                        <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">{item.description}</p>
+                        <div className="mt-3 flex items-center justify-between">
+                          <span className="text-sm font-black text-slate-900">₹{item.price}</span>
+                          {qty > 0 ? (
+                            <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1.5 font-bold shadow-sm">
+                              <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
+                              <span className="text-xs font-black px-1">{qty}</span>
+                              <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
+                            </div>
+                          ) : (
+                            <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border-2 border-emerald-600 text-emerald-700 bg-emerald-50 font-black text-xs active:scale-95 transition-transform">
+                              + ADD
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Offers section anchor */}
+              {offers.length > 0 && (
+                <div
+                  data-cat-id="offers"
+                  ref={el => { sectionRefs.current['offers'] = el; }}
+                  style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 400px' }}
+                >
+                  <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm py-2 mb-4 border-b border-amber-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Flame className="w-5 h-5 text-amber-500 fill-amber-500" />
+                      <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">Special Offers</h2>
+                    </div>
+                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">{offers.length} deals</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {offers.map(offer => {
+                      const qty = getItemCartQty(offer.id);
+                      const savings = Number(offer.original_price || offer.price) - Number(offer.price);
+                      return (
+                        <div key={offer.id} className="bg-white border border-amber-200/90 rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl hover:border-amber-300 transition-all shadow-2xs group overflow-hidden">
+                          <div className="space-y-3">
+                            <div className="h-28 rounded-xl bg-gradient-to-br from-amber-500/10 via-amber-100/50 to-slate-50 flex items-center justify-center relative overflow-hidden group-hover:scale-[1.02] transition-transform">
+                              <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{offer.emoji || '🔥'}</span>
+                              {offer.tag && <span className="absolute top-2.5 right-2.5 text-[10px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-md">{offer.tag}</span>}
+                              {savings > 0 && <span className="absolute bottom-2.5 left-2.5 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300">Save ₹{savings}</span>}
+                            </div>
+                            <div>
+                              <h3 className="text-base font-black text-slate-900 leading-tight">{offer.name}</h3>
+                              <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mt-1">{offer.description || offer.items_included}</p>
+                            </div>
+                          </div>
+                          <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-lg font-black text-slate-900">₹{offer.price}</span>
+                              {offer.original_price && <span className="text-xs line-through text-slate-400">₹{offer.original_price}</span>}
+                            </div>
+                            {qty > 0 ? (
+                              <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md">
+                                <button onClick={() => updateCartQty(offer.id, -1)} className="hover:opacity-80 p-0.5"><Minus className="w-3.5 h-3.5" /></button>
+                                <span className="text-xs font-black px-1">{qty}</span>
+                                <button onClick={() => updateCartQty(offer.id, 1)} className="hover:opacity-80 p-0.5"><Plus className="w-3.5 h-3.5" /></button>
+                              </div>
+                            ) : (
+                              <button onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥' })} className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0">+ ADD</button>
                             )}
                           </div>
-                          {item.description && (
-                            <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{item.description}</p>
-                          )}
-                          <span className="text-sm font-black text-slate-900 mt-1 block">₹{item.price}</span>
                         </div>
-                      </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
-                      <motion.div layout className="flex items-center">
-                        {qty > 0 ? (
-                          <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md"
-                          >
-                            <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer">
-                              <Minus className="w-3.5 h-3.5" />
-                            </button>
-                            <span className="text-xs font-black px-1">{qty}</span>
-                            <button onClick={() => updateCartQty(item.id, 1)} className="hover:opacity-85 p-0.5 cursor-pointer">
-                              <Plus className="w-3.5 h-3.5" />
-                            </button>
-                          </motion.div>
-                        ) : (
-                          <motion.button
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            onClick={(e) => handleAddToCartWithAnim(e, item)}
-                            className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95"
-                          >
-                            + ADD
-                          </motion.button>
-                        )}
-                      </motion.div>
-                    </motion.div>
-                  );
-                }
+              {/* Category sections */}
+              {groupedByCategory.map(cat => (
+                <div
+                  key={cat.id}
+                  data-cat-id={cat.id}
+                  ref={el => { sectionRefs.current[cat.id] = el; }}
+                  style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 500px' }}
+                >
+                  {/* Sticky section header */}
+                  <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm py-2 mb-4 border-b border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{cat.emoji || '🍽️'}</span>
+                      <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">{cat.name}</h2>
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">{cat.items.length} items</span>
+                  </div>
 
-                return (
-                  /* Premium Bento Box Grid Card Layout with framer-motion */
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }}
-                    whileHover={{ scale: 1.015 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 shadow-2xs group relative overflow-hidden"
-                  >
-                    <div className="space-y-2">
+                  {/* Items grid (Accordion Logic) */}
+                  <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4' : 'grid grid-cols-1 gap-3'}>
+                    {cat.items.slice(0, expandedSections.has(cat.id) ? undefined : 3).map((item, idx) => {
+                      const qty = getItemCartQty(item.id);
                       
-                      {/* Top Visual Container with subtle gradient & hover zoom */}
-                      <div className="h-28 sm:h-36 rounded-xl bg-gradient-to-br from-emerald-500/5 via-slate-100 to-amber-500/5 flex items-center justify-center relative overflow-hidden group-hover:from-emerald-500/10 group-hover:to-teal-500/10 transition-colors">
-                        <span className="text-4xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">
-                          {item.emoji || '🍽️'}
-                        </span>
+                      const renderTag = (tag) => {
+                        if (!tag) return null;
+                        const lowerTag = tag.toLowerCase();
+                        let colorClass = 'text-slate-700 bg-slate-100';
+                        if (lowerTag.includes('bestseller') || lowerTag.includes('popular')) colorClass = 'text-amber-900 bg-amber-200';
+                        else if (lowerTag.includes('trending')) colorClass = 'text-orange-900 bg-orange-200';
+                        else if (lowerTag.includes('new')) colorClass = 'text-blue-900 bg-blue-100 border border-blue-200';
+                        else if (lowerTag.includes('value') || lowerTag.includes('discount')) colorClass = 'text-emerald-900 bg-emerald-100 border border-emerald-200';
+                        
+                        return <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-md shadow-2xs ${colorClass}`}>{tag}</span>;
+                      };
 
-                        {/* Veg / Non-Veg Indicator Dot */}
-                        <div className={`absolute top-2.5 left-2.5 w-4 h-4 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-xs ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}>
-                          <div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} />
-                        </div>
-
-                        {/* Tag Badge */}
-                        {item.tag && (
-                          <span className="absolute top-2.5 right-2.5 text-[9px] uppercase font-black text-slate-800 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-md border border-slate-200/80 shadow-2xs">
-                            {item.tag}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Title & Category Tag */}
-                      <div className="pt-1">
-                        <div className="flex items-start justify-between gap-1">
-                          <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug line-clamp-1 group-hover:text-emerald-700 transition-colors">
-                            {item.name}
-                          </h3>
-                        </div>
-                        {item.categories?.name && (
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">
-                            {item.categories.name}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Description */}
-                      {item.description && (
-                        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
-                          {item.description}
-                        </p>
-                      )}
+                      if (viewMode === 'list') {
+                        return (
+                          <div key={item.id} className="bg-white border border-slate-200/90 rounded-2xl p-3 flex items-center justify-between gap-3 hover:shadow-md transition-all shadow-2xs group relative overflow-hidden">
+                            <div className="flex items-center gap-3 overflow-hidden">
+                              <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">{item.emoji || '🍽️'}</div>
+                              <div className="flex flex-col gap-0.5 overflow-hidden">
+                                <div className="flex items-center gap-1.5">
+                                  <div className={`w-2.5 h-2.5 rounded-xs border bg-white flex items-center justify-center p-0.5 ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                                  <h3 className="text-sm font-black text-slate-900 truncate">{item.name}</h3>
+                                  {renderTag(item.tag)}
+                                </div>
+                                <span className="text-[11px] font-black text-slate-700 block">₹{item.price}</span>
+                              </div>
+                            </div>
+                            {qty > 0 ? (
+                              <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-2.5 py-1.5 font-bold shadow-sm shrink-0">
+                                <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3.5 h-3.5" /></button>
+                                <span className="text-xs font-black px-1">{qty}</span>
+                                <button onClick={() => updateCartQty(item.id, 1)} className="hover:opacity-85 p-0.5"><Plus className="w-3.5 h-3.5" /></button>
+                              </div>
+                            ) : (
+                              <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs active:scale-95 transition-transform shadow-2xs shrink-0">+ ADD</button>
+                            )}
+                          </div>
+                        );
+                      }
+                      return (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: Math.min(idx * 0.02, 0.2) }}
+                          className="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:shadow-md transition-all shadow-2xs group relative"
+                        >
+                          <div className="space-y-2">
+                            <div className="h-28 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center relative overflow-hidden group-hover:bg-emerald-50/50 transition-colors">
+                              <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{item.emoji || '🍽️'}</span>
+                              <div className={`absolute top-2 left-2 w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-xs ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                              <div className="absolute top-2 right-2">{renderTag(item.tag)}</div>
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-extrabold text-slate-900 leading-snug line-clamp-1">{item.name}</h3>
+                              {item.description && <p className="text-[10px] text-slate-500 line-clamp-1">{item.description}</p>}
+                            </div>
+                          </div>
+                          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-base font-black text-slate-900">₹{item.price}</span>
+                            {qty > 0 ? (
+                              <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1 font-bold shadow-sm">
+                                <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
+                                <span className="text-xs font-black px-1">{qty}</span>
+                                <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
+                              </div>
+                            ) : (
+                              <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-[11px] active:scale-95 transition-transform shadow-2xs">+ ADD</button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                  
+                  {/* Accordion Show More Button */}
+                  {cat.items.length > 3 && !expandedSections.has(cat.id) && (
+                    <div className="mt-3 text-center">
+                      <button 
+                        onClick={() => setExpandedSections(prev => new Set([...prev, cat.id]))}
+                        className="inline-flex items-center gap-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full transition-colors active:scale-95"
+                      >
+                        Show More ({cat.items.length - 3}) <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-
-                    {/* Footer Row: Price & Stepper / ADD Button */}
-                    <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <div>
-                        <span className="text-sm sm:text-base font-black text-slate-900">
-                          ₹{item.price}
-                        </span>
-                      </div>
-
-                      <motion.div layout className="flex items-center">
-                        {qty > 0 ? (
-                          <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-2.5 py-1.5 font-bold text-xs shadow-md"
-                          >
-                            <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer">
-                              <Minus className="w-3.5 h-3.5" />
-                            </button>
-                            <span className="text-xs font-black px-1">{qty}</span>
-                            <button
-                              onClick={(e) => {
-                                updateCartQty(item.id, 1);
-                                triggerFlyingAnimation(e, item.emoji);
-                              }}
-                              className="hover:opacity-85 p-0.5 cursor-pointer"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                            </button>
-                          </motion.div>
-                        ) : (
-                          <motion.button
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            onClick={(e) => handleAddToCartWithAnim(e, item)}
-                            className="px-4 py-1.5 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95"
-                          >
-                            + ADD
-                          </motion.button>
-                        )}
-                      </motion.div>
+                  )}
+                  {cat.items.length > 3 && expandedSections.has(cat.id) && (
+                    <div className="mt-3 text-center">
+                      <button 
+                        onClick={() => {
+                          const newSet = new Set([...expandedSections]);
+                          newSet.delete(cat.id);
+                          setExpandedSections(newSet);
+                          
+                          // Optional: scroll back to section top
+                          const el = sectionRefs.current[cat.id];
+                          if (el) {
+                            const top = el.getBoundingClientRect().top + window.scrollY - 72;
+                            window.scrollTo({ top, behavior: 'smooth' });
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 px-4 py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-full transition-colors active:scale-95"
+                      >
+                        Show Less <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                  </motion.div>
-                );
-              })}
+                  )}
+                </div>
+              ))}
             </div>
+
+          ) : (
+            /* ── FILTERED / SEARCH MODE: flat grid (current behaviour) ── */
+            <>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
+                  <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase">Results</h2>
+                </div>
+                <span className="text-xs font-bold text-slate-500">Showing {filteredInventory.length} items</span>
+              </div>
+
+              {filteredInventory.length === 0 ? (
+                <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 space-y-3 shadow-2xs">
+                  <span className="text-4xl">🍽️</span>
+                  <h3 className="text-sm font-extrabold text-slate-900">No items match your filter</h3>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">Try searching for a different dish or reset filters.</p>
+                  <button onClick={() => { setSearchQuery(''); setActiveCategory('all'); }} className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-extrabold text-xs shadow-sm hover:bg-emerald-700 transition-colors">Reset All Filters</button>
+                </div>
+              ) : (
+                <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5' : 'grid grid-cols-1 gap-3'}>
+                  {filteredInventory.map((item, idx) => {
+                    const qty = getItemCartQty(item.id);
+                    if (viewMode === 'list') {
+                      return (
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.02, 0.25) }} className="bg-white border border-slate-200/90 rounded-2xl p-4 flex items-center justify-between gap-4 hover:shadow-md transition-all shadow-2xs">
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center text-3xl shrink-0">{item.emoji || '🍽️'}</div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-2xs ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                                <h3 className="text-sm font-black text-slate-900">{item.name}</h3>
+                                {item.tag && <span className="text-[9px] uppercase font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">{item.tag}</span>}
+                              </div>
+                              {item.description && <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{item.description}</p>}
+                              <span className="text-sm font-black text-slate-900 mt-1 block">₹{item.price}</span>
+                            </div>
+                          </div>
+                          <motion.div layout className="flex items-center">
+                            {qty > 0 ? (
+                              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md">
+                                <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-3.5 h-3.5" /></button>
+                                <span className="text-xs font-black px-1">{qty}</span>
+                                <button onClick={() => updateCartQty(item.id, 1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-3.5 h-3.5" /></button>
+                              </motion.div>
+                            ) : (
+                              <motion.button initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95">+ ADD</motion.button>
+                            )}
+                          </motion.div>
+                        </motion.div>
+                      );
+                    }
+                    return (
+                      <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.98 }} className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 shadow-2xs group relative overflow-hidden">
+                        <div className="space-y-2">
+                          <div className="h-28 sm:h-36 rounded-xl bg-gradient-to-br from-emerald-500/5 via-slate-100 to-amber-500/5 flex items-center justify-center relative overflow-hidden group-hover:from-emerald-500/10 group-hover:to-teal-500/10 transition-colors">
+                            <span className="text-4xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">{item.emoji || '🍽️'}</span>
+                            <div className={`absolute top-2.5 left-2.5 w-4 h-4 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-xs ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                            {item.tag && <span className="absolute top-2.5 right-2.5 text-[9px] uppercase font-black text-slate-800 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-md border border-slate-200/80 shadow-2xs">{item.tag}</span>}
+                          </div>
+                          <div className="pt-1">
+                            <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug line-clamp-1 group-hover:text-emerald-700 transition-colors">{item.name}</h3>
+                            {item.categories?.name && <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">{item.categories.name}</span>}
+                          </div>
+                          {item.description && <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>}
+                        </div>
+                        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                          <span className="text-sm sm:text-base font-black text-slate-900">₹{item.price}</span>
+                          <motion.div layout className="flex items-center">
+                            {qty > 0 ? (
+                              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-2.5 py-1.5 font-bold text-xs shadow-md">
+                                <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-3.5 h-3.5" /></button>
+                                <span className="text-xs font-black px-1">{qty}</span>
+                                <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-3.5 h-3.5" /></button>
+                              </motion.div>
+                            ) : (
+                              <motion.button initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95">+ ADD</motion.button>
+                            )}
+                          </motion.div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -818,40 +1133,7 @@ export default function CustomerMenu({ onOpenCart }) {
         )}
       </AnimatePresence>
 
-      {/* 7. Scroll to Top FAB with Progress Ring */}
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            onClick={scrollToTop}
-            className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 w-11 h-11 rounded-full bg-slate-900 text-emerald-450 border border-slate-800 shadow-2xl flex items-center justify-center cursor-pointer hover:bg-slate-800 active:scale-90 transition-transform"
-          >
-            {/* SVG Progress Circle */}
-            <svg className="absolute inset-0 w-full h-full -rotate-90">
-              <circle
-                cx="22"
-                cy="22"
-                r="19"
-                className="stroke-slate-800 fill-none"
-                strokeWidth="2.5"
-              />
-              <circle
-                cx="22"
-                cy="22"
-                r="19"
-                className="stroke-emerald-500 fill-none transition-all duration-75"
-                strokeWidth="2.5"
-                strokeDasharray={119.38}
-                strokeDashoffset={119.38 - (119.38 * scrollProgress) / 100}
-                strokeLinecap="round"
-              />
-            </svg>
-            <ChevronUp className="w-5 h-5 relative z-10 text-white" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+
 
     </div>
   );

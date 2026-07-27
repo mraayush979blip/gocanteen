@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Edit3, Trash2, Search, X, Loader2, Save } from 'lucide-react';
+import { Plus, Edit3, Trash2, Search, X, Loader2, Save, Star } from 'lucide-react';
 
 import EmojiPickerMenu from '../../components/EmojiPickerMenu';
 
@@ -133,6 +133,25 @@ export default function AdminInventory() {
     }
   };
 
+  const togglePopular = async (id, currentStatus) => {
+    try {
+      const { error } = await supabase
+        .from('inventory')
+        .update({ is_popular: !currentStatus })
+        .eq('id', id);
+        
+      if (error) throw error;
+      showToast(!currentStatus ? 'Marked as Popular' : 'Removed from Popular');
+      
+      // Optimistic update
+      setInventory(prev => prev.map(item => 
+        item.id === id ? { ...item, is_popular: !currentStatus } : item
+      ));
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  };
+
   const filtered = inventory.filter(item =>
     item.name.toLowerCase().includes(search.toLowerCase()) ||
     (item.description && item.description.toLowerCase().includes(search.toLowerCase()))
@@ -222,6 +241,17 @@ export default function AdminInventory() {
 
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
+                  onClick={() => togglePopular(item.id, item.is_popular)}
+                  className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                    item.is_popular 
+                      ? 'bg-amber-100 text-amber-600 hover:bg-amber-200' 
+                      : 'bg-slate-100 text-slate-400 hover:text-amber-500 hover:bg-amber-50'
+                  }`}
+                  title={item.is_popular ? "Remove from Popular" : "Mark as Popular Today"}
+                >
+                  <Star className="w-4 h-4" fill={item.is_popular ? "currentColor" : "none"} />
+                </button>
+                <button
                   onClick={() => handleOpenEdit(item)}
                   className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer"
                   title="Edit Item"
@@ -294,6 +324,17 @@ export default function AdminInventory() {
                   </td>
                   <td className="p-3.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => togglePopular(item.id, item.is_popular)}
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                          item.is_popular 
+                            ? 'bg-amber-100 text-amber-600 hover:bg-amber-200' 
+                            : 'bg-slate-100 text-slate-400 hover:text-amber-500 hover:bg-amber-50'
+                        }`}
+                        title={item.is_popular ? "Remove from Popular" : "Mark as Popular Today"}
+                      >
+                        <Star className="w-3.5 h-3.5" fill={item.is_popular ? "currentColor" : "none"} />
+                      </button>
                       <button
                         onClick={() => handleOpenEdit(item)}
                         className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200 cursor-pointer"

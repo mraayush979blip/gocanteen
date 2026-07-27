@@ -11,8 +11,22 @@ import { getOrderFinancials, getCancellationReason, getOrderPin, getUserSpecialI
 export default function CustomerOrders({ onOpenAuth }) {
 
   const { user, profile, showToast } = useAuth();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Pre-load from offline cache to prevent loading states on page open
+  const [orders, setOrders] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(`cg-cache-orders-${user?.id}`) || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem(`cg-cache-orders-${user?.id}`);
+      return !cached || JSON.parse(cached).length === 0;
+    } catch (e) {
+      return true;
+    }
+  });
   const [filter, setFilter] = useState('active'); // 'active' | 'today' | 'all'
   const [expandedOrderId, setExpandedOrderId] = useState(null);
 
@@ -44,7 +58,6 @@ export default function CustomerOrders({ onOpenAuth }) {
 
   const fetchUserOrders = async () => {
     if (!user) return;
-    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -54,6 +67,7 @@ export default function CustomerOrders({ onOpenAuth }) {
 
       if (error) throw error;
       setOrders(data || []);
+      localStorage.setItem(`cg-cache-orders-${user.id}`, JSON.stringify(data || []));
 
       if (data && data.length > 0 && !expandedOrderId) {
         setExpandedOrderId(data[0].id);
