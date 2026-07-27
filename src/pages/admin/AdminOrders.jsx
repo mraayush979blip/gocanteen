@@ -263,7 +263,14 @@ export default function AdminOrders() {
     if (couponFilter === 'no_coupon' && hasCoupon) return false;
 
     if (statusFilter === 'refund_requested') {
-      if (!(order.refund_status === 'requested' || (order.status === 'cancelled' && order.payment_status === 'paid'))) return false;
+      // Pending refunds: cancelled + paid but NOT yet refunded
+      if (!(
+        (order.refund_status === 'requested' || (order.status === 'cancelled' && order.payment_status === 'paid'))
+        && order.refund_status !== 'refunded'
+      )) return false;
+    } else if (statusFilter === 'refunded') {
+      // Already processed refunds
+      if (order.refund_status !== 'refunded') return false;
     } else if (statusFilter !== 'all' && order.status !== statusFilter) {
       return false;
     }
@@ -405,71 +412,108 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      {/* Financial Analytics Summary Dashboard Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5">
-        
-        {/* Gross Sale Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs space-y-1">
-          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">Gross Sales</span>
-          <div className="text-xl sm:text-2xl font-black text-slate-900">₹{totalGrossSales.toLocaleString('en-IN')}</div>
-          <span className="text-[10px] text-slate-500 font-semibold block">Full value before discounts</span>
-        </div>
+      {/* Financial Analytics — Compact Stats Strip */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+        <div className="flex flex-wrap divide-x divide-slate-100">
 
-        {/* Coupon Discount Card */}
-        <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 shadow-2xs space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider block">Coupon Deductions</span>
-            <Ticket className="w-4 h-4 text-amber-600" />
-          </div>
-          <div className="text-xl sm:text-2xl font-black text-amber-900">-₹{totalCouponDiscounts.toLocaleString('en-IN')}</div>
-          <span className="text-[10px] text-amber-700 font-bold block">Total promo discounts</span>
-        </div>
-
-        {/* Net Revenue Card */}
-        <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 shadow-2xs space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-emerald-900 uppercase tracking-wider block">Net Revenue</span>
-            <DollarSign className="w-4 h-4 text-emerald-700" />
-          </div>
-          <div className="text-xl sm:text-2xl font-black text-emerald-800">₹{totalNetSales.toLocaleString('en-IN')}</div>
-          <span className="text-[10px] text-emerald-700 font-bold block">Final money collected</span>
-        </div>
-
-        {/* Refund Applications Card */}
-        <div 
-          onClick={() => setStatusFilter('refund_requested')}
-          className="bg-red-50 border border-red-300 rounded-2xl p-4 shadow-2xs space-y-1 cursor-pointer hover:bg-red-100/80 transition-colors"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-red-900 uppercase tracking-wider block">Refund Applications</span>
-            <RefreshCw className="w-4 h-4 text-red-600 animate-spin" />
-          </div>
-          <div className="text-xl sm:text-2xl font-black text-red-800">
-            {orders.filter(o => o.refund_status === 'requested' || (o.status === 'cancelled' && o.payment_status === 'paid')).length}
-          </div>
-          <span className="text-[10px] text-red-700 font-bold block">Tap to view & process 💸</span>
-        </div>
-
-        {/* Payment Split Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs space-y-1">
-          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">Payment Breakdown</span>
-          <div className="text-xs font-bold space-y-1 pt-0.5">
-            <div className="flex justify-between text-slate-700">
-              <span className="flex items-center gap-1"><Smartphone className="w-3.5 h-3.5 text-blue-600" /> UPI/QR</span>
-              <span className="font-extrabold text-slate-900">₹{totalUpiSales}</span>
+          {/* Gross Sales */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[140px] flex-1">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+              <DollarSign className="w-4 h-4 text-slate-600" />
             </div>
-            <div className="flex justify-between text-slate-700">
-              <span className="flex items-center gap-1"><DollarSign className="w-3.5 h-3.5 text-emerald-600" /> Cash</span>
-              <span className="font-extrabold text-slate-900">₹{totalCashSales}</span>
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none mb-0.5">Gross Sales</div>
+              <div className="text-base font-black text-slate-900 leading-tight">₹{totalGrossSales.toLocaleString('en-IN')}</div>
             </div>
           </div>
-        </div>
 
-        {/* Orders Count Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs space-y-1">
-          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">Filtered Orders</span>
-          <div className="text-xl sm:text-2xl font-black text-slate-900">{totalOrdersCount} <span className="text-xs font-bold text-slate-500">Orders</span></div>
-          <span className="text-[10px] text-slate-500 font-semibold block">Matching active filters</span>
+          {/* Coupon Deductions */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[140px] flex-1">
+            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+              <Ticket className="w-4 h-4 text-amber-600" />
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider leading-none mb-0.5">Discounts</div>
+              <div className="text-base font-black text-amber-900 leading-tight">-₹{totalCouponDiscounts.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+
+          {/* Net Revenue */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[140px] flex-1 bg-emerald-50/60">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+              <DollarSign className="w-4 h-4 text-emerald-700" />
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider leading-none mb-0.5">Net Revenue</div>
+              <div className="text-base font-black text-emerald-800 leading-tight">₹{totalNetSales.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+
+          {/* UPI / Cash Split */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[160px] flex-1">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+              <Smartphone className="w-4 h-4 text-blue-600" />
+            </div>
+            <div className="text-xs font-bold space-y-0.5">
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none mb-1">Payment Split</div>
+              <div className="flex items-center gap-2 text-slate-700">
+                <span className="text-blue-700">UPI</span>
+                <span className="font-extrabold text-slate-900">₹{totalUpiSales.toLocaleString('en-IN')}</span>
+                <span className="text-slate-300">|</span>
+                <span className="text-emerald-700">Cash</span>
+                <span className="font-extrabold text-slate-900">₹{totalCashSales.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Filtered Orders */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[120px] flex-1">
+            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+              <Filter className="w-4 h-4 text-purple-600" />
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none mb-0.5">Filtered</div>
+              <div className="text-base font-black text-slate-900 leading-tight">{totalOrdersCount} <span className="text-xs font-bold text-slate-400">orders</span></div>
+            </div>
+          </div>
+
+          {/* Refund Applications — Alert */}
+          {(() => {
+            const pendingRefunds = orders.filter(o =>
+              (o.refund_status === 'requested' || (o.status === 'cancelled' && o.payment_status === 'paid'))
+              && o.refund_status !== 'refunded'
+            ).length;
+            return (
+              <button
+                onClick={() => {
+                  setStatusFilter('refund_requested');
+                  setStartDate('');
+                  setEndDate('');
+                }}
+                className={`flex items-center gap-3 px-4 py-3 min-w-[140px] flex-1 transition-colors ${
+                  pendingRefunds > 0
+                    ? 'bg-red-50 hover:bg-red-100 border-l-2 border-l-red-400'
+                    : 'hover:bg-slate-50'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 relative ${pendingRefunds > 0 ? 'bg-red-100' : 'bg-slate-100'}`}>
+                  <RefreshCw className={`w-4 h-4 ${pendingRefunds > 0 ? 'text-red-600 animate-spin' : 'text-slate-400'}`} />
+                  {pendingRefunds > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+                      {pendingRefunds}
+                    </span>
+                  )}
+                </div>
+                <div className="text-left">
+                  <div className={`text-[10px] font-extrabold uppercase tracking-wider leading-none mb-0.5 ${pendingRefunds > 0 ? 'text-red-700' : 'text-slate-400'}`}>Refunds</div>
+                  <div className={`text-base font-black leading-tight ${pendingRefunds > 0 ? 'text-red-800' : 'text-slate-400'}`}>
+                    {pendingRefunds > 0 ? `${pendingRefunds} pending` : 'All clear ✓'}
+                  </div>
+                </div>
+              </button>
+            );
+          })()}
+
         </div>
       </div>
 
@@ -546,7 +590,8 @@ export default function AdminOrders() {
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-purple-600"
             >
               <option value="all">All Statuses</option>
-              <option value="refund_requested">💸 Refund Applications ({orders.filter(o => o.refund_status === 'requested' || (o.status === 'cancelled' && o.payment_status === 'paid')).length})</option>
+              <option value="refund_requested">💸 Refund Applications ({orders.filter(o => (o.refund_status === 'requested' || (o.status === 'cancelled' && o.payment_status === 'paid')) && o.refund_status !== 'refunded').length})</option>
+              <option value="refunded">✅ Refunded ({orders.filter(o => o.refund_status === 'refunded').length})</option>
               <option value="pending">Pending ⏳</option>
               <option value="preparing">Preparing 👨‍🍳</option>
               <option value="ready">Ready ✅</option>

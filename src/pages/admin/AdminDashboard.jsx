@@ -187,93 +187,93 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* 6 Executive KPI Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
-        
-        {/* 1. Today's Net Revenue */}
-        <div className="bg-emerald-50/80 border border-emerald-300 rounded-2xl p-4 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-emerald-900 uppercase tracking-wider">Net Revenue</span>
-            <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-300">
-              <IndianRupee className="w-4 h-4" />
+      {/* KPI Stats Strip — Compact Single Row */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+        <div className="flex flex-wrap divide-x divide-slate-100">
+
+          {/* Net Revenue */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[140px] flex-1 bg-emerald-50/60">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+              <IndianRupee className="w-4 h-4 text-emerald-700" />
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider leading-none mb-0.5">Net Revenue</div>
+              <div className="text-base font-black text-emerald-800 leading-tight">₹{stats.revenue.toLocaleString('en-IN')}</div>
+              <div className="text-[10px] text-emerald-600 font-bold">Gross ₹{stats.grossSales.toLocaleString('en-IN')}</div>
             </div>
           </div>
-          <div>
-            <div className="text-2xl font-black text-emerald-800">₹{stats.revenue.toLocaleString('en-IN')}</div>
-            <span className="text-[10px] text-emerald-700 font-bold block">Gross ₹{stats.grossSales}</span>
-          </div>
-        </div>
 
-        {/* 2. Total Discounts Given */}
-        <div className="bg-amber-50/80 border border-amber-300 rounded-2xl p-4 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-amber-900 uppercase tracking-wider">Discounts</span>
-            <div className="p-1.5 rounded-lg bg-amber-100 text-amber-700 border border-amber-300">
-              <Ticket className="w-4 h-4" />
+          {/* Discounts */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[130px] flex-1">
+            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+              <Ticket className="w-4 h-4 text-amber-600" />
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider leading-none mb-0.5">Discounts</div>
+              <div className="text-base font-black text-amber-900 leading-tight">-₹{stats.totalDiscounts.toLocaleString('en-IN')}</div>
             </div>
           </div>
-          <div>
-            <div className="text-2xl font-black text-amber-800">-₹{stats.totalDiscounts.toLocaleString('en-IN')}</div>
-            <span className="text-[10px] text-amber-700 font-bold block">Promo Coupons Used</span>
-          </div>
-        </div>
 
-        {/* 3. Orders Today */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Orders Today</span>
-            <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200">
-              <ShoppingBag className="w-4 h-4" />
+          {/* Orders Today */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[120px] flex-1">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+              <ShoppingBag className="w-4 h-4 text-blue-600" />
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none mb-0.5">Orders</div>
+              <div className="text-base font-black text-slate-900 leading-tight">{stats.ordersToday}</div>
             </div>
           </div>
-          <div>
-            <div className="text-2xl font-black text-slate-900">{stats.ordersToday}</div>
-            <span className="text-[10px] text-slate-500 font-semibold block">Total Tickets Placed</span>
-          </div>
-        </div>
 
-        {/* 4. Pending Kitchen Orders */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">Pending KDS</span>
-            <div className="p-1.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-200">
-              <Clock className="w-4 h-4" />
+          {/* Pending KDS */}
+          <div className={`flex items-center gap-3 px-4 py-3 min-w-[120px] flex-1 ${stats.pendingOrders > 0 ? 'bg-amber-50/60' : ''}`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 relative ${stats.pendingOrders > 0 ? 'bg-amber-100' : 'bg-slate-100'}`}>
+              <Clock className={`w-4 h-4 ${stats.pendingOrders > 0 ? 'text-amber-600' : 'text-slate-400'}`} />
+              {stats.pendingOrders > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-amber-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+                  {stats.pendingOrders}
+                </span>
+              )}
+            </div>
+            <div>
+              <div className={`text-[10px] font-extrabold uppercase tracking-wider leading-none mb-0.5 ${stats.pendingOrders > 0 ? 'text-amber-700' : 'text-slate-400'}`}>KDS Queue</div>
+              <div className={`text-base font-black leading-tight ${stats.pendingOrders > 0 ? 'text-amber-900' : 'text-slate-400'}`}>
+                {stats.pendingOrders > 0 ? `${stats.pendingOrders} pending` : 'Queue clear ✓'}
+              </div>
             </div>
           </div>
-          <div>
-            <div className="text-2xl font-black text-amber-900">{stats.pendingOrders}</div>
-            <span className="text-[10px] text-amber-700 font-bold block">In Kitchen Queue</span>
-          </div>
-        </div>
 
-        {/* 5. Items Sold Today */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Items Sold</span>
-            <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 border border-purple-200">
-              <TrendingUp className="w-4 h-4" />
+          {/* Items Sold */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[120px] flex-1">
+            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-4 h-4 text-purple-600" />
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none mb-0.5">Items Sold</div>
+              <div className="text-base font-black text-slate-900 leading-tight">{stats.itemsSold}</div>
             </div>
           </div>
-          <div>
-            <div className="text-2xl font-black text-slate-900">{stats.itemsSold}</div>
-            <span className="text-[10px] text-slate-500 font-semibold block">Paid Food Units</span>
-          </div>
-        </div>
 
-        {/* 6. Avg Order Value */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Avg Order</span>
-            <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200">
-              <Award className="w-4 h-4" />
+          {/* Avg Order + Payment Split */}
+          <div className="flex items-center gap-3 px-4 py-3 min-w-[200px] flex-1">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+              <Award className="w-4 h-4 text-slate-600" />
+            </div>
+            <div className="text-xs font-bold space-y-0.5">
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none mb-1">Avg / Split</div>
+              <div className="flex items-center gap-2 text-slate-700">
+                <span className="font-extrabold text-slate-900">₹{stats.avgOrderValue} avg</span>
+                <span className="text-slate-300">|</span>
+                <span className="text-blue-700">UPI</span>
+                <span className="font-extrabold text-slate-900">₹{stats.upiSales.toLocaleString('en-IN')}</span>
+                <span className="text-slate-300">|</span>
+                <span className="text-emerald-700">Cash</span>
+                <span className="font-extrabold text-slate-900">₹{stats.cashSales.toLocaleString('en-IN')}</span>
+              </div>
             </div>
           </div>
-          <div>
-            <div className="text-2xl font-black text-slate-900">₹{stats.avgOrderValue}</div>
-            <span className="text-[10px] text-slate-500 font-semibold block">Revenue per Order</span>
-          </div>
-        </div>
 
+        </div>
       </div>
 
       {/* Middle Grid: Top Selling Items & Payment Channel Split */}

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Ticket, Flame, Sparkles, Copy, Check, Zap } from 'lucide-react';
 
 export default function FloatingCouponBanner() {
-  const { setAppliedPromo, showToast } = useAuth();
+  const { showToast } = useAuth();
   const [promos, setPromos] = useState([]);
   const [offers, setOffers] = useState([]);
   const [copiedCode, setCopiedCode] = useState(null);
@@ -16,7 +16,7 @@ export default function FloatingCouponBanner() {
   const fetchDeals = async () => {
     try {
       const [promoRes, offerRes] = await Promise.all([
-        supabase.from('promo_codes').select('*').eq('is_active', true),
+        supabase.from('promo_codes').select('*').eq('is_active', true).eq('is_secret', false),
         supabase.from('offers').select('*').eq('is_active', true).limit(3)
       ]);
       setPromos(promoRes.data || []);
@@ -33,9 +33,8 @@ export default function FloatingCouponBanner() {
       // Fallback
     }
 
-    setAppliedPromo(promo);
     setCopiedCode(promo.code);
-    showToast(`🎉 Coupon ${promo.code} applied! ${promo.discount_percent}% OFF saved to cart.`);
+    showToast(`📋 Code ${promo.code} copied! Paste it in your cart to get ${promo.discount_percent}% OFF.`);
     setTimeout(() => setCopiedCode(null), 2500);
   };
 
@@ -95,11 +94,11 @@ export default function FloatingCouponBanner() {
 
                     {isCopied ? (
                       <span className="text-[10px] bg-slate-950 text-yellow-400 font-black px-2 py-0.5 rounded-lg flex items-center gap-1 animate-bounce">
-                        <Check className="w-3 h-3" /> APPLIED!
+                        <Check className="w-3 h-3" /> COPIED!
                       </span>
                     ) : (
                       <span className="text-[10px] bg-emerald-500/20 group-hover:bg-yellow-400 group-hover:text-slate-950 text-emerald-200 font-extrabold px-2 py-0.5 rounded-lg flex items-center gap-1 transition-all">
-                        <Copy className="w-3 h-3" /> Apply
+                        <Copy className="w-3 h-3" /> Copy
                       </span>
                     )}
                   </div>
