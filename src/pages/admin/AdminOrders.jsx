@@ -63,7 +63,33 @@ export default function AdminOrders() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      const activeOrders = data || [];
+
+      // Auto-cancel check for unpaid cash orders past 6 PM
+      const now = new Date();
+      if (now.getHours() >= 18) {
+        const staleOrders = activeOrders.filter(o => o.payment_method === 'cash' && o.payment_status === 'unpaid' && !['cancelled', 'completed', 'delivered'].includes(o.status));
+        if (staleOrders.length > 0) {
+          const cancelReason = "System cancelled automatically: Customer had not done the payment till the closing of canteen";
+          for (const o of staleOrders) {
+            const updatedNotes = o.special_instructions ? `${o.special_instructions} | ❌ ${cancelReason}` : `❌ ${cancelReason}`;
+            supabase.from('orders').update({
+              status: 'cancelled',
+              cancellation_reason: cancelReason,
+              special_instructions: updatedNotes
+            }).eq('id', o.id).then(({error: updateErr}) => {
+              if (updateErr) {
+                supabase.from('orders').update({
+                  status: 'cancelled',
+                  special_instructions: updatedNotes
+                }).eq('id', o.id).then();
+              }
+            });
+          }
+        }
+      }
+
+      setOrders(activeOrders);
     } catch (err) {
       console.error('Error fetching admin orders:', err);
       showToast('Failed to load orders', true);
