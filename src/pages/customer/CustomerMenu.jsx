@@ -131,17 +131,6 @@ export default function CustomerMenu({ onOpenCart }) {
 
   const handleCategoryChange = (catId) => {
     triggerHaptic?.(12);
-    const isGroupedMode = activeCategory === 'all' && !searchQuery.trim();
-
-    // In grouped mode: pills scroll to sections instead of filtering
-    if (isGroupedMode && catId !== 'all' && catId !== 'offers') {
-      const el = sectionRefs.current[catId];
-      if (el) {
-        const top = el.getBoundingClientRect().top + window.scrollY - 72;
-        window.scrollTo({ top, behavior: 'smooth' });
-      }
-      return;
-    }
 
     if (catId === 'all') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
