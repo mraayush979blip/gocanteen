@@ -29,6 +29,7 @@ function initFirebase() {
         .replace(/\\n/g, '')
         .replace(/\n/g, '')
         .replace(/\r/g, '')
+        .replace(/\\/g, '') // Strip any remaining backslashes (like typos \z, \u, etc)
         .replace(/\s+/g, '');
       privateKey = `-----BEGIN PRIVATE KEY-----\n${cleanKey}\n-----END PRIVATE KEY-----\n`;
     }
