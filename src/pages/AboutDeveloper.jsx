@@ -37,24 +37,19 @@ export default function AboutDeveloper() {
     <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-between font-['Plus_Jakarta_Sans',sans-serif] overflow-hidden">
       
       {/* Immersive Background Glows & Image */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 bg-slate-950">
         <img
           src="/aayush-profile.jpg"
           alt="Aayush Sharma"
-          className="w-full h-full object-cover object-top filter contrast-125 brightness-90 saturate-50 mix-blend-luminosity scale-105 animate-[pulse_10s_ease-in-out_infinite_alternate]"
+          className="w-full h-full object-cover object-top filter brightness-90 animate-[pulse_10s_ease-in-out_infinite_alternate]"
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop';
           }}
         />
-        {/* Gradients to blend and make text readable */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-950/80 to-slate-900/40 mix-blend-multiply pointer-events-none"></div>
-        <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-slate-950 via-slate-950/40 to-transparent pointer-events-none"></div>
-        <div className="absolute bottom-0 inset-x-0 h-96 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pointer-events-none"></div>
-        
-        {/* Blurred floating orbs */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/30 rounded-full blur-[120px] pointer-events-none mix-blend-screen"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-fuchsia-500/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen"></div>
+        {/* Neutral Gradients to blend and make text readable (No blue tint) */}
+        <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-slate-950 via-slate-950/60 to-transparent pointer-events-none"></div>
+        <div className="absolute bottom-0 inset-x-0 h-[32rem] bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none"></div>
       </div>
 
       {/* Top Header Layer */}
