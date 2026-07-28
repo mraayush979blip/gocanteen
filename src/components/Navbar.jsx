@@ -350,13 +350,15 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                         </>
                       )}
 
-                      {activePortal === 'admin' && (
+                       {activePortal === 'admin' && (
                         <>
                           <NavigationItem icon={<span className="text-lg">📊</span>} iconBg="bg-purple-50" title="Executive Dashboard" subtitle="Sales analytics" onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">💵</span>} iconBg="bg-purple-50" title="Sales Controls & Refunds" subtitle="Manage payments" onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">🍱</span>} iconBg="bg-purple-50" title="Menu Inventory" subtitle="Manage items" onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">📂</span>} iconBg="bg-purple-50" title="Menu Categories" subtitle="Manage categories" onClick={() => { navigate('/admin/categories'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">🎟️</span>} iconBg="bg-purple-50" title="Combo Offers" subtitle="Manage coupons" onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">🍔</span>} iconBg="bg-purple-50" title="Food Combos" subtitle="Manage combo meals" onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">🎟️</span>} iconBg="bg-purple-50" title="Promo Codes & Coupons" subtitle="Discount codes" onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">📢</span>} iconBg="bg-purple-50" title="Broadcast Announcements" subtitle="Send push campaigns" onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">👥</span>} iconBg="bg-purple-50" title="Manage Staff" subtitle="Accounts & Access" onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<KeyRound className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Change Admin Passcode" subtitle="Security settings" onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }} />
                         </>
