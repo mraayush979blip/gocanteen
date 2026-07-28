@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { staffTranslations } from '../lib/translations';
+import { requestForToken, messaging, onForegroundMessage } from '../lib/firebase';
 
 const AuthContext = createContext({});
 
@@ -161,6 +162,52 @@ export const AuthProvider = ({ children }) => {
         window.close();
       } catch (e) { }
     }
+  }, [session]);
+
+  // Request notification permissions and save token
+  useEffect(() => {
+    const initNotifications = async () => {
+      if (session?.user) {
+        try {
+          const token = await requestForToken();
+          if (token) {
+            // Update fcm_token in Supabase profiles
+            await supabase
+              .from('profiles')
+              .update({ fcm_token: token })
+              .eq('id', session.user.id);
+          }
+        } catch (e) {
+          console.warn('FCM token initialization failed:', e);
+        }
+      }
+    };
+
+    // Delay initialization slightly to ensure service worker is fully ready
+    const timer = setTimeout(initNotifications, 2000);
+    return () => clearTimeout(timer);
+  }, [session]);
+
+  // Foreground notification listener
+  useEffect(() => {
+    let unsubscribe = null;
+    
+    if ('Notification' in window && Notification.permission === 'granted' && session?.user) {
+      try {
+        unsubscribe = onForegroundMessage((payload) => {
+          console.log('Foreground message received:', payload);
+          const body = payload.notification?.body || '';
+          const title = payload.notification?.title || 'Notification';
+          showToast(`🔔 ${title}: ${body}`, false, 5000);
+        });
+      } catch (err) {
+        console.warn('Error setting up foreground notification listener:', err);
+      }
+    }
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [session]);
 
   const triggerHaptic = (ms = 15) => {

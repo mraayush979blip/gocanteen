@@ -1,3 +1,31 @@
+// Import and configure Firebase Cloud Messaging in the service worker
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: "AIzaSyD6_lK9TP82lmj0YH4nvEkRKYj7jmmqjzA",
+  authDomain: "go-canteen-77c0a.firebaseapp.com",
+  projectId: "go-canteen-77c0a",
+  storageBucket: "go-canteen-77c0a.firebasestorage.app",
+  messagingSenderId: "83432321106",
+  appId: "1:83432321106:web:0c1560c7e3462115e1ef8b"
+});
+
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage((payload) => {
+  console.log('[sw.js] Received background message ', payload);
+  const notificationTitle = payload.notification?.title || 'Order Update';
+  const notificationOptions = {
+    body: payload.notification?.body || '',
+    icon: '/app-icon.png',
+    badge: '/logo.png',
+    data: payload.data
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
 const CACHE_NAME = 'gocanteen-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',

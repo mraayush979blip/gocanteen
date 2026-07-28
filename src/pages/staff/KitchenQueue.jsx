@@ -8,6 +8,7 @@ import {
 import PaymentConfirmModal from '../../components/PaymentConfirmModal';
 import CancelOrderModal from '../../components/CancelOrderModal';
 import { sendOrderReadyEmail, sendRefundNotificationEmail } from '../../lib/emailNotifier';
+import { sendPushNotification } from '../../lib/notificationHelper';
 import { getOrderFinancials, getOrderPin, getUserSpecialInstructions, getPaymentId, getOrderId } from '../../lib/orderUtils';
 
 export default function KitchenQueue() {
@@ -133,6 +134,24 @@ export default function KitchenQueue() {
       if (error) throw error;
       showToast(`✓ Ticket #${order.token_number || order.id.slice(0,4)} updated to ${newStatus.toUpperCase()}`);
 
+      if (order.customer_id) {
+        let title = '';
+        let body = '';
+        if (newStatus === 'preparing') {
+          title = '👨‍🍳 Preparing Order';
+          body = `Canteen has started cooking your order (Token #${order.token_number || order.id.slice(0, 4)}).`;
+        } else if (newStatus === 'ready') {
+          title = '✅ Order Ready for Pickup!';
+          body = `Your order is ready! Use Security PIN: ${order.pickup_code || ''} (Token #${order.token_number || order.id.slice(0, 4)}).`;
+        } else if (newStatus === 'completed') {
+          title = '🎉 Order Delivered!';
+          body = `Thank you for ordering with GoCanteen! Your order (Token #${order.token_number || order.id.slice(0, 4)}) has been completed.`;
+        }
+        if (title && body) {
+          sendPushNotification(order.customer_id, order.id, title, body, newStatus);
+        }
+      }
+
       if (newStatus === 'ready') {
         sendOrderReadyEmail(order).then(res => {
           if (res.success && res.email) {
@@ -199,6 +218,16 @@ export default function KitchenQueue() {
         showToast(`❌ Unpaid Order #${order.token_number || order.id.slice(0,4)} CANCELLED: ${cancelReason}`);
       }
 
+      if (order.customer_id) {
+        sendPushNotification(
+          order.customer_id,
+          order.id,
+          '❌ Order Cancelled',
+          `Your order (Token #${order.token_number || order.id.slice(0, 4)}) has been cancelled. Reason: ${cancelReason}`,
+          'cancelled'
+        );
+      }
+
       setCancelModalOrder(null);
       fetchOrders();
     } catch (err) {
@@ -223,6 +252,24 @@ export default function KitchenQueue() {
 
       if (error) throw error;
       showToast(`✓ Marked PAID (${method.toUpperCase()}) & Order updated to ${payModalTargetStatus.toUpperCase()}`);
+
+      if (payModalOrder.customer_id) {
+        let title = '';
+        let body = '';
+        if (payModalTargetStatus === 'preparing') {
+          title = '👨‍🍳 Preparing Order';
+          body = `Canteen has started cooking your order (Token #${payModalOrder.token_number || payModalOrder.id.slice(0, 4)}).`;
+        } else if (payModalTargetStatus === 'ready') {
+          title = '✅ Order Ready for Pickup!';
+          body = `Your order is ready! Use Security PIN: ${payModalOrder.pickup_code || ''} (Token #${payModalOrder.token_number || payModalOrder.id.slice(0, 4)}).`;
+        } else if (payModalTargetStatus === 'completed') {
+          title = '🎉 Order Delivered!';
+          body = `Thank you for ordering with GoCanteen! Your order (Token #${payModalOrder.token_number || payModalOrder.id.slice(0, 4)}) has been completed.`;
+        }
+        if (title && body) {
+          sendPushNotification(payModalOrder.customer_id, payModalOrder.id, title, body, payModalTargetStatus);
+        }
+      }
 
       if (payModalTargetStatus === 'ready') {
         sendOrderReadyEmail(payModalOrder).then(res => {
