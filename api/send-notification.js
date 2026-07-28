@@ -22,7 +22,15 @@ function initFirebase() {
       if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
         privateKey = privateKey.slice(1, -1);
       }
-      privateKey = privateKey.replace(/\\n/g, '\n').trim();
+      // Reconstruct PEM format by removing all formatting junk and rebuilding the wrapper
+      const cleanKey = privateKey
+        .replace(/-----BEGIN PRIVATE KEY-----/, '')
+        .replace(/-----END PRIVATE KEY-----/, '')
+        .replace(/\\n/g, '')
+        .replace(/\n/g, '')
+        .replace(/\r/g, '')
+        .replace(/\s+/g, '');
+      privateKey = `-----BEGIN PRIVATE KEY-----\n${cleanKey}\n-----END PRIVATE KEY-----\n`;
     }
 
     admin.initializeApp({
