@@ -221,237 +221,239 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
           </div>
         </div>
 
-        {/* Backdrop overlay to close menu on outside click */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm"
-                onClick={() => setMobileMenuOpen(false)}
-              />
-
-              {/* Full Screen Mobile / Side Drawer Desktop */}
-              <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 28, stiffness: 250 }}
-                className="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-slate-50 flex flex-col overflow-y-auto shadow-2xl"
-              >
-                {/* Dark Green Header matching aesthetic */}
-                <div className="bg-[#0f4d43] text-white pt-6 pb-16 px-6 relative overflow-hidden shrink-0">
-                  <div className="flex items-center gap-4 relative z-10">
-                    <button 
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm"
-                    >
-                      <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    <div>
-                      <h2 className="text-xl font-black tracking-tight leading-tight">Navigation</h2>
-                      <p className="text-emerald-100/80 text-xs font-semibold">Go Canteen</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* White Overlapping Content Card */}
-                <div className="flex-1 px-4 -mt-10 relative z-20 pb-8 flex flex-col">
-                  {/* User Profile Card */}
-                  {session && (
-                    <div 
-                      onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
-                      className="bg-white rounded-[20px] p-4 shadow-sm border border-slate-100 flex items-center justify-between mb-6 group cursor-pointer hover:border-emerald-200 transition-all"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-xl uppercase shrink-0">
-                          {profile?.full_name?.charAt(0) || session.user.email?.charAt(0) || 'U'}
-                        </div>
-                        <div className="truncate">
-                          <div className="text-base font-black text-slate-900 truncate">
-                            {profile?.full_name || 'Logged In User'}
-                          </div>
-                          <div className="text-[11px] text-slate-500 font-medium truncate">{session.user.email}</div>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-500 transition-colors" />
-                    </div>
-                  )}
-
-                  {/* Sections Wrapper */}
-                  <div className="space-y-6">
-                    {/* ORDERING SECTION */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-1.5 px-2">
-                        <div className="w-1 h-3.5 bg-emerald-600 rounded-full"></div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
-                          {activePortal === 'customer' ? 'ORDERING' : activePortal === 'admin' ? 'MANAGEMENT' : 'KITCHEN'}
-                        </span>
-                      </div>
-                      
-                      <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
-                        {activePortal === 'customer' && (
-                          <>
-                            <NavigationItem 
-                              icon={<UtensilsCrossed className="w-5 h-5 text-emerald-600" />}
-                              iconBg="bg-emerald-50"
-                              title="Explore Menu"
-                              subtitle="Browse dishes & offers"
-                              onClick={() => { navigate('/menu'); setMobileMenuOpen(false); }}
-                            />
-                            <NavigationItem 
-                              icon={<span className="text-lg">📦</span>}
-                              iconBg="bg-amber-50"
-                              title="My Orders & Live Tokens"
-                              subtitle="Track your orders"
-                              onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}
-                            />
-                            <NavigationItem 
-                              icon={<UserCheck className="w-5 h-5 text-sky-600" />}
-                              iconBg="bg-sky-50"
-                              title="My Profile"
-                              subtitle="Manage your details"
-                              onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
-                            />
-                            <NavigationItem 
-                              icon={<ShoppingCart className="w-5 h-5 text-emerald-600" />}
-                              iconBg="bg-emerald-50"
-                              title="View Order Cart"
-                              subtitle="Review your cart items"
-                              rightElement={
-                                cartCount > 0 ? (
-                                  <span className="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2 py-0.5 rounded-full">
-                                    {cartCount} Items
-                                  </span>
-                                ) : (
-                                  <span className="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-2 py-0.5 rounded-full">Empty</span>
-                                )
-                              }
-                              onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
-                            />
-                          </>
-                        )}
-
-                        {activePortal === 'staff' && (
-                          <>
-                            <NavigationItem 
-                              icon={<span className="text-lg">👨‍🍳</span>}
-                              iconBg="bg-emerald-50"
-                              title="Live Kitchen Queue (KDS)"
-                              subtitle="Manage live orders"
-                              onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
-                            />
-                            <NavigationItem 
-                              icon={<span className="text-lg">📦</span>}
-                              iconBg="bg-emerald-50"
-                              title="Quick Stock Availability"
-                              subtitle="Update item stock"
-                              onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
-                            />
-                            <NavigationItem 
-                              icon={<span className="text-lg">📋</span>}
-                              iconBg="bg-emerald-50"
-                              title="Order History Log"
-                              subtitle="Past orders"
-                              onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
-                            />
-                          </>
-                        )}
-
-                        {activePortal === 'admin' && (
-                          <>
-                            <NavigationItem icon={<span className="text-lg">📊</span>} iconBg="bg-purple-50" title="Executive Dashboard" subtitle="Sales analytics" onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }} />
-                            <NavigationItem icon={<span className="text-lg">💵</span>} iconBg="bg-purple-50" title="Sales Controls & Refunds" subtitle="Manage payments" onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }} />
-                            <NavigationItem icon={<span className="text-lg">🍱</span>} iconBg="bg-purple-50" title="Menu Inventory" subtitle="Manage items" onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }} />
-                            <NavigationItem icon={<span className="text-lg">📂</span>} iconBg="bg-purple-50" title="Menu Categories" subtitle="Manage categories" onClick={() => { navigate('/admin/categories'); setMobileMenuOpen(false); }} />
-                            <NavigationItem icon={<span className="text-lg">🎟️</span>} iconBg="bg-purple-50" title="Combo Offers" subtitle="Manage coupons" onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }} />
-                            <NavigationItem icon={<span className="text-lg">👥</span>} iconBg="bg-purple-50" title="Manage Staff" subtitle="Accounts & Access" onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }} />
-                            <NavigationItem icon={<KeyRound className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Change Admin Passcode" subtitle="Security settings" onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }} />
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* MORE SECTION */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-1.5 px-2">
-                        <div className="w-1 h-3.5 bg-slate-600 rounded-full"></div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">MORE</span>
-                      </div>
-                      
-                      <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
-                        {activePortal !== 'admin' && (
-                          <NavigationItem 
-                            icon={<Instagram className="w-5 h-5 text-pink-500" />}
-                            iconBg="bg-pink-50"
-                            title="Instagram (@gocanteen.in)"
-                            subtitle="Follow us on Instagram"
-                            onClick={() => window.open('https://www.instagram.com/gocanteen.in/', '_blank')}
-                          />
-                        )}
-                        <NavigationItem 
-                          icon={<Bug className="w-5 h-5 text-amber-600" />}
-                          iconBg="bg-amber-50"
-                          title="Report Bug / Suggestions"
-                          subtitle="Help us improve"
-                          onClick={() => { navigate('/report-bug'); setMobileMenuOpen(false); }}
-                        />
-                        {activePortal !== 'admin' && (
-                          <NavigationItem 
-                            icon={<Code className="w-5 h-5 text-indigo-600" />}
-                            iconBg="bg-indigo-50"
-                            title="About Developer (Aayush Sharma)"
-                            subtitle="Know more about the developer"
-                            onClick={() => { navigate('/about-developer'); setMobileMenuOpen(false); }}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom Action */}
-                  <div className="mt-8 mb-4">
-                    {session ? (
-                      <button
-                        onClick={() => { logout(); setMobileMenuOpen(false); }}
-                        className="w-full bg-red-50 hover:bg-red-100 text-red-600 rounded-[20px] p-4 flex items-center justify-between transition-colors cursor-pointer group border border-red-100"
-                      >
-                        <div className="flex items-center gap-3">
-                          <LogOut className="w-5 h-5" />
-                          <div className="flex flex-col text-left">
-                            <span className="font-extrabold text-[13px] leading-tight mb-0.5">Sign Out</span>
-                            <span className="text-[11px] text-red-400 font-medium">Log out from your account</span>
-                          </div>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-red-300 group-hover:text-red-500 transition-colors" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => { onOpenAuth?.('customer'); setMobileMenuOpen(false); }}
-                        className="w-full bg-[#0f4d43] hover:bg-[#0c4038] text-white rounded-[20px] p-4 flex items-center justify-between transition-colors cursor-pointer group shadow-md"
-                      >
-                        <div className="flex items-center gap-3">
-                          <LogIn className="w-5 h-5" />
-                          <div className="flex flex-col text-left">
-                            <span className="font-extrabold text-[13px] leading-tight mb-0.5">Sign In</span>
-                            <span className="text-[11px] text-emerald-100/80 font-medium">Access your account</span>
-                          </div>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-emerald-300 group-hover:text-white transition-colors" />
-                      </button>
-                    )}
-                  </div>
-
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </header>
+
+      {/* Mobile / Side Drawer Menu */}
+      {/* Backdrop overlay to close menu on outside click */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Full Screen Mobile / Side Drawer Desktop */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 250 }}
+              className="fixed inset-y-0 right-0 z-[110] w-full sm:w-[420px] bg-slate-50 flex flex-col overflow-y-auto shadow-2xl"
+            >
+              {/* Dark Green Header matching aesthetic */}
+              <div className="bg-[#0f4d43] text-white pt-6 pb-16 px-6 relative overflow-hidden shrink-0">
+                <div className="flex items-center gap-4 relative z-10">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <div>
+                    <h2 className="text-xl font-black tracking-tight leading-tight">Navigation</h2>
+                    <p className="text-emerald-100/80 text-xs font-semibold">Go Canteen</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* White Overlapping Content Card */}
+              <div className="flex-1 px-4 -mt-10 relative z-20 pb-8 flex flex-col">
+                {/* User Profile Card */}
+                {session && (
+                  <div 
+                    onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
+                    className="bg-white rounded-[20px] p-4 shadow-sm border border-slate-100 flex items-center justify-between mb-6 group cursor-pointer hover:border-emerald-200 transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-xl uppercase shrink-0">
+                        {profile?.full_name?.charAt(0) || session.user.email?.charAt(0) || 'U'}
+                      </div>
+                      <div className="truncate">
+                        <div className="text-base font-black text-slate-900 truncate">
+                          {profile?.full_name || 'Logged In User'}
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-medium truncate">{session.user.email}</div>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-500 transition-colors" />
+                  </div>
+                )}
+
+                {/* Sections Wrapper */}
+                <div className="space-y-6">
+                  {/* ORDERING SECTION */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-1.5 px-2">
+                      <div className="w-1 h-3.5 bg-emerald-600 rounded-full"></div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                        {activePortal === 'customer' ? 'ORDERING' : activePortal === 'admin' ? 'MANAGEMENT' : 'KITCHEN'}
+                      </span>
+                    </div>
+                    
+                    <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
+                      {activePortal === 'customer' && (
+                        <>
+                          <NavigationItem 
+                            icon={<UtensilsCrossed className="w-5 h-5 text-emerald-600" />}
+                            iconBg="bg-emerald-50"
+                            title="Explore Menu"
+                            subtitle="Browse dishes & offers"
+                            onClick={() => { navigate('/menu'); setMobileMenuOpen(false); }}
+                          />
+                          <NavigationItem 
+                            icon={<span className="text-lg">📦</span>}
+                            iconBg="bg-amber-50"
+                            title="My Orders & Live Tokens"
+                            subtitle="Track your orders"
+                            onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}
+                          />
+                          <NavigationItem 
+                            icon={<UserCheck className="w-5 h-5 text-sky-600" />}
+                            iconBg="bg-sky-50"
+                            title="My Profile"
+                            subtitle="Manage your details"
+                            onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
+                          />
+                          <NavigationItem 
+                            icon={<ShoppingCart className="w-5 h-5 text-emerald-600" />}
+                            iconBg="bg-emerald-50"
+                            title="View Order Cart"
+                            subtitle="Review your cart items"
+                            rightElement={
+                              cartCount > 0 ? (
+                                <span className="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2 py-0.5 rounded-full">
+                                  {cartCount} Items
+                                </span>
+                              ) : (
+                                <span className="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-2 py-0.5 rounded-full">Empty</span>
+                              )
+                            }
+                            onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
+                          />
+                        </>
+                      )}
+
+                      {activePortal === 'staff' && (
+                        <>
+                          <NavigationItem 
+                            icon={<span className="text-lg">👨‍🍳</span>}
+                            iconBg="bg-emerald-50"
+                            title="Live Kitchen Queue (KDS)"
+                            subtitle="Manage live orders"
+                            onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
+                          />
+                          <NavigationItem 
+                            icon={<span className="text-lg">📦</span>}
+                            iconBg="bg-emerald-50"
+                            title="Quick Stock Availability"
+                            subtitle="Update item stock"
+                            onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
+                          />
+                          <NavigationItem 
+                            icon={<span className="text-lg">📋</span>}
+                            iconBg="bg-emerald-50"
+                            title="Order History Log"
+                            subtitle="Past orders"
+                            onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
+                          />
+                        </>
+                      )}
+
+                      {activePortal === 'admin' && (
+                        <>
+                          <NavigationItem icon={<span className="text-lg">📊</span>} iconBg="bg-purple-50" title="Executive Dashboard" subtitle="Sales analytics" onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">💵</span>} iconBg="bg-purple-50" title="Sales Controls & Refunds" subtitle="Manage payments" onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">🍱</span>} iconBg="bg-purple-50" title="Menu Inventory" subtitle="Manage items" onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">📂</span>} iconBg="bg-purple-50" title="Menu Categories" subtitle="Manage categories" onClick={() => { navigate('/admin/categories'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">🎟️</span>} iconBg="bg-purple-50" title="Combo Offers" subtitle="Manage coupons" onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">👥</span>} iconBg="bg-purple-50" title="Manage Staff" subtitle="Accounts & Access" onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<KeyRound className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Change Admin Passcode" subtitle="Security settings" onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }} />
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* MORE SECTION */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-1.5 px-2">
+                      <div className="w-1 h-3.5 bg-slate-600 rounded-full"></div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">MORE</span>
+                    </div>
+                    
+                    <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
+                      {activePortal !== 'admin' && (
+                        <NavigationItem 
+                          icon={<Instagram className="w-5 h-5 text-pink-500" />}
+                          iconBg="bg-pink-50"
+                          title="Instagram (@gocanteen.in)"
+                          subtitle="Follow us on Instagram"
+                          onClick={() => window.open('https://www.instagram.com/gocanteen.in/', '_blank')}
+                        />
+                      )}
+                      <NavigationItem 
+                        icon={<Bug className="w-5 h-5 text-amber-600" />}
+                        iconBg="bg-amber-50"
+                        title="Report Bug / Suggestions"
+                        subtitle="Help us improve"
+                        onClick={() => { navigate('/report-bug'); setMobileMenuOpen(false); }}
+                      />
+                      {activePortal !== 'admin' && (
+                        <NavigationItem 
+                          icon={<Code className="w-5 h-5 text-indigo-600" />}
+                          iconBg="bg-indigo-50"
+                          title="About Developer (Aayush Sharma)"
+                          subtitle="Know more about the developer"
+                          onClick={() => { navigate('/about-developer'); setMobileMenuOpen(false); }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Action */}
+                <div className="mt-8 mb-4">
+                  {session ? (
+                    <button
+                      onClick={() => { logout(); setMobileMenuOpen(false); }}
+                      className="w-full bg-red-50 hover:bg-red-100 text-red-600 rounded-[20px] p-4 flex items-center justify-between transition-colors cursor-pointer group border border-red-100"
+                    >
+                      <div className="flex items-center gap-3">
+                        <LogOut className="w-5 h-5" />
+                        <div className="flex flex-col text-left">
+                          <span className="font-extrabold text-[13px] leading-tight mb-0.5">Sign Out</span>
+                          <span className="text-[11px] text-red-400 font-medium">Log out from your account</span>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-red-300 group-hover:text-red-500 transition-colors" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { onOpenAuth?.('customer'); setMobileMenuOpen(false); }}
+                      className="w-full bg-[#0f4d43] hover:bg-[#0c4038] text-white rounded-[20px] p-4 flex items-center justify-between transition-colors cursor-pointer group shadow-md"
+                    >
+                      <div className="flex items-center gap-3">
+                        <LogIn className="w-5 h-5" />
+                        <div className="flex flex-col text-left">
+                          <span className="font-extrabold text-[13px] leading-tight mb-0.5">Sign In</span>
+                          <span className="text-[11px] text-emerald-100/80 font-medium">Access your account</span>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-emerald-300 group-hover:text-white transition-colors" />
+                    </button>
+                  )}
+                </div>
+
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Change Admin Unlock Passcode Modal */}
       {showChangeCodeModal && (
