@@ -7,22 +7,36 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Initialize Firebase Admin
-if (!admin.apps.length) {
+let initError = null;
+
+function initFirebase() {
+  if (admin.apps.length > 0) return true;
+  
   try {
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY
-      ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-      : undefined;
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    if (privateKey) {
+      privateKey = privateKey.trim();
+      if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+        privateKey = privateKey.slice(1, -1);
+      }
+      if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
+        privateKey = privateKey.slice(1, -1);
+      }
+      privateKey = privateKey.replace(/\\n/g, '\n').trim();
+    }
 
     admin.initializeApp({
       credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        projectId: process.env.FIREBASE_PROJECT_ID?.trim(),
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL?.trim(),
         privateKey: privateKey,
       }),
     });
+    return true;
   } catch (error) {
+    initError = error;
     console.error('Firebase Admin initialization error:', error);
+    return false;
   }
 }
 
@@ -42,6 +56,16 @@ export default async function handler(req, res) {
   if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
     console.warn('FCM credentials are not configured in Vercel environment variables.');
     return res.status(200).json({ success: false, reason: 'FCM environment variables not configured yet' });
+  }
+
+  // Trigger Firebase Initialization
+  const isInitialized = initFirebase();
+  if (!isInitialized) {
+    return res.status(200).json({ 
+      success: false, 
+      reason: 'Firebase Admin initialization failed', 
+      error: initError ? initError.message : 'Unknown initialization error' 
+    });
   }
 
   try {

@@ -124,13 +124,17 @@ export function getUserSpecialInstructions(instructions) {
   const parts = instructions.split('|').map(p => p.trim());
   const cleanParts = parts.filter(p => {
     if (!p) return false;
-    if (p.includes('Platform Fee')) return false;
-    if (p.includes('PIN:')) return false;
-    if (p.includes('Razorpay Payment ID:')) return false;
-    if (p.includes('Coupon:')) return false;
-    if (p.includes('Cancelled Reason:')) return false;
-    if (p.includes('Subtotal:')) return false;
-    if (p.includes('Saved:')) return false;
+    const lower = p.toLowerCase();
+    if (lower.includes('platform fee')) return false;
+    if (lower.includes('pin:')) return false;
+    if (lower.includes('razorpay payment id:')) return false;
+    if (lower.includes('coupon:')) return false;
+    if (lower.includes('cancelled reason:')) return false;
+    if (lower.includes('subtotal:')) return false;
+    if (lower.includes('saved:')) return false;
+    if (lower.includes('❌')) return false;
+    if (lower.includes('cancelled')) return false;
+    if (lower.includes('cancellation')) return false;
     return true;
   });
   

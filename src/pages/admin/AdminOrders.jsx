@@ -9,7 +9,7 @@ import {
 import PaymentConfirmModal from '../../components/PaymentConfirmModal';
 import CancelOrderModal from '../../components/CancelOrderModal';
 import { sendPushNotification } from '../../lib/notificationHelper';
-import { getOrderFinancials, getOrderPin, getUserSpecialInstructions, getPaymentId, getOrderId } from '../../lib/orderUtils';
+import { getOrderFinancials, getOrderPin, getUserSpecialInstructions, getPaymentId, getOrderId, getCancellationReason } from '../../lib/orderUtils';
 
 export default function AdminOrders() {
   const { showToast, profile, session } = useAuth();
@@ -840,7 +840,7 @@ export default function AdminOrders() {
                           <span>Order Cancelled</span>
                         </div>
                         <p className="text-[11px] text-slate-900">
-                          Reason: <b>{order.cancellation_reason || 'Out of stock or customer cancellation'}</b>
+                          Reason: <b>{getCancellationReason(order)}</b>
                         </p>
                       </div>
                     )}
