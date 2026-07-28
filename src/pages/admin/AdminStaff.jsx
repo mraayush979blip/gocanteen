@@ -22,9 +22,57 @@ export default function AdminStaff() {
   const [validFrom, setValidFrom] = useState('');
   const [validTill, setValidTill] = useState('');
 
+  // Canteen Settings State
+  const [openTime, setOpenTime] = useState('08:00');
+  const [closeTime, setCloseTime] = useState('17:00');
+  const [isHolidayToggle, setIsHolidayToggle] = useState(false);
+  const [updatingSettings, setUpdatingSettings] = useState(false);
+
   useEffect(() => {
     fetchUsers();
+    fetchCanteenSettings();
   }, []);
+
+  const fetchCanteenSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('*');
+      if (!error && data) {
+        const openVal = data.find(s => s.key === 'canteen_open_time')?.value || '08:00';
+        const closeVal = data.find(s => s.key === 'canteen_close_time')?.value || '17:00';
+        const holidayVal = data.find(s => s.key === 'canteen_is_holiday')?.value === 'true';
+        setOpenTime(openVal);
+        setCloseTime(closeVal);
+        setIsHolidayToggle(holidayVal);
+      }
+    } catch (err) {
+      console.error('Error fetching canteen settings:', err);
+    }
+  };
+
+  const handleSaveCanteenSettings = async (e) => {
+    e.preventDefault();
+    setUpdatingSettings(true);
+    try {
+      const settings = [
+        { key: 'canteen_open_time', value: openTime },
+        { key: 'canteen_close_time', value: closeTime },
+        { key: 'canteen_is_holiday', value: isHolidayToggle ? 'true' : 'false' }
+      ];
+
+      const { error } = await supabase
+        .from('system_settings')
+        .upsert(settings);
+
+      if (error) throw error;
+      showToast('✓ Canteen operational settings updated successfully!');
+    } catch (err) {
+      showToast('Failed to update canteen settings: ' + err.message, true);
+    } finally {
+      setUpdatingSettings(false);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -221,6 +269,64 @@ export default function AdminStaff() {
         >
           <Plus className="w-4 h-4" /> Add New Staff Member
         </button>
+      </div>
+
+      {/* Canteen Settings Card */}
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+          <Clock className="w-5 h-5 text-purple-600" />
+          <div>
+            <h2 className="text-sm font-extrabold text-slate-900">Canteen Operational Controls</h2>
+            <p className="text-[11px] text-slate-500 font-medium">Control operating hours and holiday toggles for the user menu</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSaveCanteenSettings} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Canteen Open Time</label>
+            <input
+              type="time"
+              required
+              value={openTime}
+              onChange={(e) => setOpenTime(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-purple-600 font-bold"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Canteen Close Time</label>
+            <input
+              type="time"
+              required
+              value={closeTime}
+              onChange={(e) => setCloseTime(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-purple-600 font-bold"
+            />
+          </div>
+
+          {/* Holiday Toggle Switch */}
+          <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-2xl p-2.5 h-[38px] cursor-pointer" onClick={() => setIsHolidayToggle(!isHolidayToggle)}>
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-red-500" />
+              <span className="text-xs font-extrabold text-slate-700">Mark Today as Holiday</span>
+            </div>
+            <input
+              type="checkbox"
+              checked={isHolidayToggle}
+              onChange={(e) => e.stopPropagation()} // handled by div click
+              className="w-4 h-4 rounded text-red-600 focus:ring-red-500 cursor-pointer"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={updatingSettings}
+            className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 h-[38px]"
+          >
+            {updatingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save Controls
+          </button>
+        </form>
       </div>
 
       {/* Mobile View: Stacked Card List */}

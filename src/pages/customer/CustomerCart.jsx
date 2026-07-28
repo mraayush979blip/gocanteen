@@ -14,20 +14,70 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   const [phoneError, setPhoneError] = useState('');
   const [saveToProfileOption, setSaveToProfileOption] = useState(true);
 
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [canteenSettings, setCanteenSettings] = useState({
+    openTime: '08:00',
+    closeTime: '17:00',
+    isHoliday: false,
+    loading: true
+  });
+
+  const fetchCanteenSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('*');
+      if (!error && data) {
+        const open = data.find(s => s.key === 'canteen_open_time')?.value || '08:00';
+        const close = data.find(s => s.key === 'canteen_close_time')?.value || '17:00';
+        const holiday = data.find(s => s.key === 'canteen_is_holiday')?.value === 'true';
+        setCanteenSettings({ openTime: open, closeTime: close, isHoliday: holiday, loading: false });
+      } else {
+        setCanteenSettings(prev => ({ ...prev, loading: false }));
+      }
+    } catch (err) {
+      console.warn('Error fetching canteen settings:', err);
+      setCanteenSettings(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchCanteenSettings();
+    }
+  }, [isOpen]);
+
   const isCanteenOpen = () => {
+    if (canteenSettings.isHoliday) return false;
     try {
       const now = new Date();
       const options = { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: 'numeric', hour12: false };
       const formatter = new Intl.DateTimeFormat('en-US', options);
       const timeStr = formatter.format(now);
-      const [hour] = timeStr.split(':').map(Number);
-      return hour >= 8 && hour < 17;
+      const [currHour, currMin] = timeStr.split(':').map(Number);
+
+      const [openHour, openMin] = canteenSettings.openTime.split(':').map(Number);
+      const [closeHour, closeMin] = canteenSettings.closeTime.split(':').map(Number);
+
+      const currMinutes = currHour * 60 + currMin;
+      const openMinutes = openHour * 60 + openMin;
+      const closeMinutes = closeHour * 60 + closeMin;
+
+      return currMinutes >= openMinutes && currMinutes < closeMinutes;
     } catch (e) {
-      const hour = new Date().getHours();
-      return hour >= 8 && hour < 17;
+      const now = new Date();
+      const currHour = now.getHours();
+      const currMin = now.getMinutes();
+      const [openHour, openMin] = canteenSettings.openTime.split(':').map(Number);
+      const [closeHour, closeMin] = canteenSettings.closeTime.split(':').map(Number);
+
+      const currMinutes = currHour * 60 + currMin;
+      const openMinutes = openHour * 60 + openMin;
+      const closeMinutes = closeHour * 60 + closeMin;
+
+      return currMinutes >= openMinutes && currMinutes < closeMinutes;
     }
   };
-  const [savingProfile, setSavingProfile] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' | 'cash'
   const [notes, setNotes] = useState('');
@@ -453,9 +503,12 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   };
 
   const handlePlaceOrder = async () => {
-    // Time-gated ordering (8 AM to 5 PM IST)
+    if (canteenSettings.isHoliday) {
+      showToast('🗓️ Canteen is closed today due to a holiday.', true);
+      return;
+    }
     if (!isCanteenOpen()) {
-      showToast('⏰ Canteen is currently closed. Orders can only be placed between 8:00 AM and 5:00 PM IST.', true);
+      showToast(`⏰ Canteen is currently closed. Orders can only be placed between ${canteenSettings.openTime} and ${canteenSettings.closeTime} IST.`, true);
       return;
     }
 
@@ -1084,10 +1137,12 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                     <Clock className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5" />
                     <div className="space-y-0.5 text-left">
                       <span className="text-xs font-black uppercase tracking-wider block text-amber-755">
-                        Ordering Closed
+                        {canteenSettings.isHoliday ? 'Canteen Holiday' : 'Ordering Closed'}
                       </span>
                       <p className="text-[11px] font-bold text-amber-900 leading-snug">
-                        Orders are only accepted between 8:00 AM and 5:00 PM (IST). Online checkout is locked.
+                        {canteenSettings.isHoliday
+                          ? 'The canteen is closed today due to a holiday. Online checkout is locked.'
+                          : `Orders are only accepted between ${canteenSettings.openTime} and ${canteenSettings.closeTime} (IST). Online checkout is locked.`}
                       </p>
                     </div>
                   </div>
@@ -1163,7 +1218,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                   ) : !isCanteenOpen() ? (
                     <>
                       <Clock className="w-5 h-5 text-slate-400" />
-                      <span>CANTEEN CLOSED (8AM - 5PM)</span>
+                      <span>{canteenSettings.isHoliday ? 'CLOSED FOR HOLIDAY' : `CLOSED (${canteenSettings.openTime} - ${canteenSettings.closeTime})`}</span>
                     </>
                   ) : pendingOrdersCount >= 3 ? (
                     <span>LIMIT REACHED (3 PENDING ORDERS)</span>
