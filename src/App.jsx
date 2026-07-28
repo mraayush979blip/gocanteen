@@ -166,7 +166,8 @@ function MainContent() {
 
   const p = location.pathname;
   const activePortal = p.startsWith('/admin') ? 'admin' : p.startsWith('/staff') ? 'staff' : 'customer';
-  const isLegalPolicyRoute = ['/terms', '/privacy', '/refund', '/shipping', '/contact', '/report-bug', '/about-developer'].includes(p);
+  const isLegalPolicyRoute = ['/terms', '/privacy', '/refund', '/shipping', '/contact', '/report-bug'].includes(p);
+  const isDeveloperRoute = p.endsWith('/developer');
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-['Plus_Jakarta_Sans',sans-serif] w-full max-w-full overflow-x-hidden">
@@ -196,13 +197,15 @@ function MainContent() {
       )}
 
       {/* Top Navbar */}
-      <Navbar
-        onOpenAuth={() => handleOpenAuth('customer')}
-        onOpenCart={() => setCartOpen(true)}
-      />
+      {!isDeveloperRoute && (
+        <Navbar
+          onOpenAuth={() => handleOpenAuth('customer')}
+          onOpenCart={() => setCartOpen(true)}
+        />
+      )}
 
       {/* Floating Coupon & Deal Ticker Banner */}
-      {activePortal === 'customer' && !isLegalPolicyRoute && <FloatingCouponBanner />}
+      {activePortal === 'customer' && !isLegalPolicyRoute && !isDeveloperRoute && <FloatingCouponBanner />}
 
       {/* Main Container with React Router Routes */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -260,7 +263,12 @@ function MainContent() {
           <Route path="/contact" element={<PolicyPage initialPolicy="contact" onBackToMenu={() => navigate('/menu')} />} />
           
           <Route path="/report-bug" element={<ReportBug />} />
-          <Route path="/about-developer" element={<AboutDeveloper />} />
+          
+          {/* Scoped Developer Pages */}
+          <Route path="/customer/developer" element={<AboutDeveloper />} />
+          <Route path="/staff/developer" element={<AboutDeveloper />} />
+          <Route path="/admin/developer" element={<AboutDeveloper />} />
+          <Route path="/about-developer" element={<Navigate to="/customer/developer" replace />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/menu" replace />} />
@@ -270,10 +278,12 @@ function MainContent() {
       </main>
 
       {/* Footer */}
-      <Footer
-        onOpenAdminAuth={() => handleOpenAuth('admin')}
-        onOpenStaffAuth={() => handleOpenAuth('staff')}
-      />
+      {!isDeveloperRoute && (
+        <Footer
+          onOpenAdminAuth={() => handleOpenAuth('admin')}
+          onOpenStaffAuth={() => handleOpenAuth('staff')}
+        />
+      )}
 
       {/* Slide-over Cart Modal */}
       <CustomerCart

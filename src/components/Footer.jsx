@@ -36,7 +36,11 @@ export default function Footer({ onOpenAdminAuth, onOpenStaffAuth, onOpenReportB
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <button
-                onClick={() => navigate('/about-developer')}
+                onClick={() => {
+                  const p = window.location.pathname;
+                  const portal = p.startsWith('/admin') ? 'admin' : p.startsWith('/staff') ? 'staff' : 'customer';
+                  navigate(`/${portal}/developer`);
+                }}
                 className="px-2.5 py-1 rounded-lg bg-indigo-950/80 hover:bg-indigo-900/90 text-indigo-300 font-extrabold text-[10px] border border-indigo-700/40 flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
               >
                 <span>💻 About Developer</span>

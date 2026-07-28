@@ -394,7 +394,12 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                           iconBg="bg-indigo-50"
                           title="About Developer (Aayush Sharma)"
                           subtitle="Know more about the developer"
-                          onClick={() => { navigate('/about-developer'); setMobileMenuOpen(false); }}
+                          onClick={() => {
+                            const p = window.location.pathname;
+                            const portal = p.startsWith('/admin') ? 'admin' : p.startsWith('/staff') ? 'staff' : 'customer';
+                            navigate(`/${portal}/developer`);
+                            setMobileMenuOpen(false);
+                          }}
                         />
                       )}
                     </div>
