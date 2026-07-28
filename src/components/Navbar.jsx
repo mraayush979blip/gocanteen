@@ -243,7 +243,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 250 }}
+              transition={{ type: 'tween', ease: [0.16, 1, 0.3, 1], duration: 0.5 }}
               className="fixed inset-y-0 right-0 z-[110] w-full sm:w-[420px] bg-slate-50 flex flex-col overflow-y-auto shadow-2xl"
             >
               {/* Dark Green Header matching aesthetic */}
@@ -313,13 +313,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                             subtitle="Track your orders"
                             onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}
                           />
-                          <NavigationItem 
-                            icon={<UserCheck className="w-5 h-5 text-sky-600" />}
-                            iconBg="bg-sky-50"
-                            title="My Profile"
-                            subtitle="Manage your details"
-                            onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
-                          />
+
                           <NavigationItem 
                             icon={<ShoppingCart className="w-5 h-5 text-emerald-600" />}
                             iconBg="bg-emerald-50"
