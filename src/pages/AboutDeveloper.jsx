@@ -8,8 +8,8 @@ export default function AboutDeveloper() {
     navigate(-1);
   };
 
-  const linkedinUrl = "https://in.linkedin.com/in/aayush-sharma-5a2103233";
-  const portfolioUrl = "https://aayush-sharma.vercel.app";
+  const linkedinUrl = "https://www.linkedin.com/in/aayush-sharma-2013d";
+  const portfolioUrl = "https://itsaayushsharma.vercel.app";
 
   return (
     <>
