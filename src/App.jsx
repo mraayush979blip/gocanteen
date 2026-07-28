@@ -31,8 +31,8 @@ import AdminOrders from './pages/admin/AdminOrders';
 
 import Footer from './components/Footer';
 import PolicyPage from './components/PolicyPage';
-import ReportBugModal from './components/ReportBugModal';
-import AboutDeveloperModal from './components/AboutDeveloperModal';
+import ReportBug from './pages/ReportBug';
+import AboutDeveloper from './pages/AboutDeveloper';
 import SEOHead from './components/SEOHead';
 import SplashScreen from './components/SplashScreen';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
@@ -152,8 +152,6 @@ function MainContent() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalRole, setAuthModalRole] = useState('customer');
   const [cartOpen, setCartOpen] = useState(false);
-  const [reportBugOpen, setReportBugOpen] = useState(false);
-  const [aboutDevOpen, setAboutDevOpen] = useState(false);
 
   const handleOpenAuth = (role = 'customer') => {
     setAuthModalRole(role);
@@ -168,7 +166,7 @@ function MainContent() {
 
   const p = location.pathname;
   const activePortal = p.startsWith('/admin') ? 'admin' : p.startsWith('/staff') ? 'staff' : 'customer';
-  const isLegalPolicyRoute = ['/terms', '/privacy', '/refund', '/shipping', '/contact'].includes(p);
+  const isLegalPolicyRoute = ['/terms', '/privacy', '/refund', '/shipping', '/contact', '/report-bug', '/about-developer'].includes(p);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-['Plus_Jakarta_Sans',sans-serif] w-full max-w-full overflow-x-hidden">
@@ -201,8 +199,6 @@ function MainContent() {
       <Navbar
         onOpenAuth={() => handleOpenAuth('customer')}
         onOpenCart={() => setCartOpen(true)}
-        onOpenReportBug={() => setReportBugOpen(true)}
-        onOpenAboutDev={() => setAboutDevOpen(true)}
       />
 
       {/* Floating Coupon & Deal Ticker Banner */}
@@ -262,6 +258,9 @@ function MainContent() {
           <Route path="/refund" element={<PolicyPage initialPolicy="refund" onBackToMenu={() => navigate('/menu')} />} />
           <Route path="/shipping" element={<PolicyPage initialPolicy="shipping" onBackToMenu={() => navigate('/menu')} />} />
           <Route path="/contact" element={<PolicyPage initialPolicy="contact" onBackToMenu={() => navigate('/menu')} />} />
+          
+          <Route path="/report-bug" element={<ReportBug />} />
+          <Route path="/about-developer" element={<AboutDeveloper />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/menu" replace />} />
@@ -274,8 +273,6 @@ function MainContent() {
       <Footer
         onOpenAdminAuth={() => handleOpenAuth('admin')}
         onOpenStaffAuth={() => handleOpenAuth('staff')}
-        onOpenReportBug={() => setReportBugOpen(true)}
-        onOpenAboutDev={() => setAboutDevOpen(true)}
       />
 
       {/* Slide-over Cart Modal */}
@@ -291,18 +288,6 @@ function MainContent() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialRole={authModalRole}
-      />
-
-      {/* Report Bug / Suggestions Modal */}
-      <ReportBugModal
-        isOpen={reportBugOpen}
-        onClose={() => setReportBugOpen(false)}
-      />
-
-      {/* About Developer Modal */}
-      <AboutDeveloperModal
-        isOpen={aboutDevOpen}
-        onClose={() => setAboutDevOpen(false)}
       />
 
       <Toast />

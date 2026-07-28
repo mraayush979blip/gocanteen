@@ -4,8 +4,31 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram
+  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram, ArrowLeft, ChevronRight
 } from 'lucide-react';
+
+function NavigationItem({ icon, iconBg, title, subtitle, rightElement, onClick }) {
+  return (
+    <button 
+      onClick={onClick}
+      className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors cursor-pointer text-left group"
+    >
+      <div className="flex items-center gap-4">
+        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${iconBg}`}>
+          {icon}
+        </div>
+        <div className="flex flex-col">
+          <span className="font-extrabold text-[13px] text-slate-900 leading-tight mb-0.5">{title}</span>
+          <span className="text-[11px] text-slate-500 font-medium">{subtitle}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        {rightElement}
+        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" />
+      </div>
+    </button>
+  );
+}
 
 export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpenAboutDev }) {
   const navigate = useNavigate();
@@ -202,259 +225,228 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
         <AnimatePresence>
           {mobileMenuOpen && (
             <>
+              {/* Backdrop */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="fixed top-16 sm:top-[72px] inset-x-0 bottom-0 z-40 bg-slate-900/10 backdrop-blur-xs"
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm"
                 onClick={() => setMobileMenuOpen(false)}
               />
 
-              {/* Standard Professional 3-Bar Floating Popover Menu */}
+              {/* Full Screen Mobile / Side Drawer Desktop */}
               <motion.div
-                initial={{ opacity: 0, y: -12, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -12, scale: 0.95 }}
-                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute right-4 sm:right-6 top-[68px] sm:top-[76px] z-50 w-72 sm:w-80 rounded-2xl bg-white border border-slate-200/90 shadow-2xl p-2.5 text-slate-900 space-y-1 origin-top-right"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 250 }}
+                className="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-slate-50 flex flex-col overflow-y-auto shadow-2xl"
               >
-                
-                {/* User Profile Header if signed in */}
-                {session && (
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3 mb-1">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-sm uppercase shrink-0">
-                      {profile?.full_name?.charAt(0) || session.user.email?.charAt(0) || 'U'}
-                    </div>
-                    <div className="truncate">
-                      <div className="text-xs font-black text-slate-900 truncate">
-                        {profile?.full_name || 'Logged In User'}
-                      </div>
-                      <div className="text-[10px] text-slate-500 font-medium truncate">{session.user.email}</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Section 1: Navigation Links */}
-                <div className="px-2 pt-1 pb-0.5 text-[10px] font-black uppercase tracking-wider text-slate-400">
-                  Navigation
-                </div>
-
-                <div className="space-y-0.5">
-                  {activePortal === 'customer' && (
-                    <>
-                      <button
-                        onClick={() => { navigate('/menu'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/' || pathname === '/menu' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>🍽️</span>
-                        <span>Explore Menu</span>
-                      </button>
-
-                      <button
-                        onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/orders' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>📦</span>
-                        <span>My Orders & Live Tokens</span>
-                      </button>
-
-                      <button
-                        onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/profile' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>👤</span>
-                        <span>My Profile</span>
-                      </button>
-                    </>
-                  )}
-
-                  {activePortal === 'staff' && (
-                    <>
-                      <button
-                        onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/staff' || pathname === '/staff/kds' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>👨‍🍳</span>
-                        <span>Live Kitchen Queue (KDS)</span>
-                      </button>
-                      <button
-                        onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/staff/stock' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>📦</span>
-                        <span>Quick Stock Availability</span>
-                      </button>
-                      <button
-                        onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/staff/history' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>📋</span>
-                        <span>Order History Log</span>
-                      </button>
-                    </>
-                  )}
-
-                  {activePortal === 'admin' && (
-                    <>
-                      <button
-                        onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/admin' || pathname === '/admin/dashboard' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>📊</span>
-                        <span>Executive Dashboard</span>
-                      </button>
-                      <button
-                        onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/admin/orders' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>💵</span>
-                        <span>Sales Controls & Refunds</span>
-                      </button>
-                      <button
-                        onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/admin/inventory' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>🍱</span>
-                        <span>Menu Inventory</span>
-                      </button>
-                      <button
-                        onClick={() => { navigate('/admin/categories'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/admin/categories' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>📂</span>
-                        <span>Menu Categories</span>
-                      </button>
-                      <button
-                        onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/admin/promos' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>🎟️</span>
-                        <span>Coupon Codes</span>
-                      </button>
-                      <button
-                        onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2.5 hover:translate-x-1 transition-all ${
-                          pathname === '/admin/staff' ? 'bg-purple-50 text-purple-700' : 'text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>👥</span>
-                        <span>Manage Staff</span>
-                      </button>
-                      <button
-                        onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }}
-                        className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold text-purple-700 bg-purple-50 hover:bg-purple-100 hover:translate-x-1 flex items-center gap-2.5 transition-all"
-                      >
-                        <KeyRound className="w-4 h-4 text-purple-600" />
-                        <span>Change Admin Passcode</span>
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* Section 2: Quick Cart Action */}
-                {activePortal === 'customer' && (
-                  <div className="pt-2 border-t border-slate-100 space-y-0.5">
-                    <button
-                      onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
-                      className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:translate-x-1 flex items-center justify-between transition-all border border-emerald-200/60"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <ShoppingCart className="w-4 h-4 text-emerald-600" />
-                        <span>View Order Cart</span>
-                      </div>
-                      {cartCount > 0 ? (
-                        <span className="bg-emerald-600 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
-                          {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-emerald-600 font-bold">Empty</span>
-                      )}
-                    </button>
-                  </div>
-                )}
-
-                {/* Section 3: Support & Developer Credits — hidden for admin portal */}
-                <div className="pt-2 border-t border-slate-100 space-y-0.5">
-                  {activePortal !== 'admin' && (
-                    <a
-                      href="https://www.instagram.com/gocanteen.in/"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                {/* Dark Green Header matching aesthetic */}
+                <div className="bg-[#0f4d43] text-white pt-6 pb-16 px-6 relative overflow-hidden shrink-0">
+                  <div className="flex items-center gap-4 relative z-10">
+                    <button 
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:translate-x-1 flex items-center gap-2.5 transition-all"
+                      className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer backdrop-blur-sm"
                     >
-                      <Instagram className="w-4 h-4 text-pink-500" />
-                      <span>Instagram (@gocanteen.in)</span>
-                    </a>
-                  )}
-
-                  <button
-                    onClick={() => { onOpenReportBug?.(); setMobileMenuOpen(false); }}
-                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:translate-x-1 flex items-center gap-2.5 transition-all"
-                  >
-                    <Bug className="w-4 h-4 text-amber-600" />
-                    <span>Report Bug / Suggestions</span>
-                  </button>
-
-                  {activePortal !== 'admin' && (
-                    <button
-                      onClick={() => { onOpenAboutDev?.(); setMobileMenuOpen(false); }}
-                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 hover:translate-x-1 flex items-center gap-2.5 transition-all"
-                    >
-                      <Code className="w-4 h-4 text-indigo-600" />
-                      <span>About Developer (Aayush Sharma)</span>
+                      <ArrowLeft className="w-5 h-5" />
                     </button>
-                  )}
+                    <div>
+                      <h2 className="text-xl font-black tracking-tight leading-tight">Navigation</h2>
+                      <p className="text-emerald-100/80 text-xs font-semibold">Go Canteen</p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Section 4: Account Actions */}
-                <div className="pt-2 border-t border-slate-100">
-                  {session ? (
-                    <button
-                      onClick={() => { logout(); setMobileMenuOpen(false); }}
-                      className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-red-50 hover:bg-red-100 hover:translate-x-1 text-red-700 flex items-center justify-between transition-all"
+                {/* White Overlapping Content Card */}
+                <div className="flex-1 px-4 -mt-10 relative z-20 pb-8 flex flex-col">
+                  {/* User Profile Card */}
+                  {session && (
+                    <div 
+                      onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
+                      className="bg-white rounded-[20px] p-4 shadow-sm border border-slate-100 flex items-center justify-between mb-6 group cursor-pointer hover:border-emerald-200 transition-all"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <LogOut className="w-4 h-4 text-red-600" />
-                        <span>Sign Out</span>
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-xl uppercase shrink-0">
+                          {profile?.full_name?.charAt(0) || session.user.email?.charAt(0) || 'U'}
+                        </div>
+                        <div className="truncate">
+                          <div className="text-base font-black text-slate-900 truncate">
+                            {profile?.full_name || 'Logged In User'}
+                          </div>
+                          <div className="text-[11px] text-slate-500 font-medium truncate">{session.user.email}</div>
+                        </div>
                       </div>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => { onOpenAuth?.('customer'); setMobileMenuOpen(false); }}
-                      className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 hover:translate-x-1 text-white rounded-xl flex items-center justify-between transition-all"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <LogIn className="w-4 h-4 text-emerald-400" />
-                        <span>Sign In / Register</span>
-                      </div>
-                    </button>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-500 transition-colors" />
+                    </div>
                   )}
-                </div>
 
+                  {/* Sections Wrapper */}
+                  <div className="space-y-6">
+                    {/* ORDERING SECTION */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-1.5 px-2">
+                        <div className="w-1 h-3.5 bg-emerald-600 rounded-full"></div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                          {activePortal === 'customer' ? 'ORDERING' : activePortal === 'admin' ? 'MANAGEMENT' : 'KITCHEN'}
+                        </span>
+                      </div>
+                      
+                      <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
+                        {activePortal === 'customer' && (
+                          <>
+                            <NavigationItem 
+                              icon={<UtensilsCrossed className="w-5 h-5 text-emerald-600" />}
+                              iconBg="bg-emerald-50"
+                              title="Explore Menu"
+                              subtitle="Browse dishes & offers"
+                              onClick={() => { navigate('/menu'); setMobileMenuOpen(false); }}
+                            />
+                            <NavigationItem 
+                              icon={<span className="text-lg">📦</span>}
+                              iconBg="bg-amber-50"
+                              title="My Orders & Live Tokens"
+                              subtitle="Track your orders"
+                              onClick={() => { navigate('/orders'); setMobileMenuOpen(false); }}
+                            />
+                            <NavigationItem 
+                              icon={<UserCheck className="w-5 h-5 text-sky-600" />}
+                              iconBg="bg-sky-50"
+                              title="My Profile"
+                              subtitle="Manage your details"
+                              onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
+                            />
+                            <NavigationItem 
+                              icon={<ShoppingCart className="w-5 h-5 text-emerald-600" />}
+                              iconBg="bg-emerald-50"
+                              title="View Order Cart"
+                              subtitle="Review your cart items"
+                              rightElement={
+                                cartCount > 0 ? (
+                                  <span className="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2 py-0.5 rounded-full">
+                                    {cartCount} Items
+                                  </span>
+                                ) : (
+                                  <span className="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-2 py-0.5 rounded-full">Empty</span>
+                                )
+                              }
+                              onClick={() => { onOpenCart?.(); setMobileMenuOpen(false); }}
+                            />
+                          </>
+                        )}
+
+                        {activePortal === 'staff' && (
+                          <>
+                            <NavigationItem 
+                              icon={<span className="text-lg">👨‍🍳</span>}
+                              iconBg="bg-emerald-50"
+                              title="Live Kitchen Queue (KDS)"
+                              subtitle="Manage live orders"
+                              onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
+                            />
+                            <NavigationItem 
+                              icon={<span className="text-lg">📦</span>}
+                              iconBg="bg-emerald-50"
+                              title="Quick Stock Availability"
+                              subtitle="Update item stock"
+                              onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
+                            />
+                            <NavigationItem 
+                              icon={<span className="text-lg">📋</span>}
+                              iconBg="bg-emerald-50"
+                              title="Order History Log"
+                              subtitle="Past orders"
+                              onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
+                            />
+                          </>
+                        )}
+
+                        {activePortal === 'admin' && (
+                          <>
+                            <NavigationItem icon={<span className="text-lg">📊</span>} iconBg="bg-purple-50" title="Executive Dashboard" subtitle="Sales analytics" onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }} />
+                            <NavigationItem icon={<span className="text-lg">💵</span>} iconBg="bg-purple-50" title="Sales Controls & Refunds" subtitle="Manage payments" onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }} />
+                            <NavigationItem icon={<span className="text-lg">🍱</span>} iconBg="bg-purple-50" title="Menu Inventory" subtitle="Manage items" onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }} />
+                            <NavigationItem icon={<span className="text-lg">📂</span>} iconBg="bg-purple-50" title="Menu Categories" subtitle="Manage categories" onClick={() => { navigate('/admin/categories'); setMobileMenuOpen(false); }} />
+                            <NavigationItem icon={<span className="text-lg">🎟️</span>} iconBg="bg-purple-50" title="Combo Offers" subtitle="Manage coupons" onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }} />
+                            <NavigationItem icon={<span className="text-lg">👥</span>} iconBg="bg-purple-50" title="Manage Staff" subtitle="Accounts & Access" onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }} />
+                            <NavigationItem icon={<KeyRound className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Change Admin Passcode" subtitle="Security settings" onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }} />
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* MORE SECTION */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-1.5 px-2">
+                        <div className="w-1 h-3.5 bg-slate-600 rounded-full"></div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">MORE</span>
+                      </div>
+                      
+                      <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
+                        {activePortal !== 'admin' && (
+                          <NavigationItem 
+                            icon={<Instagram className="w-5 h-5 text-pink-500" />}
+                            iconBg="bg-pink-50"
+                            title="Instagram (@gocanteen.in)"
+                            subtitle="Follow us on Instagram"
+                            onClick={() => window.open('https://www.instagram.com/gocanteen.in/', '_blank')}
+                          />
+                        )}
+                        <NavigationItem 
+                          icon={<Bug className="w-5 h-5 text-amber-600" />}
+                          iconBg="bg-amber-50"
+                          title="Report Bug / Suggestions"
+                          subtitle="Help us improve"
+                          onClick={() => { navigate('/report-bug'); setMobileMenuOpen(false); }}
+                        />
+                        {activePortal !== 'admin' && (
+                          <NavigationItem 
+                            icon={<Code className="w-5 h-5 text-indigo-600" />}
+                            iconBg="bg-indigo-50"
+                            title="About Developer (Aayush Sharma)"
+                            subtitle="Know more about the developer"
+                            onClick={() => { navigate('/about-developer'); setMobileMenuOpen(false); }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Action */}
+                  <div className="mt-8 mb-4">
+                    {session ? (
+                      <button
+                        onClick={() => { logout(); setMobileMenuOpen(false); }}
+                        className="w-full bg-red-50 hover:bg-red-100 text-red-600 rounded-[20px] p-4 flex items-center justify-between transition-colors cursor-pointer group border border-red-100"
+                      >
+                        <div className="flex items-center gap-3">
+                          <LogOut className="w-5 h-5" />
+                          <div className="flex flex-col text-left">
+                            <span className="font-extrabold text-[13px] leading-tight mb-0.5">Sign Out</span>
+                            <span className="text-[11px] text-red-400 font-medium">Log out from your account</span>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-red-300 group-hover:text-red-500 transition-colors" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => { onOpenAuth?.('customer'); setMobileMenuOpen(false); }}
+                        className="w-full bg-[#0f4d43] hover:bg-[#0c4038] text-white rounded-[20px] p-4 flex items-center justify-between transition-colors cursor-pointer group shadow-md"
+                      >
+                        <div className="flex items-center gap-3">
+                          <LogIn className="w-5 h-5" />
+                          <div className="flex flex-col text-left">
+                            <span className="font-extrabold text-[13px] leading-tight mb-0.5">Sign In</span>
+                            <span className="text-[11px] text-emerald-100/80 font-medium">Access your account</span>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-emerald-300 group-hover:text-white transition-colors" />
+                      </button>
+                    )}
+                  </div>
+
+                </div>
               </motion.div>
             </>
           )}

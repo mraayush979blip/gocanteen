@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, Globe, Linkedin } from 'lucide-react';
+import { ArrowLeft, Globe, Linkedin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function FlipBox({ value }) {
   return (
@@ -9,20 +10,17 @@ function FlipBox({ value }) {
   );
 }
 
-export default function AboutDeveloperModal({ isOpen, onClose }) {
+export default function AboutDeveloper() {
+  const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
-    if (!isOpen) return;
-
     const interval = setInterval(() => {
       setTime(new Date());
     }, 30);
 
     return () => clearInterval(interval);
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+  }, []);
 
   const hours = time.getHours().toString().padStart(2, '0');
   const minutes = time.getMinutes().toString().padStart(2, '0');
@@ -33,8 +31,8 @@ export default function AboutDeveloperModal({ isOpen, onClose }) {
   const portfolioUrl = "https://itsaayushsharma.vercel.app";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in text-slate-900">
-      <div className="relative max-w-sm w-full mx-auto animate-scale-up">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+      <div className="relative max-w-sm w-full mx-auto">
         
         {/* Main Developer Card matching user reference image */}
         <div className="relative bg-slate-950 rounded-[32px] overflow-hidden shadow-2xl border border-slate-800 text-white flex flex-col items-center">
@@ -47,13 +45,13 @@ export default function AboutDeveloperModal({ isOpen, onClose }) {
             <FlipBox value={ms} />
           </div>
 
-          {/* Top Right Circular Close Button */}
+          {/* Top Right Circular Go Back Button */}
           <button
-            onClick={onClose}
+            onClick={() => navigate(-1)}
             className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 backdrop-blur-md border border-slate-700/60 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95"
-            title="Close"
+            title="Go Back"
           >
-            <X className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
 
           {/* Full-bleed Portrait Developer Image */}
