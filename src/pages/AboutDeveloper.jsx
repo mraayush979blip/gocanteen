@@ -9,7 +9,7 @@ export default function AboutDeveloper() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] font-['Inter',sans-serif] text-white overflow-y-auto overflow-x-hidden relative">
+    <div className="fixed inset-0 z-50 bg-[#0B0F17] font-['Inter',sans-serif] text-white overflow-y-auto overflow-x-hidden">
       {/* Fixed Hero Image Background */}
       <div className="fixed top-0 inset-x-0 h-[60vh] z-0">
         <img 
@@ -20,7 +20,7 @@ export default function AboutDeveloper() {
         <img 
           src="/aayush-profile.jpg" 
           alt="Aayush Sharma" 
-          className="w-full h-full object-cover object-center hidden sm:block" 
+          className="w-full h-full object-cover object-top hidden sm:block" 
         />
         {/* Smooth black gradient from bottom only */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/60 to-transparent"></div>
