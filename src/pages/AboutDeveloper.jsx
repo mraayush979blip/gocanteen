@@ -34,14 +34,14 @@ export default function AboutDeveloper() {
   const portfolioUrl = "https://itsaayushsharma.vercel.app";
 
   return (
-    <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-between font-['Plus_Jakarta_Sans',sans-serif] overflow-hidden">
+    <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-between font-['Plus_Jakarta_Sans',sans-serif] overflow-hidden touch-none overscroll-none">
       
       {/* Immersive Background Glows & Image */}
       <div className="absolute inset-0 z-0 bg-slate-950">
         <img
           src="/aayush-profile.jpg"
           alt="Aayush Sharma"
-          className="w-full h-full object-cover object-top filter brightness-90 animate-[pulse_10s_ease-in-out_infinite_alternate]"
+          className="w-full h-full object-cover object-center filter brightness-90 animate-[pulse_10s_ease-in-out_infinite_alternate]"
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop';
@@ -80,19 +80,9 @@ export default function AboutDeveloper() {
         
         {/* Title Block */}
         <div className="space-y-2">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Code2 className="w-5 h-5 text-indigo-400" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-300 bg-indigo-900/40 px-4 py-1.5 rounded-full border border-indigo-500/30 backdrop-blur-md">
-              Engineered With Passion
-            </span>
-            <Sparkles className="w-5 h-5 text-fuchsia-400" />
-          </div>
           <h2 className="text-5xl sm:text-6xl font-black tracking-tight text-white drop-shadow-lg">
             Aayush Sharma
           </h2>
-          <p className="text-sm font-bold tracking-[0.2em] text-slate-300 uppercase pt-2">
-            Full Stack Architect
-          </p>
         </div>
 
         {/* Action Buttons */}
