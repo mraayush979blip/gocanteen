@@ -8,6 +8,7 @@ export const sendPushNotification = async (userId, orderId, title, body, status 
   }
 
   try {
+    console.log(`📡 [FCM] Dispatched push request for user: ${userId}`, { orderId, title, body, status });
     const response = await fetch('/api/send-notification', {
       method: 'POST',
       headers: {
@@ -17,9 +18,10 @@ export const sendPushNotification = async (userId, orderId, title, body, status 
     });
 
     const result = await response.json();
+    console.log(`🛰️ [FCM] Response for user ${userId}:`, result);
     return result;
   } catch (err) {
-    console.error('Failed to trigger push notification:', err);
+    console.error(`❌ [FCM] Failed for user ${userId}:`, err);
     return { success: false, error: err.message };
   }
 };
