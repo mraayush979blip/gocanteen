@@ -672,7 +672,10 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
           }
         },
         modal: {
-          backdropclose: true,
+          backdropclose: false,
+          escape: false,
+          handleback: true,
+          confirm_close: true,
           ondismiss: function () {
             setPlacingOrder(false);
             showToast('Payment window closed. Order was not placed.');
@@ -707,7 +710,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   const isProfileSaved = Boolean(profile?.full_name && profile?.phone);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs animate-fade-in text-slate-900" onClick={handleSafeClose}>
+    <div className={`fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300 text-slate-900 ${placingOrder ? 'opacity-0 pointer-events-none' : 'opacity-100 animate-fade-in'}`} onClick={handleSafeClose}>
       <div className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
         
         {/* Cart Header */}
