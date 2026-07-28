@@ -125,18 +125,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     }
   }, [isOpen, session, profile]);
 
-  // Window anti-exit listener during payment execution (Must be declared before any conditional return)
-  useEffect(() => {
-    if (placingOrder) {
-      const handleBeforeUnload = (e) => {
-        e.preventDefault();
-        e.returnValue = 'Payment is processing. Closing this page will interrupt your transaction!';
-        return e.returnValue;
-      };
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }
-  }, [placingOrder]);
+  // Window anti-exit listener has been removed because it intercepts and blocks UPI deep links (upi://) from opening native apps on mobile devices.
 
   if (!isOpen) return null;
 
