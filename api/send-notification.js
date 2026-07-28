@@ -38,24 +38,30 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields: userId, title, body' });
   }
 
+  // Gracefully handle missing server environment credentials (setup stage)
+  if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+    console.warn('FCM credentials are not configured in Vercel environment variables.');
+    return res.status(200).json({ success: false, reason: 'FCM environment variables not configured yet' });
+  }
+
   try {
-    // 1. Fetch user profile to get fcm_token
+    // 1. Fetch user profile to get fcm_token (using maybeSingle to handle empty records)
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('fcm_token')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (profileError) {
-      console.error('Error fetching user profile for FCM:', profileError);
-      return res.status(500).json({ error: 'Failed to fetch user profile' });
+      console.warn('Profile fetch warning (check if SQL migration was run):', profileError.message);
+      return res.status(200).json({ success: false, reason: 'FCM token fetch failed', error: profileError.message });
     }
 
     const fcmToken = profile?.fcm_token;
 
     if (!fcmToken) {
       console.log(`User ${userId} does not have an active FCM token. Skipping notification.`);
-      return res.status(200).json({ success: false, reason: 'No FCM token' });
+      return res.status(200).json({ success: false, reason: 'No FCM token registered' });
     }
 
     // 2. Prepare message
@@ -67,7 +73,7 @@ export default async function handler(req, res) {
       data: {
         orderId: orderId || '',
         status: status || '',
-        click_action: 'FLUTTER_NOTIFICATION_CLICK', // standard fallback for web/app
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
       },
       token: fcmToken,
       webpush: {
@@ -84,6 +90,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('send-notification handler error:', err);
-    return res.status(500).json({ error: err.message || 'Internal Server Error' });
+    return res.status(200).json({ success: false, reason: 'Internal exception', error: err.message });
   }
 }
