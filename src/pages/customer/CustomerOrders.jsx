@@ -68,9 +68,9 @@ export default function CustomerOrders({ onOpenAuth }) {
       if (error) throw error;
       const activeOrders = data || [];
       
-      // Auto-cancel check for unpaid cash orders past 6 PM
+      // Auto-cancel check for unpaid cash orders past 11:59 PM
       const now = new Date();
-      if (now.getHours() >= 18) {
+      if (now.getHours() >= 23 && now.getMinutes() >= 59) {
         const staleOrders = activeOrders.filter(o => o.payment_method === 'cash' && o.payment_status === 'unpaid' && !['cancelled', 'completed', 'delivered'].includes(o.status));
         if (staleOrders.length > 0) {
           const cancelReason = "System cancelled automatically: Customer had not done the payment till the closing of canteen";

@@ -763,8 +763,17 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   const isProfileSaved = Boolean(profile?.full_name && profile?.phone);
 
   return (
-    <div className={`fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300 text-slate-900 ${placingOrder ? 'opacity-0 pointer-events-none' : 'opacity-100 animate-fade-in'}`} onClick={handleSafeClose}>
+    <div className={`fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300 text-slate-900 ${placingOrder ? 'pointer-events-none' : 'opacity-100 animate-fade-in'}`} onClick={handleSafeClose}>
       <div className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+        
+        {/* Loading Overlay inside Cart */}
+        {placingOrder && (
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-xs z-50 flex flex-col items-center justify-center space-y-3 animate-fade-in pointer-events-auto">
+            <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
+            <p className="text-sm font-black text-slate-900">Processing Your Order...</p>
+            <p className="text-xs text-slate-500 font-semibold">Please do not close or refresh this page.</p>
+          </div>
+        )}
         
         {/* Cart Header */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
