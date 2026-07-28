@@ -26,10 +26,21 @@ export default function AboutDeveloper() {
         
         {/* Immersive Background Glows & Image */}
         <div className="absolute inset-0 z-0 bg-black">
+          {/* Mobile Image (hidden on sm and up) */}
+          <img
+            src="/photo.jpg"
+            alt="Aayush Sharma"
+            className="w-full h-full object-cover object-center block sm:hidden"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop';
+            }}
+          />
+          {/* Desktop/Laptop Image (hidden on mobile, visible on sm and up) */}
           <img
             src="/aayush-profile.jpg"
             alt="Aayush Sharma"
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-center hidden sm:block"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop';
