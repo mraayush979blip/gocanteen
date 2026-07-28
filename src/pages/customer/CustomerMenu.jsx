@@ -1035,11 +1035,11 @@ export default function CustomerMenu({ onOpenCart }) {
       <AnimatePresence>
         {totalCartCount > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 420, damping: 28 }}
-            className="fixed bottom-4 left-3 right-3 z-40 sm:hidden"
+            initial={{ opacity: 0, y: 50, scaleY: 0.5, transformOrigin: "bottom center" }}
+            animate={{ opacity: 1, y: 0, scaleY: 1 }}
+            exit={{ opacity: 0, y: 50, scaleY: 0.5 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            className="fixed bottom-4 left-3 right-3 z-40 sm:hidden origin-bottom"
           >
             <div
               onClick={onOpenCart}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import FloatingCouponBanner from './components/FloatingCouponBanner';
@@ -209,8 +210,17 @@ function MainContent() {
 
       {/* Main Container with React Router Routes */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <Routes>
-          {/* Default Redirect from Plain Root / */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="w-full h-full"
+          >
+            <Routes location={location}>
+              {/* Default Redirect from Plain Root / */}
           <Route path="/" element={<Navigate to="/menu" replace />} />
 
           {/* Customer Routes protected strictly for customers */}
@@ -256,6 +266,8 @@ function MainContent() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/menu" replace />} />
         </Routes>
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Footer */}
