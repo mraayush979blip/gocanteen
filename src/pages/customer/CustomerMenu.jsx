@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { MenuGridSkeleton } from '../../components/SkeletonLoader';
@@ -18,39 +19,32 @@ export default function CustomerMenu({ onOpenCart }) {
   const urlQuery = searchParams.get('q') || '';
   const urlCat = searchParams.get('category') || 'all';
 
-  const [categories, setCategories] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('cg-cache-categories') || '[]');
-    } catch (e) {
-      return [];
-    }
+  const queryClient = useQueryClient();
+
+  const { data: menuData, isLoading: loading } = useQuery({
+    queryKey: ['menu'],
+    queryFn: async () => {
+      const [catRes, invRes, offRes] = await Promise.all([
+        supabase.from('categories').select('*').eq('is_active', true).order('sort_order'),
+        supabase.from('inventory').select('*, categories(name)').eq('is_available', true).order('created_at'),
+        supabase.from('offers').select('*').eq('is_active', true).order('created_at', { ascending: false })
+      ]);
+      return {
+        categories: catRes.data || [],
+        inventory: invRes.data || [],
+        offers: offRes.data || []
+      };
+    },
   });
-  const [inventory, setInventory] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('cg-cache-inventory') || '[]');
-    } catch (e) {
-      return [];
-    }
-  });
-  const [offers, setOffers] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('cg-cache-offers') || '[]');
-    } catch (e) {
-      return [];
-    }
-  });
+
+  const categories = menuData?.categories || [];
+  const inventory = menuData?.inventory || [];
+  const offers = menuData?.offers || [];
+
   const [activeCategory, setActiveCategory] = useState(urlCat);
   const [searchQuery, setSearchQuery] = useState(urlQuery);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'price-low' | 'price-high'
-  const [loading, setLoading] = useState(() => {
-    try {
-      const cachedInv = localStorage.getItem('cg-cache-inventory');
-      return !cachedInv || JSON.parse(cachedInv).length === 0;
-    } catch (e) {
-      return true;
-    }
-  });
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -207,43 +201,15 @@ export default function CustomerMenu({ onOpenCart }) {
   };
 
   useEffect(() => {
-    fetchData();
-
     const channel = supabase
       .channel('customer-menu-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'offers' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => queryClient.invalidateQueries(['menu']))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => queryClient.invalidateQueries(['menu']))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'offers' }, () => queryClient.invalidateQueries(['menu']))
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const [catRes, invRes, offRes] = await Promise.all([
-        supabase.from('categories').select('*').eq('is_active', true).order('sort_order'),
-        supabase.from('inventory').select('*, categories(name)').eq('is_available', true).order('created_at'),
-        supabase.from('offers').select('*').eq('is_active', true).order('created_at', { ascending: false })
-      ]);
-
-      const catData = catRes.data || [];
-      const invData = invRes.data || [];
-      const offData = offRes.data || [];
-
-      setCategories(catData);
-      setInventory(invData);
-      setOffers(offData);
-
-      localStorage.setItem('cg-cache-categories', JSON.stringify(catData));
-      localStorage.setItem('cg-cache-inventory', JSON.stringify(invData));
-      localStorage.setItem('cg-cache-offers', JSON.stringify(offData));
-    } catch (err) {
-      console.error('Error fetching menu:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [queryClient]);
 
   useEffect(() => {
     const fetchRecentOrders = async () => {
@@ -967,30 +933,31 @@ export default function CustomerMenu({ onOpenCart }) {
                       );
                     }
                     return (
-                      <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.98 }} className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 shadow-2xs group relative overflow-hidden">
-                        <div className="space-y-2">
-                          <div className="h-28 sm:h-36 rounded-xl bg-gradient-to-br from-emerald-500/5 via-slate-100 to-amber-500/5 flex items-center justify-center relative overflow-hidden group-hover:from-emerald-500/10 group-hover:to-teal-500/10 transition-colors">
-                            <span className="text-4xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">{item.emoji || '🍽️'}</span>
-                            <div className={`absolute top-2.5 left-2.5 w-4 h-4 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-xs ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
-                            {item.tag && <span className="absolute top-2.5 right-2.5 text-[9px] uppercase font-black text-slate-800 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-md border border-slate-200/80 shadow-2xs">{item.tag}</span>}
+                      <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-white border border-slate-200/90 rounded-2xl p-4 flex flex-col justify-between hover:shadow-2xl hover:border-emerald-400 transition-all duration-300 shadow-sm group relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-emerald-50/0 via-transparent to-teal-50/0 group-hover:from-emerald-50/50 group-hover:to-teal-50/50 transition-colors pointer-events-none" />
+                        <div className="space-y-3 z-10">
+                          <div className="h-32 sm:h-40 rounded-xl bg-gradient-to-br from-emerald-100/40 via-slate-50 to-amber-100/40 flex items-center justify-center relative overflow-hidden group-hover:from-emerald-200/40 group-hover:to-teal-200/40 transition-colors shadow-inner">
+                            <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-md">{item.emoji || '🍽️'}</motion.span>
+                            <div className={`absolute top-3 left-3 w-5 h-5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                            {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-800 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
                           </div>
-                          <div className="pt-1">
-                            <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug line-clamp-1 group-hover:text-emerald-700 transition-colors">{item.name}</h3>
-                            {item.categories?.name && <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">{item.categories.name}</span>}
+                          <div className="pt-2">
+                            <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug line-clamp-1 group-hover:text-emerald-700 transition-colors">{item.name}</h3>
+                            {item.categories?.name && <span className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest block mt-1">{item.categories.name}</span>}
                           </div>
-                          {item.description && <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>}
+                          {item.description && <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>}
                         </div>
-                        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                          <span className="text-sm sm:text-base font-black text-slate-900">₹{item.price}</span>
+                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2 z-10">
+                          <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight">₹{item.price}</span>
                           <motion.div layout className="flex items-center">
                             {qty > 0 ? (
-                              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-2.5 py-1.5 font-bold text-xs shadow-md">
-                                <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-3.5 h-3.5" /></button>
-                                <span className="text-xs font-black px-1">{qty}</span>
-                                <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-3.5 h-3.5" /></button>
+                              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-md">
+                                <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-4 h-4" /></button>
+                                <span className="text-sm font-black px-1.5">{qty}</span>
+                                <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-4 h-4" /></button>
                               </motion.div>
                             ) : (
-                              <motion.button initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0 cursor-pointer active:scale-95">+ ADD</motion.button>
+                              <motion.button initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs sm:text-sm transition-all shadow-sm shrink-0 cursor-pointer active:scale-95">+ ADD</motion.button>
                             )}
                           </motion.div>
                         </div>

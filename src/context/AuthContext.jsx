@@ -6,7 +6,13 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cg-user-profile')) || null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [connectionError, setConnectionError] = useState(false);
   
@@ -80,9 +86,11 @@ export const AuthProvider = ({ children }) => {
           .single();
         const p = newProfile || { id: userId, email: userEmail, role: 'customer' };
         setProfile(p);
+        localStorage.setItem('cg-user-profile', JSON.stringify(p));
         return p;
       } else if (data) {
         setProfile(data);
+        localStorage.setItem('cg-user-profile', JSON.stringify(data));
         return data;
       }
     } catch (err) {
@@ -90,6 +98,7 @@ export const AuthProvider = ({ children }) => {
     }
     const fallback = { id: userId, email: userEmail, role: 'customer' };
     setProfile(fallback);
+    localStorage.setItem('cg-user-profile', JSON.stringify(fallback));
     return fallback;
   };
 
@@ -112,6 +121,7 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         setProfile(null);
+        localStorage.removeItem('cg-user-profile');
         setActivePortal('customer');
       }
       
@@ -202,6 +212,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem('cg-admin-unlocked');
+    localStorage.removeItem('cg-user-profile');
     setSession(null);
     setProfile(null);
     clearCart();
