@@ -48,7 +48,6 @@ export default function CustomerMenu({ onOpenCart }) {
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [activeSectionId, setActiveSectionId] = useState(null);
   const [menuModalOpen, setMenuModalOpen] = useState(false);
   
   // New features state
@@ -82,26 +81,6 @@ export default function CustomerMenu({ onOpenCart }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Scrollspy — auto-highlight the category pill matching the visible section
-  useEffect(() => {
-    if (activeCategory !== 'all' || searchQuery.trim()) {
-      setActiveSectionId(null);
-      return;
-    }
-    const obs = new IntersectionObserver(
-      entries => {
-        entries.forEach(e => {
-          if (e.isIntersecting) setActiveSectionId(e.target.dataset.catId);
-        });
-      },
-      { rootMargin: '-10% 0px -60% 0px', threshold: 0 }
-    );
-    const timer = setTimeout(() => {
-      Object.values(sectionRefs.current).filter(Boolean).forEach(el => obs.observe(el));
-    }, 80);
-    return () => { clearTimeout(timer); obs.disconnect(); };
-  }, [activeCategory, searchQuery, categories, inventory]);
-
   const scrollToTop = () => {
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -134,7 +113,6 @@ export default function CustomerMenu({ onOpenCart }) {
 
     if (catId === 'all') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      setActiveSectionId(null);
     }
 
     setActiveCategory(catId);
@@ -486,14 +464,14 @@ export default function CustomerMenu({ onOpenCart }) {
             onClick={() => handleCategoryChange('all')}
             aria-selected={activeCategory === 'all'}
             className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
-              activeCategory === 'all' && !activeSectionId
+              activeCategory === 'all'
                 ? 'bg-slate-900 text-white border-transparent shadow-md'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
             }`}
           >
             <span className="relative z-10">🍽️ All Items</span>
             <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${
-              activeCategory === 'all' && !activeSectionId ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
+              activeCategory === 'all' ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
             }`}>
               {inventory.length}
             </span>
@@ -504,16 +482,16 @@ export default function CustomerMenu({ onOpenCart }) {
             <button
               type="button"
               onClick={() => handleCategoryChange('offers')}
-              aria-selected={activeCategory === 'offers' || activeSectionId === 'offers'}
+              aria-selected={activeCategory === 'offers'}
               className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
-                activeCategory === 'offers' || activeSectionId === 'offers'
+                activeCategory === 'offers'
                   ? 'bg-amber-500 text-slate-950 border-transparent shadow-md'
                   : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-amber-200'
               }`}
             >
               <span className="relative z-10 animate-pulse">🔥 Special Offers</span>
               <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${
-                activeCategory === 'offers' || activeSectionId === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-100 text-amber-900'
+                activeCategory === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-100 text-amber-900'
               }`}>
                 {offers.length}
               </span>
@@ -523,7 +501,7 @@ export default function CustomerMenu({ onOpenCart }) {
           {/* Dynamic Category pills — scroll anchors in grouped mode, filters otherwise */}
           {categories.map(cat => {
             const count = inventory.filter(i => i.category_id === cat.id).length;
-            const isActive = isGroupedMode ? activeSectionId === cat.id : activeCategory === cat.id;
+            const isActive = activeCategory === cat.id;
             return (
               <button
                 key={cat.id}
