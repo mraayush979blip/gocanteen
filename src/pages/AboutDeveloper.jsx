@@ -8,10 +8,10 @@ export default function AboutDeveloper() {
   const portfolioUrl = "https://itsaayushsharma.vercel.app";
 
   return (
-    <div className="fixed inset-0 bg-slate-950 flex flex-col font-['Plus_Jakarta_Sans',sans-serif] overflow-hidden touch-none overscroll-none">
+    <div className="fixed inset-0 bg-black flex flex-col font-['Plus_Jakarta_Sans',sans-serif] overflow-hidden touch-none overscroll-none">
       
       {/* Solid Black Header with Back Button */}
-      <div className="relative z-30 h-16 bg-slate-950 flex items-center px-4 sm:px-6 shadow-md border-b border-slate-900">
+      <div className="relative z-30 h-16 bg-black flex items-center px-4 sm:px-6 shadow-md border-b border-black">
         <button
           onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
@@ -25,19 +25,19 @@ export default function AboutDeveloper() {
       <div className="relative flex-1 w-full flex flex-col items-center justify-between">
         
         {/* Immersive Background Glows & Image */}
-        <div className="absolute inset-0 z-0 bg-slate-950">
+        <div className="absolute inset-0 z-0 bg-black">
           <img
             src="/aayush-profile.jpg"
             alt="Aayush Sharma"
-            className="w-full h-full object-cover object-center filter brightness-90 animate-[pulse_10s_ease-in-out_infinite_alternate]"
+            className="w-full h-full object-cover object-center"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop';
             }}
           />
-          {/* Neutral Gradients to blend and make text readable */}
-          <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-slate-950 via-slate-950/60 to-transparent pointer-events-none"></div>
-          <div className="absolute bottom-0 inset-x-0 h-[32rem] bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none"></div>
+          {/* Neutral Gradients to blend and make text readable (Pure black, absolutely no blue tint) */}
+          <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-black via-black/60 to-transparent pointer-events-none"></div>
+          <div className="absolute bottom-0 inset-x-0 h-[32rem] bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"></div>
         </div>
 
         {/* Spacer for top */}
