@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
   const [connectionError, setConnectionError] = useState(false);
-  
+
   // View mode for role switcher: 'customer' | 'staff' | 'admin'
   const [activePortal, setActivePortalState] = useState(() => {
     return localStorage.getItem('cg-active-portal') || 'customer';
@@ -56,14 +56,14 @@ export const AuthProvider = ({ children }) => {
   // Global Toast
   const [toast, setToast] = useState({ show: false, message: '', isError: false });
   const toastTimeoutRef = useRef(null);
-  
+
   const showToast = (message, isError = false, duration = 3500) => {
     if (toastTimeoutRef.current) {
       clearTimeout(toastTimeoutRef.current);
     }
-    
+
     setToast({ show: true, message, isError });
-    
+
     toastTimeoutRef.current = setTimeout(() => {
       setToast(prev => ({ ...prev, show: false }));
       toastTimeoutRef.current = null;
@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }) => {
     const handleSessionChange = async (newSession) => {
       if (!mounted) return;
       setSession(newSession);
-      
+
       if (newSession?.user) {
         try {
           const prof = await fetchProfile(newSession.user.id, newSession.user.email);
@@ -124,7 +124,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('cg-user-profile');
         setActivePortal('customer');
       }
-      
+
       if (mounted) {
         setLoading(false);
       }
@@ -159,7 +159,7 @@ export const AuthProvider = ({ children }) => {
     if (window.opener && window.opener !== window && session?.user) {
       try {
         window.close();
-      } catch (e) {}
+      } catch (e) { }
     }
   }, [session]);
 
@@ -167,7 +167,7 @@ export const AuthProvider = ({ children }) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       try {
         navigator.vibrate(ms);
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 

@@ -706,10 +706,10 @@ export default function CustomerMenu({ onOpenCart }) {
                     .map((item, idx) => {
                     const qty = getItemCartQty(item.id);
                     return (
-                      <div key={`popular-${item.id}`} className="snap-start shrink-0 w-64 bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col shadow-xs group">
-                        <div className="h-28 rounded-xl bg-gradient-to-br from-amber-500/10 via-slate-50 to-orange-500/10 flex items-center justify-center relative mb-3 group-hover:bg-amber-100/30 transition-colors">
+                      <div key={`popular-${item.id}`} className="snap-start shrink-0 w-64 bg-white border border-slate-200 rounded-2xl p-3 flex flex-col shadow-xs group hover:shadow-md transition-all">
+                        <div className="h-28 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center relative mb-3 group-hover:bg-slate-100/80 transition-colors">
                           <span className="text-4xl group-hover:scale-110 transition-transform">{item.emoji || '🍽️'}</span>
-                          <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-amber-900 bg-amber-200 px-2 py-0.5 rounded shadow-2xs">Bestseller</span>
+                          <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-slate-800 bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm">Bestseller</span>
                         </div>
                         <h3 className="text-sm font-black text-slate-900 line-clamp-1">{item.name}</h3>
                         <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">{item.description}</p>
@@ -834,12 +834,12 @@ export default function CustomerMenu({ onOpenCart }) {
                       return (
                         <div
                           key={item.id}
-                          className="shrink-0 w-64 snap-start bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:shadow-md transition-all shadow-2xs group relative"
+                          className="shrink-0 w-64 snap-start bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-xs group relative"
                         >
                           <div className="space-y-2">
-                            <div className="h-28 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center relative overflow-hidden group-hover:bg-emerald-50/50 transition-colors">
+                            <div className="h-28 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:bg-slate-100/80 transition-colors">
                               <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{item.emoji || '🍽️'}</span>
-                              <div className={`absolute top-2 left-2 w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-xs ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                              <div className={`absolute top-2 left-2 w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
                               <div className="absolute top-2 right-2">{renderTag(item.tag)}</div>
                             </div>
                             <div>
@@ -933,13 +933,12 @@ export default function CustomerMenu({ onOpenCart }) {
                       );
                     }
                     return (
-                      <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-white border border-slate-200/90 rounded-2xl p-4 flex flex-col justify-between hover:shadow-2xl hover:border-emerald-400 transition-all duration-300 shadow-sm group relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-emerald-50/0 via-transparent to-teal-50/0 group-hover:from-emerald-50/50 group-hover:to-teal-50/50 transition-colors pointer-events-none" />
+                      <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl hover:border-slate-300 transition-all duration-300 shadow-sm group relative overflow-hidden">
                         <div className="space-y-3 z-10">
-                          <div className="h-32 sm:h-40 rounded-xl bg-gradient-to-br from-emerald-100/40 via-slate-50 to-amber-100/40 flex items-center justify-center relative overflow-hidden group-hover:from-emerald-200/40 group-hover:to-teal-200/40 transition-colors shadow-inner">
-                            <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-md">{item.emoji || '🍽️'}</motion.span>
+                          <div className="h-32 sm:h-40 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:bg-slate-100/80 transition-colors shadow-inner">
+                            <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</motion.span>
                             <div className={`absolute top-3 left-3 w-5 h-5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
-                            {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-800 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
+                            {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-800 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-sm">{item.tag}</span>}
                           </div>
                           <div className="pt-2">
                             <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug line-clamp-1 group-hover:text-emerald-700 transition-colors">{item.name}</h3>

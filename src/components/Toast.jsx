@@ -7,9 +7,9 @@ export default function Toast() {
   if (!toast.show) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-bounce-short">
+    <div className="fixed bottom-28 sm:bottom-6 right-4 sm:right-6 left-4 sm:left-auto z-[999] animate-bounce-short pointer-events-none flex justify-center sm:justify-end">
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border text-xs font-bold ${
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border text-xs font-bold pointer-events-auto ${
           toast.isError
             ? 'bg-red-50 text-red-700 border-red-200'
             : 'bg-emerald-900 text-white border-emerald-800'
