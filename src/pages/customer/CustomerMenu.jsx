@@ -1060,9 +1060,9 @@ export default function CustomerMenu({ onOpenCart }) {
                 onClick={(e) => e.stopPropagation()}
                 initial={{ 
                   y: "100%", 
-                  scaleX: 0.35, 
-                  scaleY: 0.15, 
-                  borderRadius: "100px",
+                  scaleX: 0.3, 
+                  scaleY: 0.1, 
+                  borderRadius: "80px",
                   opacity: 0 
                 }}
                 animate={{ 
@@ -1074,15 +1074,16 @@ export default function CustomerMenu({ onOpenCart }) {
                 }}
                 exit={{ 
                   y: "100%", 
-                  scaleX: 0.2, 
-                  scaleY: 0.05, 
-                  borderRadius: "100px",
+                  scaleX: 0.25, 
+                  scaleY: 0.08, 
+                  borderRadius: "80px",
                   opacity: 0 
                 }}
                 transition={{ 
                   type: "spring",
-                  damping: 24,
-                  stiffness: 240
+                  damping: 26,
+                  stiffness: 220,
+                  mass: 0.85
                 }}
                 className="bg-white w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative origin-bottom"
               >
@@ -1116,9 +1117,11 @@ export default function CustomerMenu({ onOpenCart }) {
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-3">
                       <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{item.name}</h2>
-                      <div className={`w-6 h-6 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 mt-1 ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}>
-                        <div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} />
-                      </div>
+                      {typeof item.is_veg === 'boolean' && (
+                        <div className={`w-6 h-6 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 mt-1 ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}>
+                          <div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} />
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {cat && (
@@ -1126,7 +1129,7 @@ export default function CustomerMenu({ onOpenCart }) {
                           {cat.emoji || '🍽️'} {cat.name}
                         </span>
                       )}
-                      {!item.is_veg && (
+                      {item.is_veg === false && (
                         <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-lg border uppercase tracking-wider text-red-800 bg-red-50 border-red-200">
                           🍗 Non-Veg
                         </span>
