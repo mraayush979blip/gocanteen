@@ -12,12 +12,15 @@ export default function AdminOffers() {
   const [editingOffer, setEditingOffer] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  const [emoji1, setEmoji1] = useState('🍔');
+  const [emoji2, setEmoji2] = useState('🥤');
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     original_price: '',
-    emoji: '🔥',
+    emoji: '🍔 + 🥤',
     tag: 'SPECIAL',
     items_included: '',
     is_active: true
@@ -92,12 +95,14 @@ export default function AdminOffers() {
 
   const handleOpenCreate = () => {
     setEditingOffer(null);
+    setEmoji1('🍔');
+    setEmoji2('🥤');
     setFormData({
       name: '',
       description: '',
       price: '',
       original_price: '',
-      emoji: '🔥',
+      emoji: '🍔 + 🥤',
       tag: 'SPECIAL',
       items_included: '',
       is_active: true
@@ -107,12 +112,15 @@ export default function AdminOffers() {
 
   const handleOpenEdit = (offer) => {
     setEditingOffer(offer);
+    const parts = (offer.emoji || '').split('+').map(p => p.trim());
+    setEmoji1(parts[0] || '🍔');
+    setEmoji2(parts[1] || '🥤');
     setFormData({
       name: offer.name || '',
       description: offer.description || '',
       price: offer.price || '',
       original_price: offer.original_price || '',
-      emoji: offer.emoji || '🔥',
+      emoji: offer.emoji || '🍔 + 🥤',
       tag: offer.tag || '',
       items_included: offer.items_included || '',
       is_active: offer.is_active !== false
@@ -133,7 +141,7 @@ export default function AdminOffers() {
       description: formData.description.trim(),
       price: Number(formData.price),
       original_price: formData.original_price ? Number(formData.original_price) : null,
-      emoji: formData.emoji || '🔥',
+      emoji: `${emoji1.trim()} + ${emoji2.trim()}`,
       tag: formData.tag.trim(),
       items_included: formData.items_included.trim(),
       is_active: formData.is_active
@@ -207,7 +215,22 @@ export default function AdminOffers() {
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-3xl">{offer.emoji}</span>
+                    <div className="flex items-center gap-1 font-bold text-slate-500 shrink-0">
+                      {offer.emoji?.includes('+') ? (
+                        (() => {
+                          const parts = offer.emoji.split('+').map(p => p.trim());
+                          return (
+                            <>
+                              <span className="text-2xl">{parts[0]}</span>
+                              <span className="text-[11px] text-slate-400 font-extrabold">+</span>
+                              <span className="text-2xl">{parts[1]}</span>
+                            </>
+                          );
+                        })()
+                      ) : (
+                        <span className="text-2xl">{offer.emoji}</span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
                         {offer.tag || 'DEAL'}
@@ -323,16 +346,28 @@ export default function AdminOffers() {
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="grid grid-cols-4 gap-2">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Emoji</label>
+                  <label className="block text-[10px] font-black text-slate-700 mb-1">Emoji 1</label>
                   <input
                     type="text"
                     required
-                    value={formData.emoji}
-                    onChange={(e) => setFormData({ ...formData, emoji: e.target.value })}
-                    className="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-xl text-slate-900 focus:outline-none"
+                    maxLength={2}
+                    value={emoji1}
+                    onChange={(e) => setEmoji1(e.target.value)}
+                    className="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-lg text-slate-900 focus:outline-none focus:border-purple-500 font-bold"
                   />
                 </div>
-                <div className="col-span-3">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-700 mb-1">Emoji 2</label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={2}
+                    value={emoji2}
+                    onChange={(e) => setEmoji2(e.target.value)}
+                    className="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-lg text-slate-900 focus:outline-none focus:border-purple-500 font-bold"
+                  />
+                </div>
+                <div className="col-span-2">
                   <label className="block text-xs font-bold text-slate-700 mb-1">Offer Title</label>
                   <input
                     type="text"

@@ -542,43 +542,53 @@ export default function CustomerMenu({ onOpenCart }) {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {offers.map(offer => {
               const qty = getItemCartQty(offer.id);
               const savings = Number(offer.original_price || offer.price) - Number(offer.price);
+              const hasPlus = offer.emoji?.includes('+');
+              const parts = hasPlus ? offer.emoji.split('+').map(p => p.trim()) : [offer.emoji];
 
               return (() => {
                 const cardGradients = [
-                  'from-amber-50/80 via-orange-50/40 to-white border-amber-200/60',
-                  'from-violet-50/80 via-purple-50/40 to-white border-violet-200/60',
-                  'from-rose-50/80 via-pink-50/40 to-white border-rose-200/60',
+                  'from-amber-50 via-orange-50/20 to-white border-amber-300 shadow-md shadow-amber-200/20 hover:border-amber-400',
+                  'from-violet-50 via-purple-50/20 to-white border-purple-300 shadow-md shadow-purple-200/20 hover:border-purple-400',
+                  'from-rose-50 via-pink-50/20 to-white border-pink-300 shadow-md shadow-pink-200/20 hover:border-pink-400',
                 ];
                 const gradient = cardGradients[offers.indexOf(offer) % cardGradients.length];
                 return (
                   <div
                     key={offer.id}
                     onClick={() => setSelectedItem(offer)}
-                    className={`bg-gradient-to-br ${gradient} border rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative group overflow-hidden shadow-2xs cursor-pointer`}
+                    className={`bg-gradient-to-br ${gradient} border-2 rounded-3xl p-5 flex flex-col sm:flex-row gap-4 items-center justify-between hover:shadow-xl transition-all duration-300 relative group overflow-hidden cursor-pointer`}
                   >
-                    <div className="space-y-3">
-                      <div className="h-32 rounded-xl bg-white/60 backdrop-blur-sm border border-white/85 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
-                        <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">
-                          {offer.emoji || '🔥'}
-                        </span>
-                        
-                        {offer.tag && (
-                          <span className="absolute top-2.5 right-2.5 text-[10px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-md shadow-xs">
-                            {offer.tag}
-                          </span>
-                        )}
-
-                        {savings > 0 && (
-                          <span className="absolute bottom-2.5 left-2.5 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300 shadow-2xs">
-                            Save ₹{savings}
-                          </span>
+                    {/* Left: Emojis Box & Tags */}
+                    <div className="shrink-0 w-full sm:w-36 h-28 rounded-2xl bg-white/70 backdrop-blur-xs border border-white flex flex-col items-center justify-center relative shadow-sm gap-2">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-500">
+                        <span className="text-4xl drop-shadow-sm group-hover:scale-110 transition-transform duration-300">{parts[0]}</span>
+                        {hasPlus && (
+                          <>
+                            <span className="text-base text-amber-500 font-extrabold animate-pulse">+</span>
+                            <span className="text-4xl drop-shadow-sm group-hover:scale-110 transition-transform duration-300">{parts[1]}</span>
+                          </>
                         )}
                       </div>
+                      
+                      {offer.tag && (
+                        <span className="text-[9px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-md shadow-xs">
+                          {offer.tag}
+                        </span>
+                      )}
 
+                      {savings > 0 && (
+                        <span className="text-[9px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300 shadow-2xs">
+                          Save ₹{savings}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Right: Info & Action */}
+                    <div className="flex-1 w-full flex flex-col justify-between h-full min-w-0 space-y-3">
                       <div>
                         <h3 className="text-base font-black text-slate-900 leading-tight">
                           {offer.name}
@@ -587,36 +597,36 @@ export default function CustomerMenu({ onOpenCart }) {
                           {offer.description || offer.items_included}
                         </p>
                       </div>
-                    </div>
 
-                    <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
-                      <div>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-lg font-black text-slate-900">₹{offer.price}</span>
-                          {offer.original_price && (
-                            <span className="text-xs line-through text-slate-400 font-semibold">₹{offer.original_price}</span>
-                          )}
+                      <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                        <div>
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-lg font-black text-slate-900">₹{offer.price}</span>
+                            {offer.original_price && (
+                              <span className="text-xs line-through text-slate-400 font-semibold">₹{offer.original_price}</span>
+                            )}
+                          </div>
                         </div>
+
+                        {qty > 0 ? (
+                          <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md">
+                            <button onClick={() => updateCartQty(offer.id, -1)} className="hover:opacity-85 p-0.5">
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="text-xs font-black px-1">{qty}</span>
+                            <button onClick={() => updateCartQty(offer.id, 1)} className="hover:opacity-85 p-0.5">
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥', has_packaging_charge: true })}
+                            className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0"
+                          >
+                            + ADD
+                          </button>
+                        )}
                       </div>
-
-                      {qty > 0 ? (
-                        <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md">
-                          <button onClick={() => updateCartQty(offer.id, -1)} className="hover:opacity-85 p-0.5">
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="text-xs font-black px-1">{qty}</span>
-                          <button onClick={() => updateCartQty(offer.id, 1)} className="hover:opacity-85 p-0.5">
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥', has_packaging_charge: true })}
-                          className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0"
-                        >
-                          + ADD
-                        </button>
-                      )}
                     </div>
                   </div>
                 );
@@ -694,7 +704,7 @@ export default function CustomerMenu({ onOpenCart }) {
                           <div
                             key={`popular-${item.id}`}
                             onClick={() => setSelectedItem(item)}
-                            className={`snap-start shrink-0 w-64 bg-gradient-to-br ${gradient} border rounded-2xl p-3 flex flex-col justify-between hover:shadow-xl transition-all duration-300 shadow-sm group relative overflow-hidden cursor-pointer`}
+                            className={`snap-start shrink-0 w-64 bg-gradient-to-br ${gradient} border-2 border-amber-300 shadow-md shadow-amber-200/20 hover:border-amber-400 hover:shadow-lg transition-all duration-300 rounded-2xl p-3 flex flex-col justify-between group relative overflow-hidden cursor-pointer`}
                           >
                             <div className="space-y-2">
                               <div className="h-28 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
@@ -1098,14 +1108,35 @@ export default function CustomerMenu({ onOpenCart }) {
                 {/* Hero Emoji Section */}
                 <div className={`bg-gradient-to-br ${heroGradient} px-6 pt-10 pb-8 flex flex-col items-center gap-3 relative overflow-hidden`}>
                   <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.6) 0%, transparent 50%)' }} />
-                  <motion.span
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
-                    transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 } }}
-                    className="text-8xl sm:text-9xl drop-shadow-md relative z-10"
-                  >
-                    {item.emoji || '🍽️'}
-                  </motion.span>
+                  {(() => {
+                    const hasPlus = item.emoji?.includes('+');
+                    const parts = hasPlus ? item.emoji.split('+').map(p => p.trim()) : [item.emoji];
+                    return (
+                      <div className="flex items-center gap-1.5 relative z-10">
+                        <motion.span
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
+                          transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 } }}
+                          className="text-8xl sm:text-9xl drop-shadow-md"
+                        >
+                          {parts[0]}
+                        </motion.span>
+                        {hasPlus && (
+                          <>
+                            <span className="text-4xl text-amber-600 font-extrabold">+</span>
+                            <motion.span
+                              initial={{ scale: 0.5, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
+                              transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.6 } }}
+                              className="text-8xl sm:text-9xl drop-shadow-md"
+                            >
+                              {parts[1]}
+                            </motion.span>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
                   {item.tag && (
                     <span className="text-[10px] uppercase font-black bg-white/80 backdrop-blur-sm text-slate-800 px-3 py-1 rounded-full border border-slate-200/80 shadow-sm relative z-10">{item.tag}</span>
                   )}
@@ -1137,13 +1168,32 @@ export default function CustomerMenu({ onOpenCart }) {
                     </div>
                   </div>
 
-                  {/* Description */}
-                  {item.description && (
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">About this item</span>
-                      <p className="text-sm text-slate-600 leading-relaxed font-medium">{item.description}</p>
-                    </div>
-                  )}
+                  {/* Description / Combo Details */}
+                  <div className="space-y-3">
+                    {item.description && (
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">About this item</span>
+                        <p className="text-sm text-slate-600 leading-relaxed font-medium">{item.description}</p>
+                      </div>
+                    )}
+
+                    {item.items_included && (
+                      <div className="space-y-1 bg-amber-50/70 border border-amber-200/60 rounded-2xl p-3.5">
+                        <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">🍱 Items Included in Combo:</span>
+                        <p className="text-xs text-amber-900 font-bold leading-relaxed">{item.items_included}</p>
+                      </div>
+                    )}
+
+                    {item.original_price && (
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Combo Discount</span>
+                          <span className="text-xs text-slate-500 font-semibold">Original Price: <span className="line-through">₹{item.original_price}</span></span>
+                        </div>
+                        <span className="text-xs font-black text-emerald-800 bg-emerald-100 px-3 py-1 rounded-xl">Save ₹{Number(item.original_price) - Number(item.price)}!</span>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Quick Info */}
                   <div className="flex items-center gap-3 py-3 border-y border-slate-100">
