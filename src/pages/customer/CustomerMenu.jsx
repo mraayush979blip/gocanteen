@@ -547,71 +547,80 @@ export default function CustomerMenu({ onOpenCart }) {
               const qty = getItemCartQty(offer.id);
               const savings = Number(offer.original_price || offer.price) - Number(offer.price);
 
-              return (
-                <div
-                  key={offer.id}
-                  className="bg-white border border-amber-200/90 rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl hover:border-amber-300 transition-all duration-300 relative group overflow-hidden shadow-2xs"
-                >
-                  <div className="space-y-3">
-                    <div className="h-32 rounded-xl bg-gradient-to-br from-amber-500/10 via-amber-100/50 to-slate-50 flex items-center justify-center relative overflow-hidden group-hover:scale-[1.02] transition-transform">
-                      <span className="text-5xl group-hover:scale-110 transition-transform duration-300">
-                        {offer.emoji || '🔥'}
-                      </span>
-                      
-                      {offer.tag && (
-                        <span className="absolute top-2.5 right-2.5 text-[10px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-md shadow-xs">
-                          {offer.tag}
+              return (() => {
+                const cardGradients = [
+                  'from-amber-50/80 via-orange-50/40 to-white border-amber-200/60',
+                  'from-violet-50/80 via-purple-50/40 to-white border-violet-200/60',
+                  'from-rose-50/80 via-pink-50/40 to-white border-rose-200/60',
+                ];
+                const gradient = cardGradients[offers.indexOf(offer) % cardGradients.length];
+                return (
+                  <div
+                    key={offer.id}
+                    onClick={() => setSelectedItem(offer)}
+                    className={`bg-gradient-to-br ${gradient} border rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative group overflow-hidden shadow-2xs cursor-pointer`}
+                  >
+                    <div className="space-y-3">
+                      <div className="h-32 rounded-xl bg-white/60 backdrop-blur-sm border border-white/85 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
+                        <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">
+                          {offer.emoji || '🔥'}
                         </span>
-                      )}
+                        
+                        {offer.tag && (
+                          <span className="absolute top-2.5 right-2.5 text-[10px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-md shadow-xs">
+                            {offer.tag}
+                          </span>
+                        )}
 
-                      {savings > 0 && (
-                        <span className="absolute bottom-2.5 left-2.5 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300 shadow-2xs">
-                          Save ₹{savings}
-                        </span>
-                      )}
-                    </div>
-
-                    <div>
-                      <h3 className="text-base font-black text-slate-900 leading-tight">
-                        {offer.name}
-                      </h3>
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mt-1">
-                        {offer.description || offer.items_included}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-lg font-black text-slate-900">₹{offer.price}</span>
-                        {offer.original_price && (
-                          <span className="text-xs line-through text-slate-400 font-semibold">₹{offer.original_price}</span>
+                        {savings > 0 && (
+                          <span className="absolute bottom-2.5 left-2.5 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300 shadow-2xs">
+                            Save ₹{savings}
+                          </span>
                         )}
                       </div>
+
+                      <div>
+                        <h3 className="text-base font-black text-slate-900 leading-tight">
+                          {offer.name}
+                        </h3>
+                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mt-1">
+                          {offer.description || offer.items_included}
+                        </p>
+                      </div>
                     </div>
 
-                    {qty > 0 ? (
-                      <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md">
-                        <button onClick={() => updateCartQty(offer.id, -1)} className="hover:opacity-80 p-0.5">
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="text-xs font-black px-1">{qty}</span>
-                        <button onClick={() => updateCartQty(offer.id, 1)} className="hover:opacity-80 p-0.5">
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
+                    <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                      <div>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-lg font-black text-slate-900">₹{offer.price}</span>
+                          {offer.original_price && (
+                            <span className="text-xs line-through text-slate-400 font-semibold">₹{offer.original_price}</span>
+                          )}
+                        </div>
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥', has_packaging_charge: true })}
-                        className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0"
-                      >
-                        + ADD
-                      </button>
-                    )}
+
+                      {qty > 0 ? (
+                        <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md">
+                          <button onClick={() => updateCartQty(offer.id, -1)} className="hover:opacity-85 p-0.5">
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="text-xs font-black px-1">{qty}</span>
+                          <button onClick={() => updateCartQty(offer.id, 1)} className="hover:opacity-85 p-0.5">
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥', has_packaging_charge: true })}
+                          className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0"
+                        >
+                          + ADD
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
+                );
+              })();
             })}
           </div>
         </div>
@@ -672,31 +681,46 @@ export default function CustomerMenu({ onOpenCart }) {
                   {inventory
                     .filter(i => i.is_popular)
                     .map((item, idx) => {
-                    const qty = getItemCartQty(item.id);
-                    return (
-                      <div key={`popular-${item.id}`} className="snap-start shrink-0 w-64 bg-white border border-slate-200 rounded-2xl p-3 flex flex-col shadow-xs group hover:shadow-md transition-all">
-                        <div className="h-28 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center relative mb-3 group-hover:bg-slate-100/80 transition-colors">
-                          <span className="text-4xl group-hover:scale-110 transition-transform">{item.emoji || '🍽️'}</span>
-                          <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-slate-800 bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm">Bestseller</span>
-                        </div>
-                        <h3 className="text-sm font-black text-slate-900 line-clamp-1">{item.name}</h3>
-                        <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">{item.description}</p>
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="text-sm font-black text-slate-900">₹{item.price}</span>
-                          {qty > 0 ? (
-                            <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1.5 font-bold shadow-sm">
-                              <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
-                              <span className="text-xs font-black px-1">{qty}</span>
-                              <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
+                      const qty = getItemCartQty(item.id);
+                      return (() => {
+                        const cardGradients = [
+                          'from-amber-50/80 via-orange-50/40 to-white border-amber-200/60',
+                          'from-emerald-50/80 via-teal-50/40 to-white border-emerald-200/60',
+                          'from-violet-50/80 via-purple-50/40 to-white border-violet-200/60',
+                          'from-sky-50/80 via-blue-50/40 to-white border-sky-200/60',
+                        ];
+                        const gradient = cardGradients[idx % cardGradients.length];
+                        return (
+                          <div
+                            key={`popular-${item.id}`}
+                            onClick={() => setSelectedItem(item)}
+                            className={`snap-start shrink-0 w-64 bg-gradient-to-br ${gradient} border rounded-2xl p-3 flex flex-col justify-between hover:shadow-xl transition-all duration-300 shadow-sm group relative overflow-hidden cursor-pointer`}
+                          >
+                            <div className="space-y-2">
+                              <div className="h-28 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
+                                <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</span>
+                                <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded shadow-sm">Bestseller</span>
+                              </div>
+                              <h3 className="text-sm font-black text-slate-900 line-clamp-1">{item.name}</h3>
+                              {item.description && <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">{item.description}</p>}
                             </div>
-                          ) : (
-                            <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border-2 border-emerald-600 text-emerald-700 bg-emerald-50 font-black text-xs active:scale-95 transition-transform">
-                              + ADD
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
+                            <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                              <span className="text-sm font-black text-slate-900">₹{item.price}</span>
+                              {qty > 0 ? (
+                                <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1.5 font-bold shadow-sm">
+                                  <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
+                                  <span className="text-xs font-black px-1">{qty}</span>
+                                  <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
+                                </div>
+                              ) : (
+                                <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border-2 border-emerald-600 text-emerald-700 bg-emerald-50 font-black text-xs active:scale-95 transition-transform">
+                                  + ADD
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })();
                   })}
                 </div>
               </div>
@@ -1009,121 +1033,155 @@ export default function CustomerMenu({ onOpenCart }) {
           </motion.div>
         )}
       </AnimatePresence>
-      {/* 7. Instamart-Style Item Detail Popup */}
-      {selectedItem && (() => {
-        const item = selectedItem;
-        const qty = getItemCartQty(item.id);
-        const cat = categories.find(c => c.id === item.category_id);
-        const detailGradients = [
-          'from-amber-100 via-orange-50 to-amber-50',
-          'from-emerald-100 via-teal-50 to-emerald-50',
-          'from-violet-100 via-purple-50 to-violet-50',
-          'from-sky-100 via-blue-50 to-sky-50',
-          'from-rose-100 via-pink-50 to-rose-50',
-        ];
-        const heroGradient = detailGradients[item.name.length % detailGradients.length];
-        return (
-          <div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-xs"
-            onClick={() => setSelectedItem(null)}
-          >
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="animate-slide-up-modal bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative"
+      {/* 7. Instamart-Style Item Detail Popup (Mac Genie Lamp Animation) */}
+      <AnimatePresence>
+        {selectedItem && (() => {
+          const item = selectedItem;
+          const qty = getItemCartQty(item.id);
+          const cat = categories.find(c => c.id === item.category_id);
+          const detailGradients = [
+            'from-amber-100 via-orange-50 to-amber-50',
+            'from-emerald-100 via-teal-50 to-emerald-50',
+            'from-violet-100 via-purple-50 to-violet-50',
+            'from-sky-100 via-blue-50 to-sky-50',
+            'from-rose-100 via-pink-50 to-rose-50',
+          ];
+          const heroGradient = detailGradients[item.name.length % detailGradients.length];
+          return (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs"
+              onClick={() => setSelectedItem(null)}
             >
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-white shadow-sm transition-all cursor-pointer"
+              <motion.div
+                onClick={(e) => e.stopPropagation()}
+                initial={{ 
+                  y: "100%", 
+                  scaleX: 0.35, 
+                  scaleY: 0.15, 
+                  borderRadius: "100px",
+                  opacity: 0 
+                }}
+                animate={{ 
+                  y: 0, 
+                  scaleX: 1, 
+                  scaleY: 1, 
+                  borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? "24px" : "24px 24px 0 0",
+                  opacity: 1 
+                }}
+                exit={{ 
+                  y: "100%", 
+                  scaleX: 0.2, 
+                  scaleY: 0.05, 
+                  borderRadius: "100px",
+                  opacity: 0 
+                }}
+                transition={{ 
+                  type: "spring",
+                  damping: 24,
+                  stiffness: 240
+                }}
+                className="bg-white w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative origin-bottom"
               >
-                <X className="w-4 h-4" />
-              </button>
-
-              {/* Hero Emoji Section */}
-              <div className={`bg-gradient-to-br ${heroGradient} px-6 pt-10 pb-8 flex flex-col items-center gap-3 relative overflow-hidden`}>
-                <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.6) 0%, transparent 50%)' }} />
-                <motion.span
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
-                  transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 } }}
-                  className="text-8xl sm:text-9xl drop-shadow-md relative z-10"
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedItem(null)}
+                  className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-white shadow-sm transition-all cursor-pointer"
                 >
-                  {item.emoji || '🍽️'}
-                </motion.span>
-                {item.tag && (
-                  <span className="text-[10px] uppercase font-black bg-white/80 backdrop-blur-sm text-slate-800 px-3 py-1 rounded-full border border-slate-200/80 shadow-sm relative z-10">{item.tag}</span>
-                )}
-              </div>
+                  <X className="w-4 h-4" />
+                </button>
 
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-                {/* Title & Badges */}
-                <div className="space-y-2">
-                  <div className="flex items-start justify-between gap-3">
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{item.name}</h2>
-                    <div className={`w-6 h-6 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 mt-1 ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}>
-                      <div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} />
+                {/* Hero Emoji Section */}
+                <div className={`bg-gradient-to-br ${heroGradient} px-6 pt-10 pb-8 flex flex-col items-center gap-3 relative overflow-hidden`}>
+                  <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.6) 0%, transparent 50%)' }} />
+                  <motion.span
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
+                    transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 } }}
+                    className="text-8xl sm:text-9xl drop-shadow-md relative z-10"
+                  >
+                    {item.emoji || '🍽️'}
+                  </motion.span>
+                  {item.tag && (
+                    <span className="text-[10px] uppercase font-black bg-white/80 backdrop-blur-sm text-slate-800 px-3 py-1 rounded-full border border-slate-200/80 shadow-sm relative z-10">{item.tag}</span>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                  {/* Title & Badges */}
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{item.name}</h2>
+                      <div className={`w-6 h-6 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 mt-1 ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}>
+                        <div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {cat && (
+                        <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 uppercase tracking-wider">
+                          {cat.emoji || '🍽️'} {cat.name}
+                        </span>
+                      )}
+                      {!item.is_veg && (
+                        <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-lg border uppercase tracking-wider text-red-800 bg-red-50 border-red-200">
+                          🍗 Non-Veg
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {cat && (
-                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 uppercase tracking-wider">
-                        {cat.emoji || '🍽️'} {cat.name}
-                      </span>
-                    )}
-                    <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-lg border uppercase tracking-wider ${item.is_veg ? 'text-emerald-800 bg-emerald-50 border-emerald-200' : 'text-red-800 bg-red-50 border-red-200'}`}>
-                      {item.is_veg ? '🌱 Pure Veg' : '🍗 Non-Veg'}
-                    </span>
+
+                  {/* Description */}
+                  {item.description && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">About this item</span>
+                      <p className="text-sm text-slate-600 leading-relaxed font-medium">{item.description}</p>
+                    </div>
+                  )}
+
+                  {/* Quick Info */}
+                  <div className="flex items-center gap-3 py-3 border-y border-slate-100">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      <span>10-15 min prep</span>
+                    </div>
+                    <div className="w-px h-4 bg-slate-200" />
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                      <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Hygiene certified</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Description */}
-                {item.description && (
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">About this item</span>
-                    <p className="text-sm text-slate-600 leading-relaxed font-medium">{item.description}</p>
+                {/* Sticky Bottom Add-to-Cart Bar */}
+                <div className="border-t border-slate-100 bg-white px-6 py-4 flex items-center justify-between gap-4 shrink-0">
+                  <div>
+                    <span className="text-2xl font-black text-slate-900">₹{item.price}</span>
+                    {item.tag && <span className="text-[10px] text-slate-400 font-bold block">{item.tag}</span>}
                   </div>
-                )}
-
-                {/* Quick Info */}
-                <div className="flex items-center gap-3 py-3 border-y border-slate-100">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>10-15 min prep</span>
-                  </div>
-                  <div className="w-px h-4 bg-slate-200" />
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                    <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Hygiene certified</span>
-                  </div>
+                  {qty > 0 ? (
+                    <div className="flex items-center gap-3 bg-emerald-600 text-white rounded-2xl px-5 py-3 font-bold shadow-lg">
+                      <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-5 h-5" /></button>
+                      <span className="text-lg font-black px-2">{qty}</span>
+                      <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-5 h-5" /></button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => { handleAddToCartWithAnim(e, item); }}
+                      className="px-8 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg transition-all cursor-pointer active:scale-95"
+                    >
+                      + ADD TO CART
+                    </button>
+                  )}
                 </div>
-              </div>
-
-              {/* Sticky Bottom Add-to-Cart Bar */}
-              <div className="border-t border-slate-100 bg-white px-6 py-4 flex items-center justify-between gap-4 shrink-0">
-                <div>
-                  <span className="text-2xl font-black text-slate-900">₹{item.price}</span>
-                  {item.tag && <span className="text-[10px] text-slate-400 font-bold block">{item.tag}</span>}
-                </div>
-                {qty > 0 ? (
-                  <div className="flex items-center gap-3 bg-emerald-600 text-white rounded-2xl px-5 py-3 font-bold shadow-lg">
-                    <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-5 h-5" /></button>
-                    <span className="text-lg font-black px-2">{qty}</span>
-                    <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-5 h-5" /></button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={(e) => { handleAddToCartWithAnim(e, item); }}
-                    className="px-8 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg transition-all cursor-pointer active:scale-95"
-                  >
-                    + ADD TO CART
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+              </motion.div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
 
 
 
