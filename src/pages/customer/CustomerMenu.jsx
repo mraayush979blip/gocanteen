@@ -98,15 +98,18 @@ export default function CustomerMenu({ onOpenCart }) {
     setActiveCategory(searchParams.get('category') || 'all');
   }, [searchParams]);
 
-  // Lock body scrolling when item detail popup is active to prevent background scrolling
+  // Lock body scrolling & touch movement when item detail popup is active to prevent background scrolling
   useEffect(() => {
     if (selectedItem) {
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open');
+      document.documentElement.classList.add('modal-open');
     } else {
-      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+      document.documentElement.classList.remove('modal-open');
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+      document.documentElement.classList.remove('modal-open');
     };
   }, [selectedItem]);
 
@@ -1095,7 +1098,7 @@ export default function CustomerMenu({ onOpenCart }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs"
+              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs touch-none overscroll-none"
               onClick={() => setSelectedItem(null)}
             >
               <div className="flex flex-col items-center gap-4 max-w-md w-full px-4 pb-6 sm:pb-0 relative" onClick={(e) => e.stopPropagation()}>
@@ -1208,7 +1211,7 @@ export default function CustomerMenu({ onOpenCart }) {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 overscroll-contain touch-pan-y">
                   {/* Title & Badges */}
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-3">
