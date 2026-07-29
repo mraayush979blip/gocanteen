@@ -9,7 +9,7 @@ import { MenuGridSkeleton } from '../../components/SkeletonLoader';
 import { 
   Search, Flame, Plus, Minus, Loader2, ShoppingCart, 
   ArrowRight, Sparkles, Filter, Check, LayoutGrid, List,
-  Clock, ShieldCheck, Zap, UtensilsCrossed, Award, ChevronRight, ChevronUp, ChevronLeft
+  Clock, ShieldCheck, Zap, UtensilsCrossed, Award, ChevronRight, ChevronUp, ChevronLeft, X
 } from 'lucide-react';
 
 export default function CustomerMenu({ onOpenCart }) {
@@ -54,6 +54,7 @@ export default function CustomerMenu({ onOpenCart }) {
   const [expandedSections, setExpandedSections] = useState(new Set());
   const [recentOrders, setRecentOrders] = useState([]);
   const [featuredFilter, setFeaturedFilter] = useState(''); // 'popular' | 'new' | 'under99' | ''
+  const [selectedItem, setSelectedItem] = useState(null); // Instamart-style item detail popup
 
   const sectionRefs = useRef({});
 
@@ -747,14 +748,25 @@ export default function CustomerMenu({ onOpenCart }) {
                         return <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-md shadow-2xs ${colorClass}`}>{tag}</span>;
                       };
 
-                      return (
+                      return (() => {
+                        const cardGradients = [
+                          'from-amber-50/80 via-orange-50/50 to-white border-amber-200/70',
+                          'from-emerald-50/80 via-teal-50/50 to-white border-emerald-200/70',
+                          'from-violet-50/80 via-purple-50/50 to-white border-violet-200/70',
+                          'from-sky-50/80 via-blue-50/50 to-white border-sky-200/70',
+                          'from-rose-50/80 via-pink-50/50 to-white border-rose-200/70',
+                          'from-lime-50/80 via-green-50/50 to-white border-lime-200/70',
+                        ];
+                        const gradient = cardGradients[cat.items.indexOf(item) % cardGradients.length];
+                        return (
                         <div
                           key={item.id}
-                          className="shrink-0 w-64 snap-start bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-xs group relative"
+                          onClick={() => setSelectedItem(item)}
+                          className={`shrink-0 w-64 snap-start bg-gradient-to-br ${gradient} border rounded-2xl p-3 flex flex-col justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-xs group relative cursor-pointer`}
                         >
                           <div className="space-y-2">
-                            <div className="h-28 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:bg-slate-100/80 transition-colors">
-                              <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{item.emoji || '🍽️'}</span>
+                            <div className="h-28 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
+                              <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</span>
                               <div className={`absolute top-2 left-2 w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
                               <div className="absolute top-2 right-2">{renderTag(item.tag)}</div>
                             </div>
@@ -763,20 +775,23 @@ export default function CustomerMenu({ onOpenCart }) {
                               {item.description && <p className="text-[10px] text-slate-500 line-clamp-1">{item.description}</p>}
                             </div>
                           </div>
-                          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+                          <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between">
                             <span className="text-base font-black text-slate-900">₹{item.price}</span>
-                            {qty > 0 ? (
-                              <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1 font-bold shadow-sm">
-                                <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
-                                <span className="text-xs font-black px-1">{qty}</span>
-                                <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
-                              </div>
-                            ) : (
-                              <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-[11px] active:scale-95 transition-transform shadow-2xs">+ ADD</button>
-                            )}
+                            <div onClick={(e) => e.stopPropagation()}>
+                              {qty > 0 ? (
+                                <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1 font-bold shadow-sm">
+                                  <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
+                                  <span className="text-xs font-black px-1">{qty}</span>
+                                  <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
+                                </div>
+                              ) : (
+                                <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-[11px] active:scale-95 transition-transform shadow-2xs">+ ADD</button>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      );
+                        );
+                      })();
                     })}
                   </div>
                 </div>
@@ -821,9 +836,9 @@ export default function CustomerMenu({ onOpenCart }) {
                     const qty = getItemCartQty(item.id);
                     if (viewMode === 'list') {
                       return (
-                        <motion.div key={item.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.02, 0.25) }} className="bg-white border border-slate-200/90 rounded-2xl p-4 flex items-center justify-between gap-4 hover:shadow-md transition-all shadow-2xs">
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.02, 0.25) }} onClick={() => setSelectedItem(item)} className="bg-white border border-slate-200/90 rounded-2xl p-4 flex items-center justify-between gap-4 hover:shadow-md transition-all shadow-2xs cursor-pointer">
                           <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center text-3xl shrink-0">{item.emoji || '🍽️'}</div>
+                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/50 flex items-center justify-center text-3xl shrink-0 shadow-inner">{item.emoji || '🍽️'}</div>
                             <div>
                               <div className="flex items-center gap-2">
                                 <div className={`w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-2xs ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
@@ -834,7 +849,7 @@ export default function CustomerMenu({ onOpenCart }) {
                               <span className="text-sm font-black text-slate-900 mt-1 block">₹{item.price}</span>
                             </div>
                           </div>
-                          <motion.div layout className="flex items-center">
+                          <motion.div layout className="flex items-center" onClick={(e) => e.stopPropagation()}>
                             {qty > 0 ? (
                               <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md">
                                 <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-3.5 h-3.5" /></button>
@@ -848,13 +863,23 @@ export default function CustomerMenu({ onOpenCart }) {
                         </motion.div>
                       );
                     }
-                    return (
-                      <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl hover:border-slate-300 transition-all duration-300 shadow-sm group relative overflow-hidden">
+                    return (() => {
+                      const cardGradients = [
+                        'from-amber-50/80 via-orange-50/40 to-white border-amber-200/60',
+                        'from-emerald-50/80 via-teal-50/40 to-white border-emerald-200/60',
+                        'from-violet-50/80 via-purple-50/40 to-white border-violet-200/60',
+                        'from-sky-50/80 via-blue-50/40 to-white border-sky-200/60',
+                        'from-rose-50/80 via-pink-50/40 to-white border-rose-200/60',
+                        'from-lime-50/80 via-green-50/40 to-white border-lime-200/60',
+                      ];
+                      const gradient = cardGradients[idx % cardGradients.length];
+                      return (
+                      <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedItem(item)} className={`bg-gradient-to-br ${gradient} border rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl transition-all duration-300 shadow-sm group relative overflow-hidden cursor-pointer`}>
                         <div className="space-y-3 z-10">
-                          <div className="h-32 sm:h-40 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:bg-slate-100/80 transition-colors shadow-inner">
+                          <div className="h-32 sm:h-40 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
                             <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</motion.span>
                             <div className={`absolute top-3 left-3 w-5 h-5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
-                            {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-800 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-sm">{item.tag}</span>}
+                            {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-800 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
                           </div>
                           <div className="pt-2">
                             <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug line-clamp-1 group-hover:text-emerald-700 transition-colors">{item.name}</h3>
@@ -862,7 +887,7 @@ export default function CustomerMenu({ onOpenCart }) {
                           </div>
                           {item.description && <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>}
                         </div>
-                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2 z-10">
+                        <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between gap-2 z-10" onClick={(e) => e.stopPropagation()}>
                           <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight">₹{item.price}</span>
                           <motion.div layout className="flex items-center">
                             {qty > 0 ? (
@@ -877,7 +902,8 @@ export default function CustomerMenu({ onOpenCart }) {
                           </motion.div>
                         </div>
                       </motion.div>
-                    );
+                      );
+                    })();
                   })}
                 </div>
               )}
@@ -983,6 +1009,121 @@ export default function CustomerMenu({ onOpenCart }) {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* 7. Instamart-Style Item Detail Popup */}
+      {selectedItem && (() => {
+        const item = selectedItem;
+        const qty = getItemCartQty(item.id);
+        const cat = categories.find(c => c.id === item.category_id);
+        const detailGradients = [
+          'from-amber-100 via-orange-50 to-amber-50',
+          'from-emerald-100 via-teal-50 to-emerald-50',
+          'from-violet-100 via-purple-50 to-violet-50',
+          'from-sky-100 via-blue-50 to-sky-50',
+          'from-rose-100 via-pink-50 to-rose-50',
+        ];
+        const heroGradient = detailGradients[item.name.length % detailGradients.length];
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-xs"
+            onClick={() => setSelectedItem(null)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="animate-slide-up-modal bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-white shadow-sm transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Hero Emoji Section */}
+              <div className={`bg-gradient-to-br ${heroGradient} px-6 pt-10 pb-8 flex flex-col items-center gap-3 relative overflow-hidden`}>
+                <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.6) 0%, transparent 50%)' }} />
+                <motion.span
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
+                  transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 } }}
+                  className="text-8xl sm:text-9xl drop-shadow-md relative z-10"
+                >
+                  {item.emoji || '🍽️'}
+                </motion.span>
+                {item.tag && (
+                  <span className="text-[10px] uppercase font-black bg-white/80 backdrop-blur-sm text-slate-800 px-3 py-1 rounded-full border border-slate-200/80 shadow-sm relative z-10">{item.tag}</span>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                {/* Title & Badges */}
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{item.name}</h2>
+                    <div className={`w-6 h-6 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 mt-1 ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}>
+                      <div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {cat && (
+                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 uppercase tracking-wider">
+                        {cat.emoji || '🍽️'} {cat.name}
+                      </span>
+                    )}
+                    <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-lg border uppercase tracking-wider ${item.is_veg ? 'text-emerald-800 bg-emerald-50 border-emerald-200' : 'text-red-800 bg-red-50 border-red-200'}`}>
+                      {item.is_veg ? '🌱 Pure Veg' : '🍗 Non-Veg'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {item.description && (
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">About this item</span>
+                    <p className="text-sm text-slate-600 leading-relaxed font-medium">{item.description}</p>
+                  </div>
+                )}
+
+                {/* Quick Info */}
+                <div className="flex items-center gap-3 py-3 border-y border-slate-100">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <span>10-15 min prep</span>
+                  </div>
+                  <div className="w-px h-4 bg-slate-200" />
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                    <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Hygiene certified</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sticky Bottom Add-to-Cart Bar */}
+              <div className="border-t border-slate-100 bg-white px-6 py-4 flex items-center justify-between gap-4 shrink-0">
+                <div>
+                  <span className="text-2xl font-black text-slate-900">₹{item.price}</span>
+                  {item.tag && <span className="text-[10px] text-slate-400 font-bold block">{item.tag}</span>}
+                </div>
+                {qty > 0 ? (
+                  <div className="flex items-center gap-3 bg-emerald-600 text-white rounded-2xl px-5 py-3 font-bold shadow-lg">
+                    <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-5 h-5" /></button>
+                    <span className="text-lg font-black px-2">{qty}</span>
+                    <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-5 h-5" /></button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={(e) => { handleAddToCartWithAnim(e, item); }}
+                    className="px-8 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg transition-all cursor-pointer active:scale-95"
+                  >
+                    + ADD TO CART
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
 
 
