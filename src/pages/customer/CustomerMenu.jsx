@@ -6,8 +6,8 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { MenuGridSkeleton } from '../../components/SkeletonLoader';
 
-import { 
-  Search, Flame, Plus, Minus, Loader2, ShoppingCart, 
+import {
+  Search, Flame, Plus, Minus, Loader2, ShoppingCart,
   ArrowRight, Sparkles, Filter, Check, LayoutGrid, List,
   Clock, ShieldCheck, Zap, UtensilsCrossed, Award, ChevronRight, ChevronUp, ChevronLeft, X
 } from 'lucide-react';
@@ -49,7 +49,7 @@ export default function CustomerMenu({ onOpenCart }) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [menuModalOpen, setMenuModalOpen] = useState(false);
-  
+
   // New features state
   const [expandedSections, setExpandedSections] = useState(new Set());
   const [recentOrders, setRecentOrders] = useState([]);
@@ -63,13 +63,13 @@ export default function CustomerMenu({ onOpenCart }) {
     const handleScroll = () => {
       const scrolled = window.scrollY;
       const height = document.documentElement.scrollHeight - window.innerHeight;
-      
+
       if (scrolled > 300) {
         setShowScrollTop(true);
       } else {
         setShowScrollTop(false);
       }
-      
+
       if (height > 0) {
         const rawProgress = (scrolled / height) * 100;
         const progress = Math.min(Math.max(rawProgress, 0), 100);
@@ -78,7 +78,7 @@ export default function CustomerMenu({ onOpenCart }) {
         setScrollProgress(0);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -174,10 +174,10 @@ export default function CustomerMenu({ onOpenCart }) {
 
   const handleAddToCartWithAnim = (e, item) => {
     const cat = categories.find(c => c.id === item.category_id);
-    addToCart({ 
-      id: item.id, 
-      name: item.name, 
-      price: Number(item.price), 
+    addToCart({
+      id: item.id,
+      name: item.name,
+      price: Number(item.price),
       emoji: item.emoji || '🍽️',
       has_packaging_charge: cat ? cat.has_packaging_charge : false
     });
@@ -205,15 +205,15 @@ export default function CustomerMenu({ onOpenCart }) {
           .eq('customer_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(10);
-          
+
         if (error || !ordersData?.length) return;
-        
+
         const orderIds = ordersData.map(o => o.id);
         const { data: itemsData } = await supabase
           .from('order_items')
           .select('inventory_id, item_name, inventory(name, emoji, price)')
           .in('order_id', orderIds);
-          
+
         if (itemsData) {
           // Get unique items
           const uniqueItems = [];
@@ -232,7 +232,7 @@ export default function CustomerMenu({ onOpenCart }) {
         console.error('Error fetching recent orders:', err);
       }
     };
-    
+
     if (inventory.length > 0) {
       fetchRecentOrders();
     }
@@ -244,12 +244,12 @@ export default function CustomerMenu({ onOpenCart }) {
     const cleanQuery = query.toLowerCase().trim();
     if (!cleanQuery) return 1;
     if (cleanText.includes(cleanQuery)) return 10; // Exact substring match is highest score
-    
+
     // Levenshtein / Token Distance calculation for typo correction
     let score = 0;
     const queryWords = cleanQuery.split(/\s+/);
     const textWords = cleanText.split(/\s+/);
-    
+
     queryWords.forEach(qw => {
       textWords.forEach(tw => {
         if (tw.startsWith(qw)) score += 5; // Prefix match
@@ -287,7 +287,7 @@ export default function CustomerMenu({ onOpenCart }) {
       const nameScore = getFuzzyScore(item.name, searchQuery);
       const descScore = item.description ? getFuzzyScore(item.description, searchQuery) : 0;
       const tagScore = item.tag ? getFuzzyScore(item.tag, searchQuery) : 0;
-      
+
       const matchesSearch = (nameScore + descScore + tagScore) > 0;
       const matchesCategory = activeCategory === 'all' || item.category_id === activeCategory;
       return matchesSearch && matchesCategory;
@@ -341,7 +341,7 @@ export default function CustomerMenu({ onOpenCart }) {
 
   return (
     <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto">
-      
+
       {/* 1. Hero Promo Banner Showcase (Blinkit / Swiggy Desktop Header) */}
       <div className="relative rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 p-6 sm:p-8 text-white shadow-xl overflow-hidden border border-emerald-500/20">
         <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-emerald-500/10 to-transparent skew-x-12 transform translate-x-10 pointer-events-none" />
@@ -353,14 +353,14 @@ export default function CustomerMenu({ onOpenCart }) {
               <Zap className="w-3.5 h-3.5 text-yellow-400 animate-bounce" />
               <span>Campus Counter Pickup • Express 10 Mins</span>
             </div>
-            
+
             <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
               Fresh Canteen Eats, <br className="hidden sm:inline" />
               <span className="bg-gradient-to-r from-yellow-300 via-emerald-300 to-teal-200 bg-clip-text text-transparent">
                 Zero Waiting in Line.
               </span>
             </h1>
-            
+
             <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-lg leading-relaxed">
               Order delicious wraps, pizzas, beverages & combos online. Collect directly from counter with your unique token PIN!
             </p>
@@ -412,7 +412,7 @@ export default function CustomerMenu({ onOpenCart }) {
       {/* 2. Modern Search & Multi-Filter Control Bar with Google SEO Integration */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-2xs space-y-3">
         <form role="search" onSubmit={(e) => e.preventDefault()} className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          
+
           {/* Search Input */}
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -480,16 +480,14 @@ export default function CustomerMenu({ onOpenCart }) {
             type="button"
             onClick={() => handleCategoryChange('all')}
             aria-selected={activeCategory === 'all'}
-            className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
-              activeCategory === 'all'
+            className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${activeCategory === 'all'
                 ? 'bg-slate-900 text-white border-transparent shadow-md'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
-            }`}
+              }`}
           >
             <span className="relative z-10">🍽️ All Items</span>
-            <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${
-              activeCategory === 'all' ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
-            }`}>
+            <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${activeCategory === 'all' ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
+              }`}>
               {inventory.length}
             </span>
           </button>
@@ -500,16 +498,14 @@ export default function CustomerMenu({ onOpenCart }) {
               type="button"
               onClick={() => handleCategoryChange('offers')}
               aria-selected={activeCategory === 'offers'}
-              className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
-                activeCategory === 'offers'
+              className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${activeCategory === 'offers'
                   ? 'bg-amber-500 text-slate-950 border-transparent shadow-md'
                   : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-amber-200'
-              }`}
+                }`}
             >
               <span className="relative z-10 animate-pulse">🔥 Combo Deals</span>
-              <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${
-                activeCategory === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-100 text-amber-900'
-              }`}>
+              <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${activeCategory === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-100 text-amber-900'
+                }`}>
                 {offers.length}
               </span>
             </button>
@@ -525,16 +521,14 @@ export default function CustomerMenu({ onOpenCart }) {
                 type="button"
                 onClick={() => handleCategoryChange(cat.id)}
                 aria-selected={isActive}
-                className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${
-                  isActive
+                className={`relative px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border ${isActive
                     ? 'bg-emerald-600 text-white border-transparent shadow-md'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
-                }`}
+                  }`}
               >
                 <span className="relative z-10">{cat.emoji || '🍽️'} {cat.name}</span>
-                <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${
-                  isActive ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
-                }`}>
+                <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${isActive ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
+                  }`}>
                   {count}
                 </span>
               </button>
@@ -589,7 +583,7 @@ export default function CustomerMenu({ onOpenCart }) {
                           </>
                         )}
                       </div>
-                      
+
                       {offer.tag && (
                         <span className="text-[9px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-md shadow-xs">
                           {offer.tag}
@@ -747,7 +741,7 @@ export default function CustomerMenu({ onOpenCart }) {
                           </div>
                         );
                       })();
-                  })}
+                    })}
                 </div>
               </div>
 
@@ -769,7 +763,7 @@ export default function CustomerMenu({ onOpenCart }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">{cat.items.length} items</span>
-                      <button 
+                      <button
                         onClick={() => {
                           setActiveCategory(cat.id);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -785,7 +779,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
                     {cat.items.map((item) => {
                       const qty = getItemCartQty(item.id);
-                      
+
                       const renderTag = (tag) => {
                         if (!tag) return null;
                         const lowerTag = tag.toLowerCase();
@@ -794,7 +788,7 @@ export default function CustomerMenu({ onOpenCart }) {
                         else if (lowerTag.includes('trending')) colorClass = 'text-orange-900 bg-orange-200';
                         else if (lowerTag.includes('new')) colorClass = 'text-blue-900 bg-blue-100 border border-blue-200';
                         else if (lowerTag.includes('value') || lowerTag.includes('discount')) colorClass = 'text-emerald-900 bg-emerald-100 border border-emerald-200';
-                        
+
                         return <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-md shadow-2xs ${colorClass}`}>{tag}</span>;
                       };
 
@@ -809,37 +803,37 @@ export default function CustomerMenu({ onOpenCart }) {
                         ];
                         const gradient = cardGradients[cat.items.indexOf(item) % cardGradients.length];
                         return (
-                        <div
-                          key={item.id}
-                          onClick={() => setSelectedItem(item)}
-                          className={`shrink-0 w-64 snap-start bg-gradient-to-br ${gradient} border rounded-2xl p-3 flex flex-col justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-xs group relative cursor-pointer`}
-                        >
-                          <div className="space-y-2">
-                            <div className="h-28 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
-                              <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</span>
-                              <div className={`absolute top-2 left-2 w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
-                              <div className="absolute top-2 right-2">{renderTag(item.tag)}</div>
+                          <div
+                            key={item.id}
+                            onClick={() => setSelectedItem(item)}
+                            className={`shrink-0 w-64 snap-start bg-gradient-to-br ${gradient} border rounded-2xl p-3 flex flex-col justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-xs group relative cursor-pointer`}
+                          >
+                            <div className="space-y-2">
+                              <div className="h-28 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
+                                <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</span>
+                                <div className={`absolute top-2 left-2 w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                                <div className="absolute top-2 right-2">{renderTag(item.tag)}</div>
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-extrabold text-slate-900 leading-snug line-clamp-1">{item.name}</h3>
+                                {item.description && <p className="text-[10px] text-slate-500 line-clamp-1">{item.description}</p>}
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="text-sm font-extrabold text-slate-900 leading-snug line-clamp-1">{item.name}</h3>
-                              {item.description && <p className="text-[10px] text-slate-500 line-clamp-1">{item.description}</p>}
+                            <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                              <span className="text-base font-black text-slate-900">₹{item.price}</span>
+                              <div onClick={(e) => e.stopPropagation()}>
+                                {qty > 0 ? (
+                                  <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1 font-bold shadow-sm">
+                                    <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
+                                    <span className="text-xs font-black px-1">{qty}</span>
+                                    <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
+                                  </div>
+                                ) : (
+                                  <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-[11px] active:scale-95 transition-transform shadow-2xs">+ ADD</button>
+                                )}
+                              </div>
                             </div>
                           </div>
-                          <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between">
-                            <span className="text-base font-black text-slate-900">₹{item.price}</span>
-                            <div onClick={(e) => e.stopPropagation()}>
-                              {qty > 0 ? (
-                                <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1 font-bold shadow-sm">
-                                  <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
-                                  <span className="text-xs font-black px-1">{qty}</span>
-                                  <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
-                                </div>
-                              ) : (
-                                <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-[11px] active:scale-95 transition-transform shadow-2xs">+ ADD</button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
                         );
                       })();
                     })}
@@ -924,34 +918,34 @@ export default function CustomerMenu({ onOpenCart }) {
                       ];
                       const gradient = cardGradients[idx % cardGradients.length];
                       return (
-                      <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedItem(item)} className={`bg-gradient-to-br ${gradient} border rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl transition-all duration-300 shadow-sm group relative overflow-hidden cursor-pointer`}>
-                        <div className="space-y-3 z-10">
-                          <div className="h-32 sm:h-40 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
-                            <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</motion.span>
-                            <div className={`absolute top-3 left-3 w-5 h-5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
-                            {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-800 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedItem(item)} className={`bg-gradient-to-br ${gradient} border rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl transition-all duration-300 shadow-sm group relative overflow-hidden cursor-pointer`}>
+                          <div className="space-y-3 z-10">
+                            <div className="h-32 sm:h-40 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
+                              <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</motion.span>
+                              <div className={`absolute top-3 left-3 w-5 h-5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                              {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-800 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
+                            </div>
+                            <div className="pt-2">
+                              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug line-clamp-1 group-hover:text-emerald-700 transition-colors">{item.name}</h3>
+                              {item.categories?.name && <span className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest block mt-1">{item.categories.name}</span>}
+                            </div>
+                            {item.description && <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>}
                           </div>
-                          <div className="pt-2">
-                            <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug line-clamp-1 group-hover:text-emerald-700 transition-colors">{item.name}</h3>
-                            {item.categories?.name && <span className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest block mt-1">{item.categories.name}</span>}
+                          <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between gap-2 z-10" onClick={(e) => e.stopPropagation()}>
+                            <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight">₹{item.price}</span>
+                            <motion.div layout className="flex items-center">
+                              {qty > 0 ? (
+                                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-md">
+                                  <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-4 h-4" /></button>
+                                  <span className="text-sm font-black px-1.5">{qty}</span>
+                                  <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-4 h-4" /></button>
+                                </motion.div>
+                              ) : (
+                                <motion.button initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs sm:text-sm transition-all shadow-sm shrink-0 cursor-pointer active:scale-95">+ ADD</motion.button>
+                              )}
+                            </motion.div>
                           </div>
-                          {item.description && <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>}
-                        </div>
-                        <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between gap-2 z-10" onClick={(e) => e.stopPropagation()}>
-                          <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight">₹{item.price}</span>
-                          <motion.div layout className="flex items-center">
-                            {qty > 0 ? (
-                              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-md">
-                                <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-4 h-4" /></button>
-                                <span className="text-sm font-black px-1.5">{qty}</span>
-                                <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-4 h-4" /></button>
-                              </motion.div>
-                            ) : (
-                              <motion.button initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs sm:text-sm transition-all shadow-sm shrink-0 cursor-pointer active:scale-95">+ ADD</motion.button>
-                            )}
-                          </motion.div>
-                        </div>
-                      </motion.div>
+                        </motion.div>
                       );
                     })();
                   })}
@@ -1152,205 +1146,204 @@ export default function CustomerMenu({ onOpenCart }) {
                     }
                     setPopupTouchStart(null);
                   }}
-                initial={{ 
-                  y: "100%", 
-                  scaleX: 0.3, 
-                  scaleY: 0.1, 
-                  borderRadius: "80px",
-                  opacity: 0
-                }}
-                animate={{ 
-                  y: 0, 
-                  scaleX: 1, 
-                  scaleY: 1, 
-                  borderRadius: "36px",
-                  opacity: 1 
-                }}
-                exit={{ 
-                  y: "100%", 
-                  scaleX: 0.25, 
-                  scaleY: 0.08, 
-                  borderRadius: "80px",
-                  opacity: 0 
-                }}
-                transition={{ 
-                  type: "spring",
-                  damping: 28,
-                  stiffness: 380,
-                  mass: 0.55
-                }}
-                className="bg-white/90 backdrop-blur-2xl border border-white/80 w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative origin-bottom rounded-[36px]"
-              >
-                {/* Close Button */}
-                <button
-                  onClick={() => setSelectedItem(null)}
-                  className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/60 hover:bg-white/90 backdrop-blur-md border border-white/90 flex items-center justify-center text-slate-700 hover:text-slate-900 shadow-md transition-all cursor-pointer active:scale-95"
+                  initial={{
+                    y: "100%",
+                    scaleX: 0.3,
+                    scaleY: 0.1,
+                    borderRadius: "80px",
+                    opacity: 0
+                  }}
+                  animate={{
+                    y: 0,
+                    scaleX: 1,
+                    scaleY: 1,
+                    borderRadius: "36px",
+                    opacity: 1
+                  }}
+                  exit={{
+                    y: "100%",
+                    scaleX: 0.25,
+                    scaleY: 0.08,
+                    borderRadius: "80px",
+                    opacity: 0
+                  }}
+                  transition={{
+                    type: "spring",
+                    damping: 28,
+                    stiffness: 380,
+                    mass: 0.55
+                  }}
+                  className="bg-white/90 backdrop-blur-2xl border border-white/80 w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative origin-bottom rounded-[36px]"
                 >
-                  <X className="w-4 h-4" />
-                </button>
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setSelectedItem(null)}
+                    className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/60 hover:bg-white/90 backdrop-blur-md border border-white/90 flex items-center justify-center text-slate-700 hover:text-slate-900 shadow-md transition-all cursor-pointer active:scale-95"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
 
-                {/* Hero Emoji Section */}
-                <div className={`bg-gradient-to-br ${heroGradient} px-6 pt-10 pb-8 flex flex-col items-center gap-3 relative overflow-hidden rounded-t-[36px] border-b border-white/60 backdrop-blur-md`}>
-                  <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.6) 0%, transparent 50%)' }} />
-                  {(() => {
-                    const hasPlus = item.emoji?.includes('+');
-                    const parts = hasPlus ? item.emoji.split('+').map(p => p.trim()) : [item.emoji];
-                    return (
-                      <div className="flex items-center gap-1.5 relative z-10">
-                        <motion.span
-                          initial={{ scale: 0.5, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
-                          transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 } }}
-                          className="text-8xl sm:text-9xl drop-shadow-md"
-                        >
-                          {parts[0]}
-                        </motion.span>
-                        {hasPlus && (
-                          <>
-                            <span className="text-4xl text-amber-600 font-extrabold">+</span>
-                            <motion.span
-                              initial={{ scale: 0.5, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
-                              transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.6 } }}
-                              className="text-8xl sm:text-9xl drop-shadow-md"
-                            >
-                              {parts[1]}
-                            </motion.span>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })()}
-                  {item.tag && (
-                    <span className="text-[10px] uppercase font-black bg-white/70 backdrop-blur-md text-slate-800 px-3.5 py-1.5 rounded-full border border-white/90 shadow-md relative z-10">{item.tag}</span>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 overscroll-contain touch-pan-y">
-                  {/* Title & Badges */}
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{item.name}</h2>
-                      {typeof item.is_veg === 'boolean' && (
-                        <div className={`w-6 h-6 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 mt-1 ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}>
-                          <div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {cat && (
-                        <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 uppercase tracking-wider">
-                          {cat.emoji || '🍽️'} {cat.name}
-                        </span>
-                      )}
-                      {item.is_veg === false && (
-                        <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-lg border uppercase tracking-wider text-red-800 bg-red-50 border-red-200">
-                          🍗 Non-Veg
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Description / Combo Details */}
-                  <div className="space-y-3">
-                    {item.description && (
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">About this item</span>
-                        <p className="text-sm text-slate-600 leading-relaxed font-medium">{item.description}</p>
-                      </div>
-                    )}
-
-                    {item.items_included && (
-                      <div className="space-y-1 bg-amber-500/10 backdrop-blur-md border border-amber-300/60 rounded-2xl p-4 shadow-2xs">
-                        <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">🍱 Items Included in Combo:</span>
-                        <p className="text-xs text-amber-900 font-bold leading-relaxed">{item.items_included}</p>
-                      </div>
-                    )}
-
-                    {item.original_price && (
-                      <div className="bg-emerald-500/10 backdrop-blur-md border border-emerald-300/60 rounded-2xl p-4 flex items-center justify-between shadow-2xs">
-                        <div>
-                          <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Combo Discount</span>
-                          <span className="text-xs text-slate-500 font-semibold">Original Price: <span className="line-through">₹{item.original_price}</span></span>
-                        </div>
-                        <span className="text-xs font-black text-emerald-800 bg-emerald-100 px-3 py-1 rounded-xl">Save ₹{Number(item.original_price) - Number(item.price)}!</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Quick Info */}
-                  <div className="flex items-center gap-3 py-3 border-y border-slate-100">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>10-15 min prep</span>
-                    </div>
-                    <div className="w-px h-4 bg-slate-200" />
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                      <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Hygiene certified</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sticky Bottom Add-to-Cart Bar */}
-                <div className="border-t border-white/60 bg-white/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between gap-4 shrink-0 shadow-lg rounded-b-[36px]">
-                  <div>
-                    <span className="text-2xl font-black text-slate-900">₹{item.price}</span>
-                    {item.tag && <span className="text-[10px] text-slate-400 font-bold block">{item.tag}</span>}
-                  </div>
-                  {qty > 0 ? (
-                    <div className="flex items-center gap-3 bg-emerald-600 text-white rounded-2xl px-5 py-3 font-bold shadow-lg">
-                      <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-5 h-5" /></button>
-                      <span className="text-lg font-black px-2">{qty}</span>
-                      <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-5 h-5" /></button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={(e) => { handleAddToCartWithAnim(e, item); }}
-                      className="px-8 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg transition-all cursor-pointer active:scale-95"
-                    >
-                      + ADD TO CART
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-
-              {/* Category items strip at the bottom (Instamart style) */}
-              {categoryItems.length > 1 && (
-                <div className="w-full flex flex-col items-center gap-2">
-                  <span className="text-[10px] font-black text-white/90 bg-slate-950/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-md uppercase tracking-wider">
-                    {categoryLabel}
-                  </span>
-                  <div className="w-full flex items-center justify-center gap-3.5 overflow-x-auto py-2 px-1 scrollbar-none snap-x snap-mandatory">
-                    {categoryItems.map(sibling => {
-                      const isSelected = sibling.id === item.id;
-                      const hasPlus = sibling.emoji?.includes('+');
-                      const parts = hasPlus ? sibling.emoji.split('+').map(p => p.trim()) : [sibling.emoji];
+                  {/* Hero Emoji Section */}
+                  <div className={`bg-gradient-to-br ${heroGradient} px-6 pt-10 pb-8 flex flex-col items-center gap-3 relative overflow-hidden rounded-t-[36px] border-b border-white/60 backdrop-blur-md`}>
+                    <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.6) 0%, transparent 50%)' }} />
+                    {(() => {
+                      const hasPlus = item.emoji?.includes('+');
+                      const parts = hasPlus ? item.emoji.split('+').map(p => p.trim()) : [item.emoji];
                       return (
-                        <div
-                          key={sibling.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedItem(sibling);
-                          }}
-                          className={`shrink-0 w-14 h-14 rounded-full bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center relative cursor-pointer transition-all duration-300 ${
-                            isSelected 
-                              ? 'ring-4 ring-emerald-500 scale-110 shadow-lg shadow-emerald-500/30' 
-                              : 'border border-slate-200 opacity-60 hover:opacity-100 hover:scale-105'
-                          }`}
-                        >
-                          <span className="text-2xl drop-shadow-xs">{parts[0]}</span>
-                          {hasPlus && <span className="absolute -top-1 -right-1 text-[9px] bg-amber-400 text-slate-950 font-black rounded-full px-1.5 shadow-xs">+</span>}
+                        <div className="flex items-center gap-1.5 relative z-10">
+                          <motion.span
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
+                            transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 } }}
+                            className="text-8xl sm:text-9xl drop-shadow-md"
+                          >
+                            {parts[0]}
+                          </motion.span>
+                          {hasPlus && (
+                            <>
+                              <span className="text-4xl text-amber-600 font-extrabold">+</span>
+                              <motion.span
+                                initial={{ scale: 0.5, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
+                                transition={{ scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.6 } }}
+                                className="text-8xl sm:text-9xl drop-shadow-md"
+                              >
+                                {parts[1]}
+                              </motion.span>
+                            </>
+                          )}
                         </div>
                       );
-                    })}
+                    })()}
+                    {item.tag && (
+                      <span className="text-[10px] uppercase font-black bg-white/70 backdrop-blur-md text-slate-800 px-3.5 py-1.5 rounded-full border border-white/90 shadow-md relative z-10">{item.tag}</span>
+                    )}
                   </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        );
+
+                  {/* Content */}
+                  <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 overscroll-contain touch-pan-y">
+                    {/* Title & Badges */}
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{item.name}</h2>
+                        {typeof item.is_veg === 'boolean' && (
+                          <div className={`w-6 h-6 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm shrink-0 mt-1 ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}>
+                            <div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {cat && (
+                          <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 uppercase tracking-wider">
+                            {cat.emoji || '🍽️'} {cat.name}
+                          </span>
+                        )}
+                        {item.is_veg === false && (
+                          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-lg border uppercase tracking-wider text-red-800 bg-red-50 border-red-200">
+                            🍗 Non-Veg
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Description / Combo Details */}
+                    <div className="space-y-3">
+                      {item.description && (
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">About this item</span>
+                          <p className="text-sm text-slate-600 leading-relaxed font-medium">{item.description}</p>
+                        </div>
+                      )}
+
+                      {item.items_included && (
+                        <div className="space-y-1 bg-amber-500/10 backdrop-blur-md border border-amber-300/60 rounded-2xl p-4 shadow-2xs">
+                          <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">🍱 Items Included in Combo:</span>
+                          <p className="text-xs text-amber-900 font-bold leading-relaxed">{item.items_included}</p>
+                        </div>
+                      )}
+
+                      {item.original_price && (
+                        <div className="bg-emerald-500/10 backdrop-blur-md border border-emerald-300/60 rounded-2xl p-4 flex items-center justify-between shadow-2xs">
+                          <div>
+                            <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Combo Discount</span>
+                            <span className="text-xs text-slate-500 font-semibold">Original Price: <span className="line-through">₹{item.original_price}</span></span>
+                          </div>
+                          <span className="text-xs font-black text-emerald-800 bg-emerald-100 px-3 py-1 rounded-xl">Save ₹{Number(item.original_price) - Number(item.price)}!</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Quick Info */}
+                    <div className="flex items-center gap-3 py-3 border-y border-slate-100">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>10-15 min prep</span>
+                      </div>
+                      <div className="w-px h-4 bg-slate-200" />
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                        <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Freshly prepared</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sticky Bottom Add-to-Cart Bar */}
+                  <div className="border-t border-white/60 bg-white/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between gap-4 shrink-0 shadow-lg rounded-b-[36px]">
+                    <div>
+                      <span className="text-2xl font-black text-slate-900">₹{item.price}</span>
+                      {item.tag && <span className="text-[10px] text-slate-400 font-bold block">{item.tag}</span>}
+                    </div>
+                    {qty > 0 ? (
+                      <div className="flex items-center gap-3 bg-emerald-600 text-white rounded-2xl px-5 py-3 font-bold shadow-lg">
+                        <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-5 h-5" /></button>
+                        <span className="text-lg font-black px-2">{qty}</span>
+                        <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-5 h-5" /></button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(e) => { handleAddToCartWithAnim(e, item); }}
+                        className="px-8 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg transition-all cursor-pointer active:scale-95"
+                      >
+                        + ADD TO CART
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+
+                {/* Category items strip at the bottom (Instamart style) */}
+                {categoryItems.length > 1 && (
+                  <div className="w-full flex flex-col items-center gap-2">
+                    <span className="text-[10px] font-black text-white/90 bg-slate-950/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-md uppercase tracking-wider">
+                      {categoryLabel}
+                    </span>
+                    <div className="w-full flex items-center justify-center gap-3.5 overflow-x-auto py-2 px-1 scrollbar-none snap-x snap-mandatory">
+                      {categoryItems.map(sibling => {
+                        const isSelected = sibling.id === item.id;
+                        const hasPlus = sibling.emoji?.includes('+');
+                        const parts = hasPlus ? sibling.emoji.split('+').map(p => p.trim()) : [sibling.emoji];
+                        return (
+                          <div
+                            key={sibling.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedItem(sibling);
+                            }}
+                            className={`shrink-0 w-14 h-14 rounded-full bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center relative cursor-pointer transition-all duration-300 ${isSelected
+                                ? 'ring-4 ring-emerald-500 scale-110 shadow-lg shadow-emerald-500/30'
+                                : 'border border-slate-200 opacity-60 hover:opacity-100 hover:scale-105'
+                              }`}
+                          >
+                            <span className="text-2xl drop-shadow-xs">{parts[0]}</span>
+                            {hasPlus && <span className="absolute -top-1 -right-1 text-[9px] bg-amber-400 text-slate-950 font-black rounded-full px-1.5 shadow-xs">+</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          );
         })()}
       </AnimatePresence>
 

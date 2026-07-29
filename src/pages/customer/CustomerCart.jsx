@@ -1175,7 +1175,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                       </span>
                       <p className="text-[11px] font-bold text-amber-900 leading-snug">
                         {canteenSettings.isHoliday
-                          ? 'The canteen is closed today due to a holiday. ordering or checkout is locked.'
+                          ? 'Ordering by app is locked by admin. ordering or checkout is locked.'
                           : `Orders are only accepted between ${canteenSettings.openTime} and ${canteenSettings.closeTime} (IST). ordering or checkout is locked.`}
                       </p>
                     </div>
