@@ -489,7 +489,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-amber-200'
               }`}
             >
-              <span className="relative z-10 animate-pulse">🔥 Special Offers</span>
+              <span className="relative z-10 animate-pulse">🔥 Combo Deals</span>
               <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${
                 activeCategory === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-100 text-amber-900'
               }`}>
@@ -700,58 +700,7 @@ export default function CustomerMenu({ onOpenCart }) {
                 </div>
               </div>
 
-              {/* Offers section anchor */}
-              {offers.length > 0 && (
-                <div
-                  data-cat-id="offers"
-                  ref={el => { sectionRefs.current['offers'] = el; }}
-                  style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 400px' }}
-                >
-                  <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm py-2 mb-4 border-b border-amber-100 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Flame className="w-5 h-5 text-amber-500 fill-amber-500" />
-                      <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">Special Offers</h2>
-                    </div>
-                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">{offers.length} deals</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {offers.map(offer => {
-                      const qty = getItemCartQty(offer.id);
-                      const savings = Number(offer.original_price || offer.price) - Number(offer.price);
-                      return (
-                        <div key={offer.id} className="bg-white border border-amber-200/90 rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl hover:border-amber-300 transition-all shadow-2xs group overflow-hidden">
-                          <div className="space-y-3">
-                            <div className="h-28 rounded-xl bg-gradient-to-br from-amber-500/10 via-amber-100/50 to-slate-50 flex items-center justify-center relative overflow-hidden group-hover:scale-[1.02] transition-transform">
-                              <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{offer.emoji || '🔥'}</span>
-                              {offer.tag && <span className="absolute top-2.5 right-2.5 text-[10px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-md">{offer.tag}</span>}
-                              {savings > 0 && <span className="absolute bottom-2.5 left-2.5 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300">Save ₹{savings}</span>}
-                            </div>
-                            <div>
-                              <h3 className="text-base font-black text-slate-900 leading-tight">{offer.name}</h3>
-                              <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mt-1">{offer.description || offer.items_included}</p>
-                            </div>
-                          </div>
-                          <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between">
-                            <div className="flex items-baseline gap-1.5">
-                              <span className="text-lg font-black text-slate-900">₹{offer.price}</span>
-                              {offer.original_price && <span className="text-xs line-through text-slate-400">₹{offer.original_price}</span>}
-                            </div>
-                            {qty > 0 ? (
-                              <div className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold shadow-md">
-                                <button onClick={() => updateCartQty(offer.id, -1)} className="hover:opacity-80 p-0.5"><Minus className="w-3.5 h-3.5" /></button>
-                                <span className="text-xs font-black px-1">{qty}</span>
-                                <button onClick={() => updateCartQty(offer.id, 1)} className="hover:opacity-80 p-0.5"><Plus className="w-3.5 h-3.5" /></button>
-                              </div>
-                            ) : (
-                              <button onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥', has_packaging_charge: true })} className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0">+ ADD</button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+
 
               {/* Category sections */}
               {groupedByCategory.map(cat => (

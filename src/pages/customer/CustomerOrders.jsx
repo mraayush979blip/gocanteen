@@ -405,9 +405,24 @@ export default function CustomerOrders({ onOpenAuth }) {
 
                   {/* Middle Row: Items Summary & Pickup Security PIN */}
                   <div className="flex items-center justify-between gap-2 text-xs">
-                    <p className="text-slate-600 font-bold truncate flex-1">
-                      {summaryText || 'Food order items'}
-                    </p>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {/* Emoji Preview Stack */}
+                      <div className="flex items-center -space-x-1.5 shrink-0">
+                        {itemsList.slice(0, 3).map((item, i) => (
+                          <div key={i} className="w-6 h-6 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center shadow-2xs">
+                            <span className="text-xs">{item.inventory?.emoji || '🍽️'}</span>
+                          </div>
+                        ))}
+                        {itemsList.length > 3 && (
+                          <div className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center shadow-2xs">
+                            <span className="text-[8px] font-black text-slate-600">+{itemsList.length - 3}</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-slate-600 font-bold truncate">
+                        {summaryText || 'Food order items'}
+                      </p>
+                    </div>
 
                     {order.status === 'cancelled' ? (
                       <span className="text-[11px] font-black text-red-800 bg-red-100 px-2 py-0.5 rounded-md border border-red-300 shrink-0">
@@ -551,19 +566,53 @@ export default function CustomerOrders({ onOpenAuth }) {
                     )}
 
                     {/* Itemized Order Breakdown */}
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Itemized Breakdown</span>
-                      <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
-                        {order.order_items?.map((item, idx) => (
-                          <div key={idx} className="p-2.5 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-emerald-700 font-black text-xs">{item.quantity}x</span>
-                              <span className="text-base">{item.inventory?.emoji || '🍽️'}</span>
-                              <span className="font-bold text-slate-900">{item.inventory?.name || item.item_name}</span>
+                      <div className="space-y-2">
+                        {order.order_items?.map((item, idx) => {
+                          const itemTotal = (Number(item.price_at_time) || 0) * (Number(item.quantity) || 1);
+                          const emoji = item.inventory?.emoji || '🍽️';
+                          const gradients = [
+                            'from-amber-50 to-orange-50 border-amber-200/80',
+                            'from-emerald-50 to-teal-50 border-emerald-200/80',
+                            'from-violet-50 to-purple-50 border-violet-200/80',
+                            'from-sky-50 to-blue-50 border-sky-200/80',
+                            'from-rose-50 to-pink-50 border-rose-200/80',
+                            'from-lime-50 to-green-50 border-lime-200/80',
+                          ];
+                          const gradient = gradients[idx % gradients.length];
+                          return (
+                            <div key={idx} className={`bg-gradient-to-r ${gradient} border rounded-2xl p-3 flex items-center gap-3 transition-all hover:shadow-sm`}>
+                              {/* Emoji Container */}
+                              <div className="relative shrink-0">
+                                <div className="w-12 h-12 rounded-xl bg-white/80 border border-white shadow-sm flex items-center justify-center backdrop-blur-sm">
+                                  <span className="text-2xl drop-shadow-sm">{emoji}</span>
+                                </div>
+                                {/* Quantity Badge */}
+                                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center shadow-sm ring-2 ring-white">
+                                  {item.quantity}
+                                </span>
+                              </div>
+
+                              {/* Item Details */}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-[13px] font-extrabold text-slate-900 leading-tight truncate">
+                                  {item.inventory?.name || item.item_name}
+                                </h4>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <span className="text-[10px] font-bold text-slate-500">
+                                    ₹{item.price_at_time} × {item.quantity}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Price */}
+                              <div className="shrink-0 text-right">
+                                <span className="text-sm font-black text-slate-900">₹{itemTotal}</span>
+                              </div>
                             </div>
-                            <span className="font-extrabold text-slate-700">₹{(Number(item.price_at_time) || 0) * (Number(item.quantity) || 1)}</span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
 

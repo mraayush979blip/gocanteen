@@ -881,16 +881,36 @@ export default function AdminOrders() {
                           Ordered Items ({order.order_items?.length || 0})
                         </span>
                         <div className="flex flex-wrap gap-2">
-                          {order.order_items?.map((item, idx) => (
-                            <span
-                              key={idx}
-                              className="bg-slate-50 border border-slate-200 text-slate-800 text-xs px-2.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-2xs"
-                            >
-                              <span className="text-emerald-700 font-extrabold">{item.quantity}x</span>
-                              {item.inventory?.emoji || '🍽️'} {item.inventory?.name || item.item_name || 'Item'}
-                              <span className="text-slate-400 font-medium">@ ₹{item.price_at_time}</span>
-                            </span>
-                          ))}
+                          {order.order_items?.map((item, idx) => {
+                            const emoji = item.inventory?.emoji || '🍽️';
+                            const chipGradients = [
+                              'from-amber-50 to-orange-50 border-amber-200',
+                              'from-emerald-50 to-teal-50 border-emerald-200',
+                              'from-violet-50 to-purple-50 border-violet-200',
+                              'from-sky-50 to-cyan-50 border-sky-200',
+                              'from-rose-50 to-pink-50 border-rose-200',
+                              'from-lime-50 to-green-50 border-lime-200',
+                            ];
+                            const chipGradient = chipGradients[idx % chipGradients.length];
+                            return (
+                              <div
+                                key={idx}
+                                className={`bg-gradient-to-r ${chipGradient} border text-slate-800 text-xs px-2.5 py-1.5 rounded-xl font-bold flex items-center gap-2 shadow-2xs`}
+                              >
+                                <div className="w-7 h-7 rounded-lg bg-white/80 border border-white shadow-sm flex items-center justify-center shrink-0">
+                                  <span className="text-base">{emoji}</span>
+                                </div>
+                                <div className="flex flex-col leading-tight">
+                                  <span className="font-extrabold text-slate-900 text-[11px]">
+                                    {item.inventory?.name || item.item_name || 'Item'}
+                                  </span>
+                                  <span className="text-[10px] text-slate-500 font-bold">
+                                    {item.quantity}x @ ₹{item.price_at_time}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                         {cleanNotes && (
                           <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5 mt-2">
