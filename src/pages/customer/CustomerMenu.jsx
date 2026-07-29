@@ -54,7 +54,8 @@ export default function CustomerMenu({ onOpenCart }) {
   const [expandedSections, setExpandedSections] = useState(new Set());
   const [recentOrders, setRecentOrders] = useState([]);
   const [featuredFilter, setFeaturedFilter] = useState(''); // 'popular' | 'new' | 'under99' | ''
-  const [selectedItem, setSelectedItem] = useState(null); // Instamart-style item detail popup
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [popupTouchStart, setPopupTouchStart] = useState(null); // Instamart-style item detail popup
 
   const sectionRefs = useRef({});
 
@@ -96,6 +97,18 @@ export default function CustomerMenu({ onOpenCart }) {
     setSearchQuery(searchParams.get('q') || '');
     setActiveCategory(searchParams.get('category') || 'all');
   }, [searchParams]);
+
+  // Lock body scrolling when item detail popup is active to prevent background scrolling
+  useEffect(() => {
+    if (selectedItem) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedItem]);
 
   // Update URL params when search query or category changes
   const handleSearchChange = (val) => {
@@ -1061,6 +1074,21 @@ export default function CustomerMenu({ onOpenCart }) {
             ? inventory.filter(i => i.category_id === item.category_id)
             : offers;
 
+          const currentIndex = categoryItems.findIndex(i => i.id === item.id);
+          const handleNextSibling = (e) => {
+            e?.stopPropagation();
+            if (categoryItems.length <= 1) return;
+            const nextIdx = (currentIndex + 1) % categoryItems.length;
+            setSelectedItem(categoryItems[nextIdx]);
+          };
+
+          const handlePrevSibling = (e) => {
+            e?.stopPropagation();
+            if (categoryItems.length <= 1) return;
+            const prevIdx = (currentIndex - 1 + categoryItems.length) % categoryItems.length;
+            setSelectedItem(categoryItems[prevIdx]);
+          };
+
           return (
             <motion.div
               initial={{ opacity: 0 }}
@@ -1070,8 +1098,41 @@ export default function CustomerMenu({ onOpenCart }) {
               className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs"
               onClick={() => setSelectedItem(null)}
             >
-              <div className="flex flex-col items-center gap-4 max-w-md w-full px-4 pb-6 sm:pb-0" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col items-center gap-4 max-w-md w-full px-4 pb-6 sm:pb-0 relative" onClick={(e) => e.stopPropagation()}>
+                {/* Floating Previous Item Arrow (Desktop/Tablet) */}
+                {categoryItems.length > 1 && (
+                  <button
+                    onClick={handlePrevSibling}
+                    className="hidden sm:flex absolute -left-14 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-800 shadow-xl border border-slate-200 items-center justify-center cursor-pointer active:scale-95 transition-all"
+                    title="Previous Item in Category"
+                  >
+                    <ChevronLeft className="w-6 h-6 text-slate-800" />
+                  </button>
+                )}
+
+                {/* Floating Next Item Arrow (Desktop/Tablet) */}
+                {categoryItems.length > 1 && (
+                  <button
+                    onClick={handleNextSibling}
+                    className="hidden sm:flex absolute -right-14 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-800 shadow-xl border border-slate-200 items-center justify-center cursor-pointer active:scale-95 transition-all"
+                    title="Next Item in Category"
+                  >
+                    <ChevronRight className="w-6 h-6 text-slate-800" />
+                  </button>
+                )}
+
                 <motion.div
+                  onTouchStart={(e) => setPopupTouchStart(e.touches[0].clientX)}
+                  onTouchEnd={(e) => {
+                    if (popupTouchStart === null) return;
+                    const diffX = popupTouchStart - e.changedTouches[0].clientX;
+                    if (diffX > 45) {
+                      handleNextSibling(e);
+                    } else if (diffX < -45) {
+                      handlePrevSibling(e);
+                    }
+                    setPopupTouchStart(null);
+                  }}
                 initial={{ 
                   y: "100%", 
                   scaleX: 0.3, 

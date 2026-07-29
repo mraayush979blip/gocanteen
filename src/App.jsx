@@ -149,9 +149,16 @@ function MainContent() {
     };
   }, []);
 
-  // Intercept back button to confirm exit when on the menu/home view
+  // Intercept back button to confirm exit when on the menu/home view (ignore during page reload/unload)
   useEffect(() => {
-    const handlePopState = (e) => {
+    let isUnloading = false;
+    const handleBeforeUnload = () => {
+      isUnloading = true;
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    const handlePopState = () => {
+      if (isUnloading) return;
       if (window.location.pathname === '/menu' || window.location.pathname === '/') {
         const confirmClose = window.confirm("Do you want to close the app?");
         if (!confirmClose) {
@@ -161,7 +168,10 @@ function MainContent() {
     };
     window.history.pushState(null, null, window.location.pathname);
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, [location.pathname]);
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -212,12 +222,10 @@ function MainContent() {
       )}
 
       {/* Top Navbar */}
-      {!isDeveloperRoute && (
-        <Navbar
-          onOpenAuth={() => handleOpenAuth('customer')}
-          onOpenCart={() => setCartOpen(true)}
-        />
-      )}
+      <Navbar
+        onOpenAuth={() => handleOpenAuth('customer')}
+        onOpenCart={() => setCartOpen(true)}
+      />
 
       {/* Floating Coupon & Deal Ticker Banner */}
       {activePortal === 'customer' && !isLegalPolicyRoute && !isDeveloperRoute && <FloatingCouponBanner />}

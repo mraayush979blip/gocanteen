@@ -98,6 +98,8 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
     }
   };
 
+  const isDeveloperRoute = pathname.endsWith('/developer') || pathname === '/about-developer';
+
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
@@ -105,20 +107,31 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
           <div className="flex items-center justify-between h-16 sm:h-18">
             
             {/* Top Header Logo with App Icon */}
-            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/90 overflow-hidden flex items-center justify-center shadow-md active:scale-95 transition-transform p-0.5 shrink-0">
-                <img src="/app-icon.png" alt="Go Canteen Logo" className="w-full h-full object-contain rounded-xl" />
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-black text-lg tracking-tight text-slate-900 leading-none">GO CANTEEN</span>
-                  <span className="bg-yellow-400 text-slate-950 font-black text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow-2xs">
-                    FAST
+            <div className="flex items-center gap-2">
+              {isDeveloperRoute && (
+                <button
+                  onClick={() => navigate(-1)}
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 transition-all shrink-0 flex items-center justify-center cursor-pointer shadow-2xs mr-1 active:scale-95 border border-slate-200"
+                  title="Go Back"
+                >
+                  <ArrowLeft className="w-5 h-5 text-slate-800 font-bold" />
+                </button>
+              )}
+              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+                <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/90 overflow-hidden flex items-center justify-center shadow-md active:scale-95 transition-transform p-0.5 shrink-0">
+                  <img src="/app-icon.png" alt="Go Canteen Logo" className="w-full h-full object-contain rounded-xl" />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-black text-lg tracking-tight text-slate-900 leading-none">GO CANTEEN</span>
+                    <span className="bg-yellow-400 text-slate-950 font-black text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow-2xs">
+                      FAST
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 font-extrabold tracking-wider uppercase mt-0.5">
+                    {activePortal === 'admin' ? 'Executive Admin' : activePortal === 'staff' ? 'Kitchen Staff KDS' : 'Customer Portal'}
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-500 font-extrabold tracking-wider uppercase mt-0.5">
-                  {activePortal === 'admin' ? 'Executive Admin' : activePortal === 'staff' ? 'Kitchen Staff KDS' : 'Customer Portal'}
-                </span>
               </div>
             </div>
 
@@ -126,18 +139,20 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
             {/* Right Action Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-2">
               
-              {/* Fullscreen Toggle Button */}
-              <button
-                onClick={toggleFullscreen}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 transition-all shrink-0 flex items-center justify-center cursor-pointer shadow-2xs"
-                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen View'}
-              >
-                {isFullscreen ? (
-                  <Minimize className="w-4 h-4 text-purple-600 font-bold" />
-                ) : (
-                  <Maximize className="w-4 h-4 text-slate-700 font-bold" />
-                )}
-              </button>
+              {/* Fullscreen Toggle Button (Hidden on Developer Page) */}
+              {!isDeveloperRoute && (
+                <button
+                  onClick={toggleFullscreen}
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 transition-all shrink-0 flex items-center justify-center cursor-pointer shadow-2xs"
+                  title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen View'}
+                >
+                  {isFullscreen ? (
+                    <Minimize className="w-4 h-4 text-purple-600 font-bold" />
+                  ) : (
+                    <Maximize className="w-4 h-4 text-slate-700 font-bold" />
+                  )}
+                </button>
+              )}
 
               {/* Language Selector for Staff / Admin */}
               {(activePortal === 'staff' || activePortal === 'admin') && (
@@ -191,22 +206,24 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 </button>
               )}
 
-              {/* 3-Bar Menu Toggle Button (Desktop & Mobile) */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-2.5 rounded-xl border transition-all cursor-pointer shadow-2xs relative w-10 h-10 flex items-center justify-center ${
-                  mobileMenuOpen 
-                    ? 'bg-slate-900 text-white border-slate-900' 
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
-                }`}
-                title="More Options & Menu"
-              >
-                <div className="flex flex-col gap-1 w-5 h-3.5 justify-between items-center relative">
-                  <span className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform origin-center ${mobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
-                  <span className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
-                  <span className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform origin-center ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
-                </div>
-              </button>
+              {/* 3-Bar Menu Toggle Button (Hidden on Developer Page) */}
+              {!isDeveloperRoute && (
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className={`p-2.5 rounded-xl border transition-all cursor-pointer shadow-2xs relative w-10 h-10 flex items-center justify-center ${
+                    mobileMenuOpen 
+                      ? 'bg-slate-900 text-white border-slate-900' 
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
+                  }`}
+                  title="More Options & Menu"
+                >
+                  <div className="flex flex-col gap-1 w-5 h-3.5 justify-between items-center relative">
+                    <span className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform origin-center ${mobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+                    <span className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
+                    <span className={`w-5 h-0.5 bg-current rounded-full transition-all duration-300 transform origin-center ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+                  </div>
+                </button>
+              )}
             </div>
 
           </div>
