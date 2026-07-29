@@ -1063,7 +1063,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   scaleX: 0.3, 
                   scaleY: 0.1, 
                   borderRadius: "80px",
-                  opacity: 0 
+                  opacity: 0
                 }}
                 animate={{ 
                   y: 0, 
@@ -1081,9 +1081,9 @@ export default function CustomerMenu({ onOpenCart }) {
                 }}
                 transition={{ 
                   type: "spring",
-                  damping: 26,
-                  stiffness: 220,
-                  mass: 0.85
+                  damping: 28,
+                  stiffness: 380,
+                  mass: 0.55
                 }}
                 className="bg-white w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative origin-bottom"
               >
