@@ -1147,7 +1147,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   y: 0, 
                   scaleX: 1, 
                   scaleY: 1, 
-                  borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? "24px" : "24px 24px 0 0",
+                  borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? "36px" : "36px 36px 0 0",
                   opacity: 1 
                 }}
                 exit={{ 
@@ -1163,18 +1163,18 @@ export default function CustomerMenu({ onOpenCart }) {
                   stiffness: 380,
                   mass: 0.55
                 }}
-                className="bg-white w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative origin-bottom"
+                className="bg-white/90 backdrop-blur-2xl border border-white/80 w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative origin-bottom rounded-t-[36px] sm:rounded-[36px]"
               >
                 {/* Close Button */}
                 <button
                   onClick={() => setSelectedItem(null)}
-                  className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-white shadow-sm transition-all cursor-pointer"
+                  className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-white/60 hover:bg-white/90 backdrop-blur-md border border-white/90 flex items-center justify-center text-slate-700 hover:text-slate-900 shadow-md transition-all cursor-pointer active:scale-95"
                 >
                   <X className="w-4 h-4" />
                 </button>
 
                 {/* Hero Emoji Section */}
-                <div className={`bg-gradient-to-br ${heroGradient} px-6 pt-10 pb-8 flex flex-col items-center gap-3 relative overflow-hidden`}>
+                <div className={`bg-gradient-to-br ${heroGradient} px-6 pt-10 pb-8 flex flex-col items-center gap-3 relative overflow-hidden rounded-t-[36px] border-b border-white/60 backdrop-blur-md`}>
                   <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.6) 0%, transparent 50%)' }} />
                   {(() => {
                     const hasPlus = item.emoji?.includes('+');
@@ -1206,7 +1206,7 @@ export default function CustomerMenu({ onOpenCart }) {
                     );
                   })()}
                   {item.tag && (
-                    <span className="text-[10px] uppercase font-black bg-white/80 backdrop-blur-sm text-slate-800 px-3 py-1 rounded-full border border-slate-200/80 shadow-sm relative z-10">{item.tag}</span>
+                    <span className="text-[10px] uppercase font-black bg-white/70 backdrop-blur-md text-slate-800 px-3.5 py-1.5 rounded-full border border-white/90 shadow-md relative z-10">{item.tag}</span>
                   )}
                 </div>
 
@@ -1246,14 +1246,14 @@ export default function CustomerMenu({ onOpenCart }) {
                     )}
 
                     {item.items_included && (
-                      <div className="space-y-1 bg-amber-50/70 border border-amber-200/60 rounded-2xl p-3.5">
+                      <div className="space-y-1 bg-amber-500/10 backdrop-blur-md border border-amber-300/60 rounded-2xl p-4 shadow-2xs">
                         <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">🍱 Items Included in Combo:</span>
                         <p className="text-xs text-amber-900 font-bold leading-relaxed">{item.items_included}</p>
                       </div>
                     )}
 
                     {item.original_price && (
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between">
+                      <div className="bg-emerald-500/10 backdrop-blur-md border border-emerald-300/60 rounded-2xl p-4 flex items-center justify-between shadow-2xs">
                         <div>
                           <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Combo Discount</span>
                           <span className="text-xs text-slate-500 font-semibold">Original Price: <span className="line-through">₹{item.original_price}</span></span>
@@ -1278,7 +1278,7 @@ export default function CustomerMenu({ onOpenCart }) {
                 </div>
 
                 {/* Sticky Bottom Add-to-Cart Bar */}
-                <div className="border-t border-slate-100 bg-white px-6 py-4 flex items-center justify-between gap-4 shrink-0">
+                <div className="border-t border-white/60 bg-white/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between gap-4 shrink-0 shadow-lg rounded-b-[36px]">
                   <div>
                     <span className="text-2xl font-black text-slate-900">₹{item.price}</span>
                     {item.tag && <span className="text-[10px] text-slate-400 font-bold block">{item.tag}</span>}
@@ -1303,7 +1303,7 @@ export default function CustomerMenu({ onOpenCart }) {
               {/* Category items strip at the bottom (Instamart style) */}
               {categoryItems.length > 1 && (
                 <div className="w-full flex flex-col items-center gap-2">
-                  <span className="text-[10px] font-black text-white/80 bg-slate-950/70 px-3 py-1 rounded-full backdrop-blur-xs shadow-xs uppercase tracking-wider">
+                  <span className="text-[10px] font-black text-white/90 bg-slate-950/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-md uppercase tracking-wider">
                     More in this Category
                   </span>
                   <div className="w-full flex items-center justify-center gap-3.5 overflow-x-auto py-2 px-1 scrollbar-none snap-x snap-mandatory">
