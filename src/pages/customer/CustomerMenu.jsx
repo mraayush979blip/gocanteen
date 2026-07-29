@@ -1098,10 +1098,10 @@ export default function CustomerMenu({ onOpenCart }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs touch-none overscroll-none"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs touch-none overscroll-none"
               onClick={() => setSelectedItem(null)}
             >
-              <div className="flex flex-col items-center gap-4 max-w-md w-full px-4 pb-6 sm:pb-0 relative" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col items-center gap-4 max-w-md w-full relative" onClick={(e) => e.stopPropagation()}>
                 {/* Floating Previous Item Arrow (Desktop/Tablet) */}
                 {categoryItems.length > 1 && (
                   <button
@@ -1147,7 +1147,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   y: 0, 
                   scaleX: 1, 
                   scaleY: 1, 
-                  borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? "36px" : "36px 36px 0 0",
+                  borderRadius: "36px",
                   opacity: 1 
                 }}
                 exit={{ 
@@ -1163,7 +1163,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   stiffness: 380,
                   mass: 0.55
                 }}
-                className="bg-white/90 backdrop-blur-2xl border border-white/80 w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative origin-bottom rounded-t-[36px] sm:rounded-[36px]"
+                className="bg-white/90 backdrop-blur-2xl border border-white/80 w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative origin-bottom rounded-[36px]"
               >
                 {/* Close Button */}
                 <button
