@@ -1057,6 +1057,10 @@ export default function CustomerMenu({ onOpenCart }) {
             'from-rose-100 via-pink-50 to-rose-50',
           ];
           const heroGradient = detailGradients[item.name.length % detailGradients.length];
+          const categoryItems = item.category_id 
+            ? inventory.filter(i => i.category_id === item.category_id)
+            : offers;
+
           return (
             <motion.div
               initial={{ opacity: 0 }}
@@ -1066,8 +1070,8 @@ export default function CustomerMenu({ onOpenCart }) {
               className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-xs"
               onClick={() => setSelectedItem(null)}
             >
-              <motion.div
-                onClick={(e) => e.stopPropagation()}
+              <div className="flex flex-col items-center gap-4 max-w-md w-full px-4 pb-6 sm:pb-0" onClick={(e) => e.stopPropagation()}>
+                <motion.div
                 initial={{ 
                   y: "100%", 
                   scaleX: 0.3, 
@@ -1231,8 +1235,42 @@ export default function CustomerMenu({ onOpenCart }) {
                   )}
                 </div>
               </motion.div>
-            </motion.div>
-          );
+
+              {/* Category items strip at the bottom (Instamart style) */}
+              {categoryItems.length > 1 && (
+                <div className="w-full flex flex-col items-center gap-2">
+                  <span className="text-[10px] font-black text-white/80 bg-slate-950/70 px-3 py-1 rounded-full backdrop-blur-xs shadow-xs uppercase tracking-wider">
+                    More in this Category
+                  </span>
+                  <div className="w-full flex items-center justify-center gap-3.5 overflow-x-auto py-2 px-1 scrollbar-none snap-x snap-mandatory">
+                    {categoryItems.map(sibling => {
+                      const isSelected = sibling.id === item.id;
+                      const hasPlus = sibling.emoji?.includes('+');
+                      const parts = hasPlus ? sibling.emoji.split('+').map(p => p.trim()) : [sibling.emoji];
+                      return (
+                        <div
+                          key={sibling.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedItem(sibling);
+                          }}
+                          className={`shrink-0 w-14 h-14 rounded-full bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center relative cursor-pointer transition-all duration-300 ${
+                            isSelected 
+                              ? 'ring-4 ring-emerald-500 scale-110 shadow-lg shadow-emerald-500/30' 
+                              : 'border border-slate-200 opacity-60 hover:opacity-100 hover:scale-105'
+                          }`}
+                        >
+                          <span className="text-2xl drop-shadow-xs">{parts[0]}</span>
+                          {hasPlus && <span className="absolute -top-1 -right-1 text-[9px] bg-amber-400 text-slate-950 font-black rounded-full px-1.5 shadow-xs">+</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        );
         })()}
       </AnimatePresence>
 

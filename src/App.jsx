@@ -149,16 +149,20 @@ function MainContent() {
     };
   }, []);
 
-  // Ask before closing / refreshing the app
+  // Intercept back button to confirm exit when on the menu/home view
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      // Modern browsers ignore custom messages and show a generic confirmation dialog
-      e.returnValue = '';
+    const handlePopState = (e) => {
+      if (window.location.pathname === '/menu' || window.location.pathname === '/') {
+        const confirmClose = window.confirm("Do you want to close the app?");
+        if (!confirmClose) {
+          window.history.pushState(null, null, window.location.pathname);
+        }
+      }
     };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, []);
+    window.history.pushState(null, null, window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [location.pathname]);
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalRole, setAuthModalRole] = useState('customer');
