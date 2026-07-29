@@ -177,6 +177,34 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
   // Window anti-exit listener has been removed because it intercepts and blocks UPI deep links (upi://) from opening native apps on mobile devices.
 
+  const [enablePlatformFee, setEnablePlatformFee] = useState(() => {
+    return localStorage.getItem('enable_platform_fee') !== 'false';
+  });
+
+  useEffect(() => {
+    const fetchPlatformFeeSetting = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('system_settings')
+          .select('value')
+          .eq('key', 'enable_platform_fee')
+          .maybeSingle();
+
+        if (!error && data) {
+          const isEnabled = data.value !== 'false';
+          setEnablePlatformFee(isEnabled);
+          localStorage.setItem('enable_platform_fee', isEnabled ? 'true' : 'false');
+        }
+      } catch (err) {
+        console.error('Error fetching platform fee setting:', err);
+      }
+    };
+
+    if (isOpen) {
+      fetchPlatformFeeSetting();
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const subtotal = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 1)), 0);
@@ -192,7 +220,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   
   const baseAmountForFee = amountAfterDiscount + parcelCharge;
   const isOnlinePayment = paymentMethod === 'razorpay';
-  const platformFee = isOnlinePayment ? Number((baseAmountForFee * 0.0236).toFixed(2)) : 0;
+  const platformFee = (isOnlinePayment && enablePlatformFee) ? Number((baseAmountForFee * 0.0236).toFixed(2)) : 0;
   const finalPayableAmount = Number((baseAmountForFee + platformFee).toFixed(2));
 
   const handleApplyPromo = async (e) => {

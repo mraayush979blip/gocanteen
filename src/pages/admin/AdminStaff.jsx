@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { UserCheck, Shield, ChefHat, User, Loader2, Plus, X, Calendar, Clock, Save, Lock, Mail, Edit3, Trash2, Eye, EyeOff, Key } from 'lucide-react';
+import { UserCheck, Shield, ChefHat, User, Loader2, Plus, X, Calendar, Clock, Save, Lock, Mail, Edit3, Trash2, Eye, EyeOff, Key, CreditCard } from 'lucide-react';
 
 export default function AdminStaff() {
   const { showToast } = useAuth();
@@ -26,6 +26,7 @@ export default function AdminStaff() {
   const [openTime, setOpenTime] = useState('08:00');
   const [closeTime, setCloseTime] = useState('17:00');
   const [isHolidayToggle, setIsHolidayToggle] = useState(false);
+  const [enablePlatformFee, setEnablePlatformFee] = useState(true);
   const [updatingSettings, setUpdatingSettings] = useState(false);
 
   useEffect(() => {
@@ -42,9 +43,13 @@ export default function AdminStaff() {
         const openVal = data.find(s => s.key === 'canteen_open_time')?.value || '08:00';
         const closeVal = data.find(s => s.key === 'canteen_close_time')?.value || '17:00';
         const holidayVal = data.find(s => s.key === 'canteen_is_holiday')?.value === 'true';
+        const platformFeeVal = data.find(s => s.key === 'enable_platform_fee')?.value;
+        const isPlatformFeeOn = platformFeeVal === undefined ? true : platformFeeVal === 'true';
         setOpenTime(openVal);
         setCloseTime(closeVal);
         setIsHolidayToggle(holidayVal);
+        setEnablePlatformFee(isPlatformFeeOn);
+        localStorage.setItem('enable_platform_fee', isPlatformFeeOn ? 'true' : 'false');
       }
     } catch (err) {
       console.error('Error fetching canteen settings:', err);
@@ -58,7 +63,8 @@ export default function AdminStaff() {
       const settings = [
         { key: 'canteen_open_time', value: openTime },
         { key: 'canteen_close_time', value: closeTime },
-        { key: 'canteen_is_holiday', value: isHolidayToggle ? 'true' : 'false' }
+        { key: 'canteen_is_holiday', value: isHolidayToggle ? 'true' : 'false' },
+        { key: 'enable_platform_fee', value: enablePlatformFee ? 'true' : 'false' }
       ];
 
       const { error } = await supabase
@@ -66,7 +72,8 @@ export default function AdminStaff() {
         .upsert(settings);
 
       if (error) throw error;
-      showToast('✓ Canteen operational settings updated successfully!');
+      localStorage.setItem('enable_platform_fee', enablePlatformFee ? 'true' : 'false');
+      showToast('✓ Canteen controls & Platform Fee setting updated successfully!');
     } catch (err) {
       showToast('Failed to update canteen settings: ' + err.message, true);
     } finally {
@@ -281,51 +288,76 @@ export default function AdminStaff() {
           </div>
         </div>
 
-        <form onSubmit={handleSaveCanteenSettings} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Canteen Open Time</label>
-            <input
-              type="time"
-              required
-              value={openTime}
-              onChange={(e) => setOpenTime(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-purple-600 font-bold"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Canteen Close Time</label>
-            <input
-              type="time"
-              required
-              value={closeTime}
-              onChange={(e) => setCloseTime(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-purple-600 font-bold"
-            />
-          </div>
-
-          {/* Holiday Toggle Switch */}
-          <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-2xl p-2.5 h-[38px] cursor-pointer" onClick={() => setIsHolidayToggle(!isHolidayToggle)}>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-red-500" />
-              <span className="text-xs font-extrabold text-slate-700">Mark Today as Holiday</span>
+        <form onSubmit={handleSaveCanteenSettings} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Canteen Open Time</label>
+              <input
+                type="time"
+                required
+                value={openTime}
+                onChange={(e) => setOpenTime(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-purple-600 font-bold"
+              />
             </div>
-            <input
-              type="checkbox"
-              checked={isHolidayToggle}
-              onChange={(e) => e.stopPropagation()} // handled by div click
-              className="w-4 h-4 rounded text-red-600 focus:ring-red-500 cursor-pointer"
-            />
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Canteen Close Time</label>
+              <input
+                type="time"
+                required
+                value={closeTime}
+                onChange={(e) => setCloseTime(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-purple-600 font-bold"
+              />
+            </div>
+
+            {/* Holiday Toggle Switch */}
+            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-2xl p-2.5 h-[38px] cursor-pointer" onClick={() => setIsHolidayToggle(!isHolidayToggle)}>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-red-500" />
+                <span className="text-xs font-extrabold text-slate-700">Mark Today as Holiday</span>
+              </div>
+              <input
+                type="checkbox"
+                checked={isHolidayToggle}
+                onChange={(e) => e.stopPropagation()}
+                className="w-4 h-4 rounded text-red-600 focus:ring-red-500 cursor-pointer"
+              />
+            </div>
+
+            {/* Platform Fee Toggle Switch */}
+            <div
+              className={`flex items-center justify-between border rounded-2xl p-2.5 h-[38px] cursor-pointer transition-all ${
+                enablePlatformFee ? 'bg-purple-50/80 border-purple-200 text-purple-900' : 'bg-slate-50 border-slate-200 text-slate-500'
+              }`}
+              onClick={() => setEnablePlatformFee(!enablePlatformFee)}
+            >
+              <div className="flex items-center gap-2 overflow-hidden">
+                <CreditCard className={`w-4 h-4 shrink-0 ${enablePlatformFee ? 'text-purple-600' : 'text-slate-400'}`} />
+                <span className="text-xs font-extrabold truncate">
+                  Platform Fee: <b className={enablePlatformFee ? 'text-purple-700' : 'text-slate-500'}>{enablePlatformFee ? 'ON (Charge Fee)' : 'OFF (Skip Fee)'}</b>
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={enablePlatformFee}
+                onChange={(e) => e.stopPropagation()}
+                className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 cursor-pointer shrink-0"
+              />
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={updatingSettings}
-            className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 h-[38px]"
-          >
-            {updatingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Controls
-          </button>
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              disabled={updatingSettings}
+              className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 h-[38px] cursor-pointer"
+            >
+              {updatingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Save Operational Controls
+            </button>
+          </div>
         </form>
       </div>
 

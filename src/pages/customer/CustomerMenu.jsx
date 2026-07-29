@@ -1073,9 +1073,25 @@ export default function CustomerMenu({ onOpenCart }) {
             'from-rose-100 via-pink-50 to-rose-50',
           ];
           const heroGradient = detailGradients[item.name.length % detailGradients.length];
-          const categoryItems = item.category_id 
-            ? inventory.filter(i => i.category_id === item.category_id)
-            : offers;
+          const isOffer = offers.some(o => o.id === item.id);
+          const isPopular = inventory.some(i => i.is_popular && i.id === item.id);
+
+          let categoryItems = [];
+          let categoryLabel = "More in this Category";
+
+          if (isOffer) {
+            categoryItems = offers;
+            categoryLabel = "More Combo Offers 🎁";
+          } else if (item.category_id) {
+            categoryItems = inventory.filter(i => i.category_id === item.category_id);
+            categoryLabel = cat ? `More in ${cat.name}` : "More in this Category";
+          } else if (isPopular) {
+            categoryItems = inventory.filter(i => i.is_popular);
+            categoryLabel = "More Special Today ⭐";
+          } else {
+            categoryItems = inventory;
+            categoryLabel = "More Items 🍽️";
+          }
 
           const currentIndex = categoryItems.findIndex(i => i.id === item.id);
           const handleNextSibling = (e) => {
@@ -1304,7 +1320,7 @@ export default function CustomerMenu({ onOpenCart }) {
               {categoryItems.length > 1 && (
                 <div className="w-full flex flex-col items-center gap-2">
                   <span className="text-[10px] font-black text-white/90 bg-slate-950/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-md uppercase tracking-wider">
-                    More in this Category
+                    {categoryLabel}
                   </span>
                   <div className="w-full flex items-center justify-center gap-3.5 overflow-x-auto py-2 px-1 scrollbar-none snap-x snap-mandatory">
                     {categoryItems.map(sibling => {

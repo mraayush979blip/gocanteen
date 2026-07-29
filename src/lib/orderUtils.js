@@ -60,12 +60,17 @@ export function getOrderFinancials(order) {
 
   // 6. Platform Fee calculation if online payment was used and platformFee wasn't parsed
   const isOnline = order.payment_method === 'razorpay' || order.payment_method === 'razorpay_upi' || order.payment_method === 'online';
-  if (isOnline && platformFee <= 0 && foodSalesAmount > 0) {
+  const hasExplicitZeroFee = order.platform_fee === 0 || order.platform_fee === '0';
+  if (isOnline && !hasExplicitZeroFee && platformFee <= 0 && foodSalesAmount > 0) {
     if (rawTotalAmount > (foodSalesAmount + parcelCharge)) {
       platformFee = Number((rawTotalAmount - (foodSalesAmount + parcelCharge)).toFixed(2));
+    } else if (rawTotalAmount > 0 && Math.abs(rawTotalAmount - (foodSalesAmount + parcelCharge)) < 0.05) {
+      platformFee = 0;
     } else {
       platformFee = Number(((foodSalesAmount + parcelCharge) * 0.0236).toFixed(2));
     }
+  } else if (hasExplicitZeroFee) {
+    platformFee = 0;
   }
 
   // 7. Customer Total Paid
