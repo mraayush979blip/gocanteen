@@ -48,7 +48,7 @@ export default function AboutDeveloper() {
 
             {/* Bio Paragraph */}
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium max-w-xl">
-              Building secure, scalable, and user-focused applications. Passionate about Cyber Security, AI, and creating products that solve real-world problems.
+
             </p>
           </div>
         </div>
