@@ -12,7 +12,7 @@ export default function AboutDeveloper() {
         <div className="relative rounded-[32px] overflow-hidden shadow-xl bg-slate-950 text-white min-h-[440px] sm:min-h-[480px] flex flex-col justify-end">
           {/* Background Image */}
           <img
-            src="/photo.jpg"
+            src="/photo.jpeg"
             alt="Aayush Sharma - Developer"
             className="absolute inset-0 w-full h-full object-cover object-center"
             onError={(e) => {
