@@ -46,6 +46,16 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  // Lock background scroll when side drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [mobileMenuOpen]);
+
   // Fullscreen state handled above
 
   const toggleFullscreen = () => {
