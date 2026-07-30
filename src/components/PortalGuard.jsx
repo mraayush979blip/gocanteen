@@ -14,8 +14,18 @@ export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
     );
   }
 
-  // Customer menu routes are public and accessible to all users
+  // Strict Role-Based Portal Guards:
+  // 1. Admin users (role === 'admin') are strictly locked to the Admin Portal (/admin/dashboard)
+  // 2. Staff users (role === 'staff') are strictly locked to Kitchen Staff KDS (/staff/kds)
+  // 3. Customer users & guests browse customer routes (/menu)
+
   if (requiredRole === 'customer') {
+    if (userRole === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    if (userRole === 'staff') {
+      return <Navigate to="/staff/kds" replace />;
+    }
     return children;
   }
 

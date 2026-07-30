@@ -33,7 +33,7 @@ function NavigationItem({ icon, iconBg, title, subtitle, rightElement, onClick }
 export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpenAboutDev }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { session, profile, activePortal, setActivePortal, cart, logout, showToast, staffLanguage, setStaffLanguage } = useAuth();
+  const { session, profile, userRole, activePortal, setActivePortal, cart, logout, showToast, staffLanguage, setStaffLanguage } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement);
 
