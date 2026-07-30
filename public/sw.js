@@ -16,10 +16,10 @@ firebase.initializeApp({
 // natively using the fcmOptions.link provided by the backend!
 const messaging = firebase.messaging();
 
-const CACHE_NAME = 'gocanteen-cache-v2';
+const CACHE_NAME = 'gocanteen-cache-v3';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
+  '/?v=3',
+  '/index.html?v=3',
   '/app-icon.png',
   '/logo.png',
   '/robots.txt',
@@ -72,7 +72,7 @@ self.addEventListener('fetch', (event) => {
   // Network-First strategy for HTML navigation requests to prevent stale asset hashes / white screens on updates
   if (isHtmlRequest) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: 'no-store' })
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseClone = networkResponse.clone();
