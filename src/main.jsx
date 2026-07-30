@@ -17,7 +17,7 @@ const queryClient = new QueryClient({
 });
 
 // PWA and Service Worker registration
-// Version 3 - Cache bust
+window.__CACHE_BUST_VERSION__ = "v5"; // Forcing a new Javascript hash to bypass 404s
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
