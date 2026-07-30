@@ -27,12 +27,12 @@ export default function AboutDeveloper() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-6 pt-6">
 
         {/* 1. HERO COVER CARD */}
-        <div className="relative rounded-[24px] overflow-hidden shadow-sm bg-white aspect-[4/5] sm:aspect-[16/9]">
+        <div className="relative rounded-[24px] overflow-hidden shadow-sm bg-white aspect-[4/5] sm:aspect-[4/3] md:aspect-[3/2]">
           {/* Background Image */}
           <img
             src="/photo.jpg"
             alt="Aayush Sharma - Developer"
-            className="absolute inset-0 w-full h-full object-cover object-top sm:object-center"
+            className="absolute inset-0 w-full h-full object-cover object-top"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = '/aayush-profile.jpg';
@@ -40,10 +40,14 @@ export default function AboutDeveloper() {
           />
 
           {/* Gradient Overlay for light theme readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent sm:bg-gradient-to-r sm:from-white sm:via-white/90 sm:to-transparent" />
+          {/* On mobile: bottom-to-top gradient. On laptop: left-to-right gradient fading out earlier */}
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent sm:bg-transparent" />
+          <div className="hidden sm:block absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-white via-white/70 to-transparent" />
+          
+          <div className="hidden sm:block absolute inset-0 bg-white/10 mix-blend-overlay" />
 
           {/* Foreground Hero Content */}
-          <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end">
+          <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end sm:justify-center">
             <div className="space-y-1 mb-2">
               <span className="text-emerald-600 font-bold text-sm tracking-wide">
                 Hello, I'm
