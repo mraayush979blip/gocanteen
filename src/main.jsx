@@ -16,7 +16,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// Register Service Worker for PWA
+// PWA and Service Worker registration
+// Version 3 - Cache bust
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
