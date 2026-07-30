@@ -1213,7 +1213,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 overscroll-contain touch-pan-y">
+                  <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 overscroll-contain touch-pan-y" data-lenis-prevent="true">
                     {/* Title & Badges */}
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-3">

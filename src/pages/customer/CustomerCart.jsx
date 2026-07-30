@@ -456,7 +456,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         price_at_time: i.price
       }));
 
-      await supabase.from('order_items').insert(orderItemsPayload);
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItemsPayload);
+      if (itemsError) {
+        console.error("Order items failed to save:", itemsError);
+        throw new Error(`Order placed but items failed to save: ${itemsError.message}`);
+      }
 
       // Promo usage count is now automatically securely handled by a Supabase Database Trigger
 
@@ -1315,7 +1319,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
             </div>
 
             {/* Coupons List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4" data-lenis-prevent="true">
               {loadingCoupons ? (
                 <div className="text-center py-12 space-y-2">
                   <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
