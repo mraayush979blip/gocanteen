@@ -1107,11 +1107,11 @@ export default function CustomerMenu({ onOpenCart }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs touch-none overscroll-none"
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-50 flex items-end justify-center px-3 sm:px-4 pb-2 sm:pb-5 pt-4 bg-slate-900/60 backdrop-blur-xs touch-none overscroll-none"
               onClick={() => setSelectedItem(null)}
             >
-              <div className="flex flex-col items-center gap-4 max-w-md w-full relative" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col items-center gap-3 max-w-md w-full relative" onClick={(e) => e.stopPropagation()}>
                 {/* Floating Previous Item Arrow (Desktop/Tablet) */}
                 {categoryItems.length > 1 && (
                   <button

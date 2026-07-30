@@ -27,8 +27,11 @@ export default async function handler(req, res) {
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest('hex');
 
-    // Check match
-    if (generated_signature === razorpay_signature) {
+    const generatedBuffer = Buffer.from(generated_signature, 'utf8');
+    const signatureBuffer = Buffer.from(razorpay_signature, 'utf8');
+
+    // Perform constant-time timing-safe comparison to prevent timing side-channel attacks
+    if (generatedBuffer.length === signatureBuffer.length && crypto.timingSafeEqual(generatedBuffer, signatureBuffer)) {
       return res.status(200).json({ status: 'success', message: 'Payment verified successfully' });
     } else {
       return res.status(400).json({ status: 'failure', error: 'Signature mismatch. Payment is invalid.' });
