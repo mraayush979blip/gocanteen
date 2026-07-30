@@ -53,7 +53,27 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      const orders = ordersData || [];
+      let orders = ordersData || [];
+
+      // Direct fallback fetch for order_items to guarantee complete item details
+      const orderIds = orders.map(o => o.id).filter(Boolean);
+      if (orderIds.length > 0) {
+        const { data: directItems } = await supabase
+          .from('order_items')
+          .select('*, inventory(name, emoji)')
+          .in('order_id', orderIds);
+
+        if (directItems && directItems.length > 0) {
+          orders = orders.map(o => {
+            const matchedItems = directItems.filter(i => i.order_id === o.id);
+            const existingItems = o.order_items || [];
+            return {
+              ...o,
+              order_items: existingItems.length > 0 ? existingItems : matchedItems
+            };
+          });
+        }
+      }
 
       let rev = 0;
       let gross = 0;

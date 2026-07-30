@@ -64,7 +64,27 @@ export default function AdminOrders() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      const activeOrders = data || [];
+      let activeOrders = data || [];
+
+      // Direct fallback fetch for order_items to guarantee complete item details across all orders
+      const orderIds = activeOrders.map(o => o.id).filter(Boolean);
+      if (orderIds.length > 0) {
+        const { data: directItems } = await supabase
+          .from('order_items')
+          .select('*, inventory(name, emoji)')
+          .in('order_id', orderIds);
+
+        if (directItems && directItems.length > 0) {
+          activeOrders = activeOrders.map(o => {
+            const matchedItems = directItems.filter(i => i.order_id === o.id);
+            const existingItems = o.order_items || [];
+            return {
+              ...o,
+              order_items: existingItems.length > 0 ? existingItems : matchedItems
+            };
+          });
+        }
+      }
 
       // Auto-cancel check for unpaid cash orders past 11:59 PM
       const now = new Date();

@@ -256,8 +256,8 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'tween', ease: [0.16, 1, 0.3, 1], duration: 0.5 }}
-              className="fixed inset-y-0 right-0 z-[110] w-full sm:w-[420px] bg-slate-50 flex flex-col overflow-y-auto overscroll-contain shadow-2xl"
+              transition={{ type: 'tween', ease: [0.16, 1, 0.3, 1], duration: 0.35 }}
+              className="fixed inset-y-0 right-0 z-[110] w-full sm:w-[420px] bg-slate-50 flex flex-col h-full max-h-screen overflow-y-auto overscroll-contain touch-pan-y scrollbar-none shadow-2xl"
             >
               {/* Dark Green Header matching aesthetic */}
               <div className="bg-[#0f4d43] text-white pt-6 pb-16 px-6 relative overflow-hidden shrink-0">
@@ -276,7 +276,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
               </div>
 
               {/* White Overlapping Content Card */}
-              <div className="flex-1 px-4 -mt-10 relative z-20 pb-8 flex flex-col">
+              <div className="flex-1 px-4 -mt-10 relative z-20 pb-16 pb-safe flex flex-col min-h-0">
                 {/* User Profile Card */}
                 {session && (
                   <div 
