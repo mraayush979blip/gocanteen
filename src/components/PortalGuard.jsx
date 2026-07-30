@@ -14,13 +14,16 @@ export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
     );
   }
 
+  // Customer menu routes are public and accessible to all users
+  if (requiredRole === 'customer') {
+    return children;
+  }
+
   const isAuthorized =
     requiredRole === 'staff'
-      ? userRole === 'staff' || isAdminUnlocked
+      ? userRole === 'staff' || userRole === 'admin' || isAdminUnlocked
       : requiredRole === 'admin'
       ? userRole === 'admin' || isAdminUnlocked
-      : requiredRole === 'customer'
-      ? userRole === 'customer'
       : true;
 
   if (!isAuthorized) {

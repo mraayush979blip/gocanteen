@@ -1146,32 +1146,24 @@ export default function CustomerMenu({ onOpenCart }) {
                     }
                     setPopupTouchStart(null);
                   }}
-                  initial={{
-                    y: "100%",
-                    scaleX: 0.3,
-                    scaleY: 0.1,
-                    borderRadius: "80px",
-                    opacity: 0
+                  initial={{ 
+                    y: 20, 
+                    opacity: 0,
+                    scale: 0.96 
                   }}
-                  animate={{
-                    y: 0,
-                    scaleX: 1,
-                    scaleY: 1,
-                    borderRadius: "36px",
-                    opacity: 1
+                  animate={{ 
+                    y: 0, 
+                    opacity: 1,
+                    scale: 1 
                   }}
-                  exit={{
-                    y: "100%",
-                    scaleX: 0.25,
-                    scaleY: 0.08,
-                    borderRadius: "80px",
-                    opacity: 0
+                  exit={{ 
+                    y: 15, 
+                    opacity: 0,
+                    scale: 0.96 
                   }}
-                  transition={{
-                    type: "spring",
-                    damping: 28,
-                    stiffness: 380,
-                    mass: 0.55
+                  transition={{ 
+                    duration: 0.18, 
+                    ease: [0.16, 1, 0.3, 1] 
                   }}
                   className="bg-white/90 backdrop-blur-2xl border border-white/80 w-full sm:max-w-md max-h-[85vh] flex flex-col shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative origin-bottom rounded-[36px]"
                 >

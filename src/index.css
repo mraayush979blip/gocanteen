@@ -118,10 +118,8 @@ html, body {
   animation: slideDownModal 0.25s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
 }
 
-/* Strict Mobile Background Scroll Lock for Modals */
-body.modal-open, html.modal-open {
+/* Strict Mobile Background Scroll Lock for Modals (preserves scroll position) */
+body.modal-open {
   overflow: hidden !important;
-  touch-action: none !important;
-  overscroll-behavior: none !important;
-  height: 100vh !important;
+  overscroll-behavior: contain !important;
 }

@@ -27,19 +27,20 @@ export const AuthProvider = ({ children }) => {
     setActivePortalState(portal);
   };
 
-  const resolveActivePortalOnLogin = (prof) => {
+  const resolveActivePortalOnLogin = (prof, isExplicitLogin = false) => {
     let target = 'customer';
     if (prof?.role === 'admin') {
       target = 'admin';
-      window.location.hash = '#/admin/dashboard';
+      if (isExplicitLogin && window.location.pathname !== '/menu') {
+        window.location.pathname = '/admin/dashboard';
+      }
     } else if (prof?.role === 'staff') {
       target = 'staff';
-      window.location.hash = '#/staff/kds';
+      if (isExplicitLogin && window.location.pathname !== '/menu') {
+        window.location.pathname = '/staff/kds';
+      }
     } else {
       target = 'customer';
-      if (!window.location.hash || window.location.hash === '#/') {
-        window.location.hash = '#/menu';
-      }
     }
     setActivePortal(target);
   };
