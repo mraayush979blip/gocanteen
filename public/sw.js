@@ -11,60 +11,10 @@ firebase.initializeApp({
   appId: "1:83432321106:web:0c1560c7e3462115e1ef8b"
 });
 
+// Initialize Firebase Messaging. 
+// Firebase will automatically handle incoming push notifications and click events 
+// natively using the fcmOptions.link provided by the backend!
 const messaging = firebase.messaging();
-
-messaging.onBackgroundMessage((payload) => {
-  console.log('[sw.js] Received background message ', payload);
-  const notificationTitle = payload.notification?.title || payload.data?.title || 'Go Canteen';
-  const notificationOptions = {
-    body: payload.notification?.body || payload.data?.body || '',
-    icon: '/app-icon.png',
-    badge: '/logo.png',
-    data: payload.data || {},
-    requireInteraction: true
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
-});
-
-// Fallback Native Push Handler for iOS Safari & Android Deep Sleep
-self.addEventListener('push', (event) => {
-  if (!event.data) return;
-  try {
-    const payload = event.data.json();
-    const notificationTitle = payload.notification?.title || payload.data?.title || 'Go Canteen';
-    const notificationOptions = {
-      body: payload.notification?.body || payload.data?.body || '',
-      icon: '/app-icon.png',
-      badge: '/logo.png',
-      data: payload.data || {},
-      requireInteraction: true
-    };
-    event.waitUntil(
-      self.registration.showNotification(notificationTitle, notificationOptions)
-    );
-  } catch (e) {
-    console.warn('Native push handling notice:', e);
-  }
-});
-
-// Handle Notification Clicks to Open App
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  const targetUrl = event.notification?.data?.link || '/#/menu';
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
-      }
-    })
-  );
-});
 
 const CACHE_NAME = 'gocanteen-cache-v2';
 const ASSETS_TO_CACHE = [

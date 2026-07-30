@@ -291,8 +291,8 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 </div>
               </div>
 
-              {/* White Overlapping Content Card - this div scrolls independently */}
-              <div className="flex-1 px-4 -mt-10 relative z-20 pb-16 pb-safe flex flex-col overflow-y-auto overscroll-contain scrollbar-none" data-lenis-prevent="true">
+              {/* White Overlapping Content Card - this div scrolls independently for all portals */}
+              <div className="flex-1 px-4 -mt-10 relative z-20 pb-16 overflow-y-auto overscroll-contain scrollbar-none" data-lenis-prevent="true">
                 {/* User Profile Card */}
                 {session && (
                   <div 

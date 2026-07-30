@@ -20,8 +20,21 @@ const queryClient = new QueryClient({
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
-      .then((reg) => console.log('PWA Service Worker registered:', reg.scope))
+      .then((reg) => {
+        console.log('PWA Service Worker registered:', reg.scope);
+        // Explicitly check for updates in the background
+        reg.update();
+      })
       .catch((err) => console.error('PWA Service Worker registration failed:', err));
+
+    // When the service worker updates and takes control, seamlessly reload the page to apply it
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
   });
 }
 
