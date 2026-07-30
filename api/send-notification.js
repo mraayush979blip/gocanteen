@@ -97,23 +97,46 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: false, reason: 'No FCM token registered' });
     }
 
-    // 2. Prepare message
+    // 2. Prepare high-reliability cross-platform message payload (Android + iOS Safari APNs + Web)
     const message = {
       notification: {
         title,
         body,
       },
       data: {
+        title,
+        body,
         orderId: orderId || '',
         status: status || '',
+        link: 'https://gocanteen.in/#/orders',
         click_action: 'FLUTTER_NOTIFICATION_CLICK',
       },
-      token: fcmToken,
+      android: {
+        priority: 'high',
+        notification: {
+          sound: 'default',
+          defaultSound: true,
+          defaultVibrateTimings: true,
+          notificationPriority: 'PRIORITY_MAX',
+          visibility: 'PUBLIC'
+        }
+      },
       webpush: {
+        headers: {
+          Urgency: 'high'
+        },
+        notification: {
+          title,
+          body,
+          icon: 'https://gocanteen.in/app-icon.png',
+          badge: 'https://gocanteen.in/logo.png',
+          requireInteraction: true
+        },
         fcmOptions: {
           link: 'https://gocanteen.in/#/orders',
         },
       },
+      token: fcmToken,
     };
 
     // 3. Send message via Firebase Admin

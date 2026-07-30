@@ -16,6 +16,27 @@ input, textarea, [contenteditable="true"] {
   user-select: text !important;
 }
 
+/* Prevent iOS Safari 16px auto-zoom on input focus */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Cross-Platform Safe Area Utilities for iPhone & Android Gesture Bars */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+.pt-safe {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
 /* Lenis smooth scrolling reset */
 html.lenis, html.lenis body {
   height: auto;
