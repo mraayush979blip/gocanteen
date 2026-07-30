@@ -99,6 +99,11 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
   };
 
   const isDeveloperRoute = pathname.endsWith('/developer') || pathname === '/about-developer';
+  const currentPortal = pathname.startsWith('/admin')
+    ? 'admin'
+    : pathname.startsWith('/staff')
+    ? 'staff'
+    : 'customer';
 
   return (
     <>
@@ -129,7 +134,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                     </span>
                   </div>
                   <span className="text-[10px] text-slate-500 font-extrabold tracking-wider uppercase mt-0.5">
-                    {activePortal === 'admin' ? 'Executive Admin' : activePortal === 'staff' ? 'Kitchen Staff KDS' : 'Customer Portal'}
+                    {currentPortal === 'admin' ? 'Executive Admin' : currentPortal === 'staff' ? 'Kitchen Staff KDS' : 'Customer Portal'}
                   </span>
                 </div>
               </div>
@@ -155,7 +160,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
               )}
 
               {/* Language Selector for Staff / Admin */}
-              {(activePortal === 'staff' || activePortal === 'admin') && (
+              {(currentPortal === 'staff' || currentPortal === 'admin') && (
                 <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-xl border border-slate-200 text-xs font-bold shrink-0">
                   <Globe className="w-4 h-4 text-emerald-600 shrink-0" />
                   <select
@@ -171,7 +176,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
               )}
 
               {/* Cart Button (Hidden on Mobile View, visible on Tablet/Desktop) */}
-              {activePortal === 'customer' && (
+              {currentPortal === 'customer' && (
                 <button
                   onClick={onOpenCart}
                   className="hidden sm:flex relative p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm shrink-0 items-center gap-1.5 cursor-pointer active:scale-95"
@@ -295,17 +300,38 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
 
                 {/* Sections Wrapper */}
                 <div className="space-y-6">
-                  {/* ORDERING SECTION */}
+                  {/* Quick Admin Portal Access Card for Admins on Customer View */}
+                  {userRole === 'admin' && currentPortal === 'customer' && (
+                    <div className="bg-purple-900 text-white rounded-[20px] p-3.5 shadow-md flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-purple-800 flex items-center justify-center font-bold text-sm">
+                          🛡️
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-white">Admin Account Logged In</p>
+                          <p className="text-[10px] text-purple-200">Switch to Management Panel</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }}
+                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-purple-50 text-purple-900 font-extrabold text-xs shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
+                      >
+                        Admin Dashboard →
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ORDERING / MANAGEMENT SECTION */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-1.5 px-2">
                       <div className="w-1 h-3.5 bg-emerald-600 rounded-full"></div>
                       <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
-                        {activePortal === 'customer' ? 'ORDERING' : activePortal === 'admin' ? 'MANAGEMENT' : 'KITCHEN'}
+                        {currentPortal === 'customer' ? 'ORDERING' : currentPortal === 'admin' ? 'MANAGEMENT' : 'KITCHEN'}
                       </span>
                     </div>
                     
                     <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
-                      {activePortal === 'customer' && (
+                      {currentPortal === 'customer' && (
                         <>
                           <NavigationItem 
                             icon={<UtensilsCrossed className="w-5 h-5 text-emerald-600" />}
@@ -341,33 +367,33 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                         </>
                       )}
 
-                      {activePortal === 'staff' && (
+                      {currentPortal === 'staff' && (
                         <>
                           <NavigationItem 
                             icon={<span className="text-lg">👨‍🍳</span>}
                             iconBg="bg-emerald-50"
-                            title="Live Kitchen Queue (KDS)"
-                            subtitle="Manage live orders"
+                            title="Kitchen KDS Queue"
+                            subtitle="Live preparing orders"
                             onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
-                            icon={<span className="text-lg">📦</span>}
-                            iconBg="bg-emerald-50"
-                            title="Quick Stock Availability"
-                            subtitle="Update item stock"
-                            onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
+                            icon={<span className="text-lg">🔔</span>}
+                            iconBg="bg-blue-50"
+                            title="Counter Ready Counter"
+                            subtitle="Ready for pickup"
+                            onClick={() => { navigate('/staff/counter'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
-                            icon={<span className="text-lg">📋</span>}
-                            iconBg="bg-emerald-50"
-                            title="Order History Log"
-                            subtitle="Past orders"
+                            icon={<span className="text-lg">📜</span>}
+                            iconBg="bg-purple-50"
+                            title="Shift History"
+                            subtitle="Completed orders log"
                             onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
                           />
                         </>
                       )}
 
-                       {activePortal === 'admin' && (
+                       {currentPortal === 'admin' && (
                         <>
                           <NavigationItem icon={<span className="text-lg">📊</span>} iconBg="bg-purple-50" title="Executive Dashboard" subtitle="Sales analytics" onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">💵</span>} iconBg="bg-purple-50" title="Sales Controls & Refunds" subtitle="Manage payments" onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }} />
@@ -391,7 +417,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                     </div>
                     
                     <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
-                      {activePortal !== 'admin' && (
+                      {currentPortal !== 'admin' && (
                         <NavigationItem 
                           icon={<Instagram className="w-5 h-5 text-pink-500" />}
                           iconBg="bg-pink-50"
@@ -407,16 +433,14 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                         subtitle="Help us improve"
                         onClick={() => { navigate('/report-bug'); setMobileMenuOpen(false); }}
                       />
-                      {activePortal !== 'admin' && (
+                      {currentPortal !== 'admin' && (
                         <NavigationItem 
                           icon={<Code className="w-5 h-5 text-indigo-600" />}
                           iconBg="bg-indigo-50"
                           title="About Developer (Aayush Sharma)"
                           subtitle="Know more about the developer"
                           onClick={() => {
-                            const p = window.location.pathname;
-                            const portal = p.startsWith('/admin') ? 'admin' : p.startsWith('/staff') ? 'staff' : 'customer';
-                            navigate(`/${portal}/developer`);
+                            navigate(`/${currentPortal}/developer`);
                             setMobileMenuOpen(false);
                           }}
                         />
