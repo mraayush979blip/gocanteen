@@ -168,7 +168,9 @@ export const AuthProvider = ({ children }) => {
   // Request notification permissions and save token
   useEffect(() => {
     const initNotifications = async () => {
-      if (session?.user) {
+      // Only auto-initialize if permission is already granted.
+      // If it's 'default', our custom NotificationPrompt component will softly ask the user instead.
+      if (session?.user && 'Notification' in window && Notification.permission === 'granted') {
         try {
           const token = await requestForToken();
           if (token) {

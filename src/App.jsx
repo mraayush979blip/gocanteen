@@ -8,6 +8,7 @@ import Toast from './components/Toast';
 import AuthModal from './pages/AuthModal';
 import PortalGuard from './components/PortalGuard';
 import { AlertTriangle, ExternalLink } from 'lucide-react';
+import NotificationPrompt from './components/NotificationPrompt';
 
 // Customer Pages
 import CustomerMenu from './pages/customer/CustomerMenu';
@@ -300,6 +301,7 @@ function MainContent() {
         initialRole={authModalRole}
       />
 
+      <NotificationPrompt />
       <Toast />
       <PwaInstallPrompt />
     </div>

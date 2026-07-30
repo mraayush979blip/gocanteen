@@ -353,18 +353,26 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
       let tokenNumber = 1;
       try {
-        const { data: maxTokenData } = await supabase
-          .from('orders')
-          .select('token_number')
-          .order('token_number', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        // Try getting the true global max token safely via Database Function (bypassing RLS)
+        const { data: rpcToken, error: rpcError } = await supabase.rpc('get_next_token');
+        
+        if (!rpcError && rpcToken) {
+          tokenNumber = Number(rpcToken);
+        } else {
+          // Fallback if RPC hasn't been created in DB yet
+          const { data: maxTokenData } = await supabase
+            .from('orders')
+            .select('token_number')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-        if (maxTokenData?.token_number && !isNaN(Number(maxTokenData.token_number))) {
-          tokenNumber = Number(maxTokenData.token_number) + 1;
+          if (maxTokenData?.token_number && !isNaN(Number(maxTokenData.token_number))) {
+            tokenNumber = Number(maxTokenData.token_number) + 1;
+          }
         }
       } catch (e) {
-        console.warn('Max token fetch error, fallback:', e);
+        console.warn('Max token fetch error, fallback to 1:', e);
       }
 
       const pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
