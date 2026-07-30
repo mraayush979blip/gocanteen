@@ -1,8 +1,4 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/:path((?!api/|assets/|.*\\..*).*)", "destination": "/index.html" }
-  ],
   "headers": [
     {
       "source": "/assets/(.*)",

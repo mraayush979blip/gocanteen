@@ -1,27 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
-
-// Auto-recover from stale build script module loading errors after new redeployments
-window.addEventListener('error', (event) => {
-  const isScriptError = 
-    event?.message?.includes('Failed to load module script') ||
-    event?.message?.includes('Importing a module script failed') ||
-    (event?.target && event?.target?.tagName === 'SCRIPT');
-
-  if (isScriptError) {
-    const lastReload = sessionStorage.getItem('chunk_reload_timestamp');
-    const now = Date.now();
-    if (!lastReload || now - Number(lastReload) > 10000) {
-      sessionStorage.setItem('chunk_reload_timestamp', String(now));
-      window.location.reload();
-    }
-  }
-}, true);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,10 +28,10 @@ if ('serviceWorker' in navigator) {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <HashRouter>
         <App />
         <Analytics />
-      </BrowserRouter>
+      </HashRouter>
     </QueryClientProvider>
   </React.StrictMode>
 );
