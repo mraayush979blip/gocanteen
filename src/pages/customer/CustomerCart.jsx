@@ -98,6 +98,18 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
   const [showCartNotifPrompt, setShowCartNotifPrompt] = useState(false);
 
+  // Dynamically load Razorpay SDK only when cart is opened to prevent preload warnings
+  useEffect(() => {
+    if (isOpen) {
+      if (typeof window !== 'undefined' && !window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen && session?.user && 'Notification' in window && Notification.permission === 'default' && cart.length > 0) {
       const dismissedStr = localStorage.getItem('cart_notification_prompt_dismissed');
