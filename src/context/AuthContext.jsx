@@ -152,7 +152,6 @@ export const AuthProvider = ({ children }) => {
     // 3. Absolute Safety fallback: force UI unlock after 2 seconds no matter what
     const fallbackTimeout = setTimeout(() => {
       if (mounted && loading) {
-        console.warn("Auth UI unblocked by hard timeout.");
         setLoading(false);
       }
     }, 2000);
