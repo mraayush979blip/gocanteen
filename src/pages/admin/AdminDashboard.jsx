@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { 
   IndianRupee, ShoppingBag, Clock, TrendingUp, Loader2, RefreshCw, Ticket, 
   Smartphone, DollarSign, Award, Flame, CheckCircle2, User, Phone, KeyRound, Sparkles, ArrowRight
 } from 'lucide-react';
 import { getOrderFinancials, getOrderId, getOrderPin } from '../../lib/orderUtils';
+import { playAlertSound, initAudioContext } from '../../lib/audio';
 
 
 export default function AdminDashboard() {
@@ -22,13 +23,24 @@ export default function AdminDashboard() {
   const [topItems, setTopItems] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const soundEnabledRef = useRef(soundEnabled);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
 
   useEffect(() => {
     fetchDashboard();
 
     const channel = supabase
       .channel('admin-dashboard-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchDashboard())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        if (payload.eventType === 'INSERT' && soundEnabledRef.current) {
+          playAlertSound();
+        }
+        fetchDashboard();
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => fetchDashboard())
       .subscribe();
 
@@ -180,7 +192,7 @@ export default function AdminDashboard() {
     <div className="space-y-6 max-w-7xl mx-auto pb-16 text-slate-900 font-['Plus_Jakarta_Sans',sans-serif]">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-2xl bg-purple-50 text-purple-700 border border-purple-200">
             <Sparkles className="w-6 h-6" />
@@ -198,13 +210,37 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <button
-          onClick={fetchDashboard}
-          className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto"
-          title="Refresh Dashboard"
-        >
-          <RefreshCw className="w-4 h-4 text-purple-600" /> Refresh Live
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (!soundEnabled) {
+                initAudioContext();
+                playAlertSound(); // Play test sound when enabling
+              }
+              setSoundEnabled(!soundEnabled);
+            }}
+            className={`p-2.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${
+              soundEnabled 
+                ? 'bg-purple-50 text-purple-700 border-purple-200 shadow-sm' 
+                : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
+            }`}
+            title="Toggle Audio Alerts for New Orders"
+          >
+            {soundEnabled ? (
+              <>🔊 Alerts On</>
+            ) : (
+              <>🔈 Alerts Off</>
+            )}
+          </button>
+          
+          <button
+            onClick={fetchDashboard}
+            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
+            title="Refresh Dashboard"
+          >
+            <RefreshCw className="w-4 h-4 text-purple-600" /> Refresh Live
+          </button>
+        </div>
       </div>
 
       {/* KPI Stats Strip — Compact Single Row */}

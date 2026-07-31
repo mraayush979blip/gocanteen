@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Edit3, Trash2, X, Loader2, Save } from 'lucide-react';
+import { Plus, Edit3, Trash2, Save, X, Loader2, Sparkles, Megaphone } from 'lucide-react';
+import EmojiPickerMenu from '../../components/EmojiPickerMenu';
 
 export default function AdminOffers() {
   const { showToast } = useAuth();
@@ -346,25 +347,17 @@ export default function AdminOffers() {
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="grid grid-cols-4 gap-2">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-700 mb-1">Emoji 1</label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={2}
-                    value={emoji1}
-                    onChange={(e) => setEmoji1(e.target.value)}
-                    className="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-lg text-slate-900 focus:outline-none focus:border-purple-500 font-bold"
+                  <EmojiPickerMenu 
+                    label="Emoji 1" 
+                    value={emoji1} 
+                    onChange={setEmoji1} 
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-700 mb-1">Emoji 2</label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={2}
-                    value={emoji2}
-                    onChange={(e) => setEmoji2(e.target.value)}
-                    className="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-lg text-slate-900 focus:outline-none focus:border-purple-500 font-bold"
+                  <EmojiPickerMenu 
+                    label="Emoji 2" 
+                    value={emoji2} 
+                    onChange={setEmoji2} 
                   />
                 </div>
                 <div className="col-span-2">

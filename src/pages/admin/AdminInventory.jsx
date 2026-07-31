@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Edit3, Trash2, Search, X, Loader2, Save, Star } from 'lucide-react';
+import { Plus, Edit3, Trash2, Search, X, Loader2, Save, Star, Copy } from 'lucide-react';
 
 import EmojiPickerMenu from '../../components/EmojiPickerMenu';
 
@@ -66,6 +66,21 @@ export default function AdminInventory() {
     setEditingItem(item);
     setFormData({
       name: item.name || '',
+      price: item.price || '',
+      category_id: item.category_id || categories[0]?.id || '',
+      emoji: item.emoji || '🍽️',
+      is_veg: item.is_veg !== false,
+      description: item.description || '',
+      tag: item.tag || '',
+      is_available: item.is_available !== false
+    });
+    setModalOpen(true);
+  };
+
+  const handleDuplicate = (item) => {
+    setEditingItem(null); // Creating a new item, not editing
+    setFormData({
+      name: `${item.name} (Copy)`,
       price: item.price || '',
       category_id: item.category_id || categories[0]?.id || '',
       emoji: item.emoji || '🍽️',
@@ -152,6 +167,58 @@ export default function AdminInventory() {
     }
   };
 
+  const toggleAvailability = async (id, currentStatus) => {
+    try {
+      // Optimistic update
+      setInventory(prev => prev.map(item => 
+        item.id === id ? { ...item, is_available: !currentStatus } : item
+      ));
+
+      const { error } = await supabase
+        .from('inventory')
+        .update({ is_available: !currentStatus })
+        .eq('id', id);
+        
+      if (error) throw error;
+      showToast(!currentStatus ? '✓ Marked In Stock' : '✕ Marked Out of Stock');
+    } catch (err) {
+      showToast(err.message, true);
+      // Revert optimistic update
+      setInventory(prev => prev.map(item => 
+        item.id === id ? { ...item, is_available: currentStatus } : item
+      ));
+    }
+  };
+
+  const handleBulkAction = async (e) => {
+    const action = e.target.value;
+    if (!action) return;
+
+    // action format: "enable_cat_123" or "disable_cat_123"
+    const [type, ...rest] = action.split('_');
+    const categoryId = rest.join('_');
+    const isAvailable = type === 'enable';
+
+    if (!window.confirm(`Are you sure you want to mark all items in this category as ${isAvailable ? 'In Stock' : 'Out of Stock'}?`)) {
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('inventory')
+        .update({ is_available: isAvailable })
+        .eq('category_id', categoryId);
+
+      if (error) throw error;
+      showToast(`Category marked ${isAvailable ? 'In Stock' : 'Out of Stock'}`);
+      fetchData();
+    } catch (err) {
+      showToast(err.message, true);
+    }
+    e.target.value = "";
+  };
+
   const filtered = inventory.filter(item =>
     item.name.toLowerCase().includes(search.toLowerCase()) ||
     (item.description && item.description.toLowerCase().includes(search.toLowerCase()))
@@ -184,16 +251,38 @@ export default function AdminInventory() {
         </button>
       </div>
 
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search items by name..."
-          className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-slate-900 text-xs shadow-2xs focus:outline-none focus:border-purple-600 font-medium"
-        />
+      {/* Search Input & Bulk Actions */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search items by name..."
+            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-slate-900 text-xs shadow-2xs focus:outline-none focus:border-purple-600 font-medium"
+          />
+        </div>
+
+        {/* Bulk Action Dropdown */}
+        <div className="sm:w-64">
+          <select 
+            onChange={handleBulkAction}
+            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-slate-900 text-xs shadow-2xs focus:outline-none focus:border-purple-600 font-medium cursor-pointer"
+          >
+            <option value="">⚡ Bulk Actions (Stock)...</option>
+            <optgroup label="Mark All In Stock">
+              {categories.map(cat => (
+                <option key={`enable_${cat.id}`} value={`enable_${cat.id}`}>✓ {cat.name}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Mark All Out of Stock">
+              {categories.map(cat => (
+                <option key={`disable_${cat.id}`} value={`disable_${cat.id}`}>❌ {cat.name}</option>
+              ))}
+            </optgroup>
+          </select>
+        </div>
       </div>
 
       {/* Mobile View: Stacked Card List */}
@@ -234,9 +323,11 @@ export default function AdminInventory() {
                   </span>
                 )}
 
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${item.is_available ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'}`}>
-                  {item.is_available ? 'Active' : 'Hidden'}
-                </span>
+                <button 
+                  onClick={() => toggleAvailability(item.id, item.is_available)}
+                  className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-colors cursor-pointer ${item.is_available ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-red-50 text-red-800 border-red-200 hover:bg-red-100'}`}>
+                  {item.is_available ? '✓ In Stock' : '✕ Out of Stock'}
+                </button>
               </div>
 
               <div className="flex items-center gap-1.5 shrink-0">
@@ -250,6 +341,13 @@ export default function AdminInventory() {
                   title={item.is_popular ? "Remove from Popular" : "Mark as Popular Today"}
                 >
                   <Star className="w-4 h-4" fill={item.is_popular ? "currentColor" : "none"} />
+                </button>
+                <button
+                  onClick={() => handleDuplicate(item)}
+                  className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:text-purple-700 hover:bg-purple-50 cursor-pointer"
+                  title="Duplicate Item"
+                >
+                  <Copy className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleOpenEdit(item)}
@@ -318,9 +416,11 @@ export default function AdminInventory() {
                     )}
                   </td>
                   <td className="p-3.5">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${item.is_available ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'}`}>
-                      {item.is_available ? 'Available' : 'Unavailable'}
-                    </span>
+                    <button 
+                      onClick={() => toggleAvailability(item.id, item.is_available)}
+                      className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition-colors cursor-pointer ${item.is_available ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-red-50 text-red-800 border-red-200 hover:bg-red-100'}`}>
+                      {item.is_available ? '✓ In Stock' : '✕ Out of Stock'}
+                    </button>
                   </td>
                   <td className="p-3.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
@@ -334,6 +434,13 @@ export default function AdminInventory() {
                         title={item.is_popular ? "Remove from Popular" : "Mark as Popular Today"}
                       >
                         <Star className="w-3.5 h-3.5" fill={item.is_popular ? "currentColor" : "none"} />
+                      </button>
+                      <button
+                        onClick={() => handleDuplicate(item)}
+                        className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:text-purple-700 hover:bg-purple-50 cursor-pointer"
+                        title="Duplicate Item"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleOpenEdit(item)}

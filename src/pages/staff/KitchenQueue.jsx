@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -10,6 +10,7 @@ import CancelOrderModal from '../../components/CancelOrderModal';
 import { sendOrderReadyEmail, sendRefundNotificationEmail } from '../../lib/emailNotifier';
 import { sendPushNotification } from '../../lib/notificationHelper';
 import { getOrderFinancials, getOrderPin, getUserSpecialInstructions, getPaymentId, getOrderId } from '../../lib/orderUtils';
+import { playAlertSound, initAudioContext } from '../../lib/audio';
 
 export default function KitchenQueue() {
 
@@ -34,23 +35,24 @@ export default function KitchenQueue() {
   };
 
   const staffIdentifier = profile?.full_name && !profile.full_name.includes('@') ? profile.full_name : 'Kitchen Staff';
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const soundEnabledRef = useRef(soundEnabled);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
 
 
   useEffect(() => {
     fetchOrders();
 
-    const playNewOrderAudio = () => {
-      try {
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        audio.play().catch(e => console.log('Audio blocked:', e));
-      } catch (e) {}
-    };
-
     const channel = supabase
       .channel('staff-kitchen-queue')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
         if (payload.eventType === 'INSERT') {
-          playNewOrderAudio();
+          if (soundEnabledRef.current) {
+            playAlertSound();
+          }
           showToast('🔔 New Order Received!');
         }
         fetchOrders();
@@ -336,12 +338,36 @@ export default function KitchenQueue() {
           </div>
         </div>
 
-        <button
-          onClick={fetchOrders}
-          className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all self-end md:self-auto shrink-0"
-        >
-          <RefreshCw className="w-4 h-4 text-emerald-600" /> Refresh Queue
-        </button>
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 self-end md:self-auto shrink-0">
+          <button
+            onClick={() => {
+              if (!soundEnabled) {
+                initAudioContext();
+                playAlertSound(); // Play test sound when enabling
+              }
+              setSoundEnabled(!soundEnabled);
+            }}
+            className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+              soundEnabled 
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm' 
+                : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
+            }`}
+            title="Toggle Audio Alerts for New Orders"
+          >
+            {soundEnabled ? (
+              <>🔊 Alerts On</>
+            ) : (
+              <>🔈 Alerts Off</>
+            )}
+          </button>
+          
+          <button
+            onClick={fetchOrders}
+            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all"
+          >
+            <RefreshCw className="w-4 h-4 text-emerald-600" /> Refresh Queue
+          </button>
+        </div>
       </div>
 
       {/* 2. Status Filter Pills */}
