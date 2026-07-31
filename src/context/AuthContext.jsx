@@ -106,7 +106,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let mounted = true;
-    let authChangeInitialized = false;
+    let authInitialized = false;
 
     const handleSessionChange = async (newSession) => {
       if (!mounted) return;
@@ -114,6 +114,7 @@ export const AuthProvider = ({ children }) => {
 
       if (newSession?.user) {
         try {
+          // We can set loading false earlier so the UI appears faster, then resolve profile async
           const prof = await fetchProfile(newSession.user.id, newSession.user.email);
           if (mounted) {
             resolveActivePortalOnLogin(prof);
@@ -127,23 +128,34 @@ export const AuthProvider = ({ children }) => {
         setActivePortal('customer');
       }
 
+      authInitialized = true;
       if (mounted) {
         setLoading(false);
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      authChangeInitialized = true;
-      await handleSessionChange(newSession);
+    // 1. Immediately check session on mount (faster than waiting for event)
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (mounted) {
+        handleSessionChange(initialSession);
+      }
+    }).catch(err => {
+      console.warn("Fast session check failed:", err);
+      if (mounted) setLoading(false);
     });
 
-    // Safety fallback: if no event fires within 1.5 seconds, force loading to false to prevent getting stuck
+    // 2. Listen for auth changes (login/logout/token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      handleSessionChange(newSession);
+    });
+
+    // 3. Absolute Safety fallback: force UI unlock after 2 seconds no matter what
     const fallbackTimeout = setTimeout(() => {
-      if (mounted && !authChangeInitialized) {
-        console.warn("Auth initialization fallback triggered.");
+      if (mounted && loading) {
+        console.warn("Auth UI unblocked by hard timeout.");
         setLoading(false);
       }
-    }, 1500);
+    }, 2000);
 
     return () => {
       mounted = false;
