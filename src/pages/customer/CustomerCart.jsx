@@ -450,7 +450,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
       const orderItemsPayload = cart.map(i => ({
         order_id: orderId,
-        inventory_id: typeof i.id === 'string' && i.id.length > 20 ? i.id : null,
+        inventory_id: (!i.is_offer && typeof i.id === 'string' && i.id.length > 20) ? i.id : null,
         item_name: i.name,
         quantity: i.qty,
         price_at_time: i.price
@@ -458,8 +458,22 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
       const { error: itemsError } = await supabase.from('order_items').insert(orderItemsPayload);
       if (itemsError) {
-        console.error("Order items failed to save:", itemsError);
-        throw new Error(`Order placed but items failed to save: ${itemsError.message}`);
+        // Fallback for stale carts where an offer was added without the is_offer flag
+        // or an inventory item was recently deleted but still in the cart.
+        if (itemsError.message?.includes('violates foreign key constraint')) {
+          console.warn('Foreign key violation on order_items, retrying with null inventory_ids...', itemsError);
+          const fallbackPayload = orderItemsPayload.map(item => ({
+            ...item,
+            inventory_id: null
+          }));
+          const { error: retryError } = await supabase.from('order_items').insert(fallbackPayload);
+          if (retryError) {
+             throw new Error(`Order placed but items failed to save (fallback): ${retryError.message}`);
+          }
+        } else {
+          console.error("Order items failed to save:", itemsError);
+          throw new Error(`Order placed but items failed to save: ${itemsError.message}`);
+        }
       }
 
       // Promo usage count is now automatically securely handled by a Supabase Database Trigger
