@@ -24,10 +24,10 @@ export default function AboutDeveloper() {
           />
 
           {/* No full gradient overlay anymore - photo is 100% clear */}
-          
+
           {/* Foreground Hero Content */}
           <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end sm:justify-end md:justify-center items-start">
-            
+
             <div className="mb-2">
               <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-emerald-600 font-bold text-[12px] tracking-wide inline-block shadow-sm">
                 Hello, I'm
@@ -42,10 +42,6 @@ export default function AboutDeveloper() {
 
             {/* Attributes */}
             <div className="space-y-2 flex flex-col items-start">
-              <div className="inline-flex items-center gap-2.5 text-slate-800 text-[12px] sm:text-[13px] font-bold bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-full shadow-sm">
-                <Shield className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
-                Cyber Security Student
-              </div>
               <div className="inline-flex items-center gap-2.5 text-slate-800 text-[12px] sm:text-[13px] font-bold bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-full shadow-sm">
                 <Code className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
                 Full Stack Developer
@@ -81,7 +77,7 @@ export default function AboutDeveloper() {
           <div className="flex-1 flex flex-col items-center justify-center p-2 space-y-1.5">
             <Rocket className="w-6 h-6 text-emerald-500 mb-1" strokeWidth={1.5} />
             <span className="text-[11px] sm:text-xs font-black text-slate-900 leading-tight px-1">Founder & Lead Developer</span>
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block pt-1">ACROAMS &<br/>LEVELONE</span>
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block pt-1">ACROAMS &<br />LEVELONE</span>
           </div>
         </div>
 
