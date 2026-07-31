@@ -35,16 +35,6 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
   const location = useLocation();
   const { session, profile, userRole, activePortal, setActivePortal, cart, logout, showToast, staffLanguage, setStaffLanguage } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement);
-
-  // Sync fullscreen state with browser escape / exit
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
 
   // Lock background scroll when side drawer is open
   useEffect(() => {
@@ -60,20 +50,6 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
       document.documentElement.style.overflow = '';
     };
   }, [mobileMenuOpen]);
-
-  // Fullscreen state handled above
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        showToast('Fullscreen mode not available', true);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-  };
 
   // Change Admin Unlock Code Modal state
   const [showChangeCodeModal, setShowChangeCodeModal] = useState(false);
@@ -180,21 +156,6 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
 
             {/* Right Action Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-2">
-              
-              {/* Fullscreen Toggle Button (Hidden on Developer Page) */}
-              {!isDeveloperRoute && (
-                <button
-                  onClick={toggleFullscreen}
-                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 transition-all shrink-0 flex items-center justify-center cursor-pointer shadow-2xs"
-                  title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen View'}
-                >
-                  {isFullscreen ? (
-                    <Minimize className="w-4 h-4 text-purple-600 font-bold" />
-                  ) : (
-                    <Maximize className="w-4 h-4 text-slate-700 font-bold" />
-                  )}
-                </button>
-              )}
 
               {/* Language Selector for Staff / Admin */}
               {(currentPortal === 'staff' || currentPortal === 'admin') && (
