@@ -253,7 +253,7 @@ export default function CustomerOrders({ onOpenAuth }) {
 
   let filteredOrders = orders;
   if (filter === 'active') {
-    filteredOrders = activeOrders.length > 0 ? activeOrders : orders;
+    filteredOrders = activeOrders;
   } else if (filter === 'today') {
     filteredOrders = todayOrders;
   }
