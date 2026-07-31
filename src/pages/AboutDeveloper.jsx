@@ -46,10 +46,7 @@ export default function AboutDeveloper() {
                 <Code className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
                 Full Stack Developer
               </div>
-              <div className="inline-flex items-center gap-2.5 text-slate-800 text-[12px] sm:text-[13px] font-bold bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-full shadow-sm">
-                <MapPin className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
-                Indore, India
-              </div>
+
             </div>
           </div>
         </div>
