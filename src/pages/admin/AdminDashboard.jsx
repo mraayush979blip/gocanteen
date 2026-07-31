@@ -23,12 +23,21 @@ export default function AdminDashboard() {
   const [topItems, setTopItems] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(false);
-  const soundEnabledRef = useRef(soundEnabled);
 
+  // Unlock AudioContext on first user interaction to bypass autoplay policies
   useEffect(() => {
-    soundEnabledRef.current = soundEnabled;
-  }, [soundEnabled]);
+    const unlockAudio = () => {
+      initAudioContext();
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('touchstart', unlockAudio);
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    };
+  }, []);
 
   useEffect(() => {
     fetchDashboard();
@@ -36,7 +45,7 @@ export default function AdminDashboard() {
     const channel = supabase
       .channel('admin-dashboard-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-        if (payload.eventType === 'INSERT' && soundEnabledRef.current) {
+        if (payload.eventType === 'INSERT') {
           playAlertSound();
         }
         fetchDashboard();
@@ -211,28 +220,6 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              if (!soundEnabled) {
-                initAudioContext();
-                playAlertSound(); // Play test sound when enabling
-              }
-              setSoundEnabled(!soundEnabled);
-            }}
-            className={`p-2.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${
-              soundEnabled 
-                ? 'bg-purple-50 text-purple-700 border-purple-200 shadow-sm' 
-                : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
-            }`}
-            title="Toggle Audio Alerts for New Orders"
-          >
-            {soundEnabled ? (
-              <>🔊 Alerts On</>
-            ) : (
-              <>🔈 Alerts Off</>
-            )}
-          </button>
-          
           <button
             onClick={fetchDashboard}
             className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
