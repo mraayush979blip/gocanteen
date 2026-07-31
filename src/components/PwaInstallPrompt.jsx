@@ -31,6 +31,7 @@ export default function PwaInstallPrompt() {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      window.deferredPromptEvent = e; // Expose globally for Navbar
       if (!isDismissed) {
         const timer = setTimeout(() => setIsVisible(true), 4000);
         return () => clearTimeout(timer);

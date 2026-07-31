@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram, ArrowLeft, ChevronRight
+  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram, ArrowLeft, ChevronRight, ArrowDownToLine
 } from 'lucide-react';
 
 function NavigationItem({ icon, iconBg, title, subtitle, rightElement, onClick }) {
@@ -119,6 +119,28 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
     : pathname.startsWith('/staff')
     ? 'staff'
     : 'customer';
+
+  const handleManualInstall = async () => {
+    const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && window.navigator.standalone;
+    
+    if (isInStandaloneMode()) {
+      showToast('App is already installed!', false);
+      setMobileMenuOpen(false);
+      return;
+    }
+
+    if (isIos()) {
+      alert("📱 iPhone Install Guide:\n\n1. Tap the 'Share' icon at the bottom of Safari.\n2. Scroll down and tap 'Add to Home Screen'.");
+    } else if (window.deferredPromptEvent) {
+      window.deferredPromptEvent.prompt();
+      await window.deferredPromptEvent.userChoice;
+      window.deferredPromptEvent = null; // Cannot be used again
+    } else {
+      showToast('Installation is not supported on this browser or already installed.', true);
+    }
+    setMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -442,6 +464,14 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                           onClick={() => window.open('https://www.instagram.com/gocanteen.in/', '_blank')}
                         />
                       )}
+                      
+                      <NavigationItem 
+                        icon={<ArrowDownToLine className="w-5 h-5 text-blue-600" />}
+                        iconBg="bg-blue-50"
+                        title="Install App"
+                        subtitle="Add to home screen"
+                        onClick={handleManualInstall}
+                      />
                       <NavigationItem 
                         icon={<Bug className="w-5 h-5 text-amber-600" />}
                         iconBg="bg-amber-50"

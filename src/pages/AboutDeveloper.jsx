@@ -23,39 +23,35 @@ export default function AboutDeveloper() {
             }}
           />
 
-          {/* Gradient Overlay for light theme readability */}
-          {/* On mobile: bottom-to-top gradient. On laptop: left-to-right gradient fading out earlier */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/5 to-transparent sm:bg-transparent" />
-          <div className="hidden sm:block absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-white via-white/40 to-transparent" />
+          {/* No full gradient overlay anymore - photo is 100% clear */}
           
-          <div className="hidden sm:block absolute inset-0 bg-white/5 mix-blend-overlay" />
-
           {/* Foreground Hero Content */}
-          <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end sm:justify-end md:justify-center">
-            <div className="space-y-1 mb-2">
-              <span className="text-emerald-600 font-bold text-sm tracking-wide">
+          <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end sm:justify-end md:justify-center items-start">
+            
+            <div className="mb-2">
+              <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-emerald-600 font-bold text-[12px] tracking-wide inline-block shadow-sm">
                 Hello, I'm
               </span>
             </div>
 
             {/* Developer Name */}
-            <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-none text-slate-900 mb-5">
-              Aayush<br/>
-              <span className="text-emerald-500">Sharma</span>
+            <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-none text-slate-900 mb-4 flex flex-col items-start gap-1">
+              <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-sm inline-block">Aayush</span>
+              <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-sm inline-block text-emerald-600">Sharma</span>
             </h1>
 
             {/* Attributes */}
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2.5 text-slate-700 text-[13px] sm:text-sm font-semibold">
-                <Shield className="w-4 h-4 text-emerald-500" strokeWidth={2.5} />
+            <div className="space-y-2 flex flex-col items-start">
+              <div className="inline-flex items-center gap-2.5 text-slate-800 text-[12px] sm:text-[13px] font-bold bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-full shadow-sm">
+                <Shield className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
                 Cyber Security Student
               </div>
-              <div className="flex items-center gap-2.5 text-slate-700 text-[13px] sm:text-sm font-semibold">
-                <Code className="w-4 h-4 text-emerald-500" strokeWidth={2.5} />
+              <div className="inline-flex items-center gap-2.5 text-slate-800 text-[12px] sm:text-[13px] font-bold bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-full shadow-sm">
+                <Code className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
                 Full Stack Developer
               </div>
-              <div className="flex items-center gap-2.5 text-slate-700 text-[13px] sm:text-sm font-semibold">
-                <MapPin className="w-4 h-4 text-emerald-500" strokeWidth={2.5} />
+              <div className="inline-flex items-center gap-2.5 text-slate-800 text-[12px] sm:text-[13px] font-bold bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-full shadow-sm">
+                <MapPin className="w-4 h-4 text-emerald-600" strokeWidth={2.5} />
                 Indore, India
               </div>
             </div>
