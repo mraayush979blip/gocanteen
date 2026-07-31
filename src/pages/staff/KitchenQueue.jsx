@@ -62,6 +62,9 @@ export default function KitchenQueue() {
         }
         fetchOrders();
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => {
+        fetchOrders();
+      })
       .subscribe();
 
     // Backup polling fallback every 20 seconds in case websocket goes to standby mode

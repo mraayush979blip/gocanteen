@@ -44,6 +44,9 @@ export default function AdminOrders() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
         fetchOrders();
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => {
+        fetchOrders();
+      })
       .subscribe();
 
     // � udd04 Backup polling fallback every 25 seconds in case WebSocket drops
