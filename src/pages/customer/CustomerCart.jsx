@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import {
-  X, Trash2, Plus, Minus, Ticket, Smartphone, DollarSign, ArrowRight, Loader2, Sparkles, CheckCircle2, LogIn, KeyRound, CreditCard, ShieldCheck, Save, Bookmark, Info, Calendar, ChevronRight, AlertCircle, Copy, Tag, Check, Gift, Clock
+  X, Trash2, Plus, Minus, Ticket, Smartphone, DollarSign, ArrowRight, Loader2, Sparkles, CheckCircle2, LogIn, KeyRound, CreditCard, ShieldCheck, Save, Bookmark, Info, Calendar, ChevronRight, AlertCircle, Copy, Tag, Check, Gift, Clock, BellRing
 } from 'lucide-react';
 
 export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlaced }) {
@@ -95,6 +95,46 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   const [confirmedToken, setConfirmedToken] = useState(null);
   const [confirmedCode, setConfirmedCode] = useState(null);
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
+
+  const [showCartNotifPrompt, setShowCartNotifPrompt] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && session?.user && 'Notification' in window && Notification.permission === 'default' && cart.length > 0) {
+      const dismissedStr = localStorage.getItem('cart_notification_prompt_dismissed');
+      let shouldShow = true;
+      if (dismissedStr) {
+        const dismissedTime = parseInt(dismissedStr, 10);
+        if (Date.now() - dismissedTime < 12 * 60 * 60 * 1000) {
+          shouldShow = false;
+        }
+      }
+      if (shouldShow) {
+        const t = setTimeout(() => setShowCartNotifPrompt(true), 600);
+        return () => clearTimeout(t);
+      }
+    } else if (!isOpen) {
+      setShowCartNotifPrompt(false);
+    }
+  }, [isOpen, session, cart.length]);
+
+  const handleAllowCartNotif = async () => {
+    setShowCartNotifPrompt(false);
+    try {
+      const { requestForToken } = await import('../../lib/firebase');
+      const token = await requestForToken();
+      if (token && session?.user) {
+        await supabase.from('profiles').update({ fcm_token: token }).eq('id', session.user.id);
+        showToast('Notifications enabled!', false);
+      }
+    } catch (e) {
+      console.warn('Failed to get notification permission:', e);
+    }
+  };
+
+  const handleDismissCartNotif = () => {
+    setShowCartNotifPrompt(false);
+    localStorage.setItem('cart_notification_prompt_dismissed', Date.now().toString());
+  };
 
   // Fetch pending order count for user-level spam protection checks
   useEffect(() => {
@@ -1474,6 +1514,45 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
               )}
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Center Aligned Notification Permission Prompt */}
+      {showCartNotifPrompt && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl relative border border-slate-100 flex flex-col items-center text-center">
+            
+            <button 
+              onClick={handleDismissCartNotif}
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-2 rounded-full transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 mt-2 animate-bounce-slow">
+              <BellRing className="w-8 h-8" />
+            </div>
+            
+            <h3 className="font-black text-slate-900 text-xl tracking-tight mb-2">Enable Notifications?</h3>
+            <p className="text-sm font-medium text-slate-500 mb-6 leading-relaxed px-2">
+              So we can instantly alert you exactly when your food is hot, ready, and waiting for pickup.
+            </p>
+            
+            <div className="flex w-full gap-3">
+              <button
+                onClick={handleDismissCartNotif}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-sm py-3.5 rounded-xl transition-all"
+              >
+                Maybe Later
+              </button>
+              <button
+                onClick={handleAllowCartNotif}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-emerald-200"
+              >
+                Yes, Notify Me
+              </button>
+            </div>
           </div>
         </div>
       )}
