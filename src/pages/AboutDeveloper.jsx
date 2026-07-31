@@ -25,7 +25,7 @@ export default function AboutDeveloper() {
 
           {/* Gradient Overlay for light theme readability */}
           {/* On mobile: bottom-to-top gradient. On laptop: left-to-right gradient fading out earlier */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent sm:bg-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/5 to-transparent sm:bg-transparent" />
           <div className="hidden sm:block absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-white via-white/40 to-transparent" />
           
           <div className="hidden sm:block absolute inset-0 bg-white/5 mix-blend-overlay" />
