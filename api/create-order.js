@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
         const { data: dbInventory } = await supabase
           .from('inventory')
-          .select('id, price, is_available, is_active')
+          .select('id, price, is_available')
           .in('id', itemIds);
 
         const { data: dbOffers } = await supabase

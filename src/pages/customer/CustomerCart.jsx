@@ -501,7 +501,6 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         // Fallback for stale carts where an offer was added without the is_offer flag
         // or an inventory item was recently deleted but still in the cart.
         if (itemsError.message?.includes('violates foreign key constraint')) {
-          console.warn('Foreign key violation on order_items, retrying with null inventory_ids...', itemsError);
           const fallbackPayload = orderItemsPayload.map(item => ({
             ...item,
             inventory_id: null
@@ -545,7 +544,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
       const { data: invItems, error } = await supabase
         .from('inventory')
-        .select('id, name, price, is_available, is_active')
+        .select('id, name, price, is_available')
         .in('id', inventoryIds);
 
       if (error) {
@@ -560,7 +559,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         const dbItem = invItems?.find(db => db.id === cartItem.id);
         if (dbItem) {
           // Check stock
-          if (dbItem.is_available === false || dbItem.is_active === false) {
+          if (dbItem.is_available === false) {
             outOfStockNames.push(dbItem.name);
             return null; // Will be filtered out
           }
@@ -765,7 +764,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         currency: orderData.currency,
         name: 'Go Canteen',
         description: `Food Order (${cart.length} items)`,
-        image: window.location.origin + '/logo.png',
+        image: window.location.hostname === 'localhost' ? '' : window.location.origin + '/logo.png',
         order_id: orderData.order_id,
         prefill: {
           name: customerName,
