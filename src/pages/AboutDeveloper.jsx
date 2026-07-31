@@ -8,22 +8,6 @@ export default function AboutDeveloper() {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] font-['Plus_Jakarta_Sans',sans-serif] text-slate-900 pb-16">
-      {/* Custom Header with Back Button (optional, to match mockup perfectly if Navbar is hidden/changed) */}
-      <div className="bg-white px-4 h-16 flex items-center justify-between border-b border-slate-100 sm:hidden">
-         <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center hover:bg-slate-50 text-slate-700 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-         </button>
-         <div className="flex flex-col items-center">
-            <div className="flex items-center gap-1.5">
-               <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain opacity-80" onError={(e) => e.target.style.display='none'} />
-               <span className="font-black text-slate-800 text-sm tracking-tight">GO CANTEEN</span>
-               <span className="bg-amber-400 text-amber-950 text-[9px] font-black px-1.5 py-0.5 rounded uppercase">FAST</span>
-            </div>
-            <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase mt-0.5">CUSTOMER PORTAL</span>
-         </div>
-         <div className="w-10" /> {/* Spacer for centering */}
-      </div>
-
       <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-6 pt-6">
 
         {/* 1. HERO COVER CARD */}
@@ -42,12 +26,12 @@ export default function AboutDeveloper() {
           {/* Gradient Overlay for light theme readability */}
           {/* On mobile: bottom-to-top gradient. On laptop: left-to-right gradient fading out earlier */}
           <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent sm:bg-transparent" />
-          <div className="hidden sm:block absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-white via-white/70 to-transparent" />
+          <div className="hidden sm:block absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-white via-white/40 to-transparent" />
           
-          <div className="hidden sm:block absolute inset-0 bg-white/10 mix-blend-overlay" />
+          <div className="hidden sm:block absolute inset-0 bg-white/5 mix-blend-overlay" />
 
           {/* Foreground Hero Content */}
-          <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end sm:justify-center">
+          <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end sm:justify-end md:justify-center">
             <div className="space-y-1 mb-2">
               <span className="text-emerald-600 font-bold text-sm tracking-wide">
                 Hello, I'm
