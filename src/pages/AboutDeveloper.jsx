@@ -36,8 +36,7 @@ export default function AboutDeveloper() {
 
             {/* Developer Name */}
             <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-none text-slate-900 mb-4 flex flex-col items-start gap-1">
-              <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-sm inline-block">Aayush</span>
-              <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-sm inline-block text-emerald-600">Sharma</span>
+              <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-sm inline-block">Aayush Sharma</span>
             </h1>
 
             {/* Attributes */}
