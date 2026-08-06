@@ -609,31 +609,34 @@ export default function CustomerMenu({ onOpenCart }) {
                   <div
                     key={offer.id}
                     onClick={() => setSelectedItem(offer)}
-                    className={`bg-gradient-to-br ${gradient} border-2 rounded-3xl p-5 flex flex-col sm:flex-row gap-4 items-center justify-between hover:shadow-xl transition-all duration-300 relative group overflow-hidden cursor-pointer`}
+                    className={`bg-gradient-to-br ${gradient} border-2 border-b-[6px] border-r-4 border-amber-300/80 rounded-3xl p-5 flex flex-col sm:flex-row gap-4 items-center justify-between hover:shadow-[10px_25px_50px_rgba(0,0,0,0.3),inset_0_2px_5px_rgba(255,255,255,1)] hover:-translate-y-1 hover:border-b-4 hover:border-r-2 transition-all duration-300 shadow-[8px_12px_24px_rgba(0,0,0,0.25),-4px_-4px_12px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] relative group overflow-hidden cursor-pointer`}
                   >
                     {/* Left: Emojis Box & Tags */}
-                    <div className="shrink-0 w-full sm:w-36 h-28 rounded-2xl bg-white/70 backdrop-blur-xs border border-white flex flex-col items-center justify-center relative shadow-sm gap-2">
-                      <div className="flex items-center gap-1.5 font-bold text-slate-500">
-                        <span className="text-4xl drop-shadow-sm group-hover:scale-110 transition-transform duration-300">{parts[0]}</span>
+                    <div className="shrink-0 w-full sm:w-36 h-28 rounded-2xl border border-white/80 flex flex-col items-center justify-center relative shadow-inner gap-2 bg-cover bg-center overflow-hidden" style={{ backgroundImage: `url('https://api.dicebear.com/8.x/shapes/svg?seed=combo-${offer.id}')` }}>
+                      <div className="absolute inset-0 bg-white/60 group-hover:bg-white/40 transition-colors" />
+                      <div className="relative z-10 flex items-center gap-1.5 font-bold text-slate-500">
+                        <span className="text-4xl drop-shadow-md group-hover:scale-110 transition-transform duration-300">{parts[0]}</span>
                         {hasPlus && (
                           <>
                             <span className="text-base text-amber-500 font-extrabold animate-pulse">+</span>
-                            <span className="text-4xl drop-shadow-sm group-hover:scale-110 transition-transform duration-300">{parts[1]}</span>
+                            <span className="text-4xl drop-shadow-md group-hover:scale-110 transition-transform duration-300">{parts[1]}</span>
                           </>
                         )}
                       </div>
 
-                      {offer.tag && (
-                        <span className="text-[9px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-md shadow-xs">
-                          {offer.tag}
-                        </span>
-                      )}
+                      <div className="relative z-10 flex flex-col items-center gap-1 mt-1">
+                        {offer.tag && (
+                          <span className="text-[9px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded-md shadow-xs">
+                            {offer.tag}
+                          </span>
+                        )}
 
-                      {savings > 0 && (
-                        <span className="text-[9px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300 shadow-2xs">
-                          Save ₹{savings}
-                        </span>
-                      )}
+                        {savings > 0 && (
+                          <span className="text-[9px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300 shadow-2xs">
+                            Save ₹{savings}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Right: Info & Action */}
@@ -669,8 +672,8 @@ export default function CustomerMenu({ onOpenCart }) {
                           </div>
                         ) : (
                           <button
-                            onClick={() => addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥', has_packaging_charge: true, is_offer: true })}
-                            className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs transition-all shadow-2xs shrink-0"
+                            onClick={(e) => { e.stopPropagation(); addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥', has_packaging_charge: true, is_offer: true }); }}
+                            className="px-5 py-2 rounded-xl border border-emerald-300 text-emerald-800 bg-gradient-to-b from-emerald-50 to-emerald-200 hover:from-emerald-400 hover:to-emerald-600 hover:text-white hover:border-emerald-500 font-black text-xs sm:text-sm active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)] active:translate-y-0.5 transition-all shadow-[0_4px_6px_rgba(0,100,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.9)] cursor-pointer tracking-wider shrink-0"
                           >
                             + ADD
                           </button>
@@ -755,11 +758,12 @@ export default function CustomerMenu({ onOpenCart }) {
                             <div
                               key={`popular-${item.id}`}
                               onClick={() => setSelectedItem(item)}
-                              className={`snap-start shrink-0 w-64 bg-gradient-to-br ${gradient} border-2 border-amber-300 shadow-md shadow-amber-200/20 hover:border-amber-400 hover:shadow-lg transition-all duration-300 rounded-2xl p-3 flex flex-col justify-between group relative overflow-hidden cursor-pointer`}
+                              className={`snap-start shrink-0 w-64 bg-gradient-to-br ${gradient} border-2 border-b-[6px] border-r-4 border-slate-300/80 rounded-3xl p-3 flex flex-col justify-between hover:shadow-[10px_20px_40px_rgba(0,0,0,0.3),inset_0_2px_5px_rgba(255,255,255,1)] hover:-translate-y-1.5 hover:border-b-4 hover:border-r-2 transition-all duration-300 shadow-[8px_12px_24px_rgba(0,0,0,0.25),-4px_-4px_12px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] group relative overflow-hidden cursor-pointer`}
                             >
                               <div className="space-y-2">
-                                <div className="h-28 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
-                                  <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</span>
+                                <div className="h-28 rounded-xl border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:shadow-inner bg-cover bg-center" style={{ backgroundImage: `url('https://api.dicebear.com/8.x/shapes/svg?seed=${item.id}')` }}>
+                                  <div className="absolute inset-0 bg-white/50 group-hover:bg-white/30 transition-colors" />
+                                  <span className="relative z-10 text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-md">{item.emoji || '🍽️'}</span>
                                   <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded shadow-sm">Bestseller</span>
                                 </div>
                                 <h3 className="text-sm font-black text-slate-900 line-clamp-1">{item.name}</h3>
@@ -774,7 +778,7 @@ export default function CustomerMenu({ onOpenCart }) {
                                     <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
                                   </div>
                                 ) : (
-                                  <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border-2 border-emerald-600 text-emerald-700 bg-emerald-50 font-black text-xs active:scale-95 transition-transform">
+                                  <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-5 py-2 rounded-xl border border-emerald-300 text-emerald-800 bg-gradient-to-b from-emerald-50 to-emerald-200 hover:from-emerald-400 hover:to-emerald-600 hover:text-white hover:border-emerald-500 font-black text-xs sm:text-sm active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)] active:translate-y-0.5 transition-all shadow-[0_4px_6px_rgba(0,100,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.9)] cursor-pointer tracking-wider shrink-0">
                                     + ADD
                                   </button>
                                 )}
@@ -852,8 +856,9 @@ export default function CustomerMenu({ onOpenCart }) {
                             className={`shrink-0 ${cardWidth} snap-start bg-gradient-to-br ${gradient} border-2 border-b-[6px] border-r-4 border-slate-300/80 rounded-3xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-[10px_20px_40px_rgba(0,0,0,0.3),inset_0_2px_5px_rgba(255,255,255,1)] hover:-translate-y-1.5 hover:border-b-4 hover:border-r-2 transition-all duration-300 shadow-[8px_12px_24px_rgba(0,0,0,0.25),-4px_-4px_12px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] group relative cursor-pointer`}
                           >
                             <div className="space-y-3">
-                              <div className="h-28 rounded-xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner">
-                                <span className="text-6xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl">{item.emoji || '🍽️'}</span>
+                              <div className="h-28 rounded-xl border border-white flex items-center justify-center relative overflow-hidden group-hover:shadow-inner bg-cover bg-center" style={{ backgroundImage: `url('https://api.dicebear.com/8.x/shapes/svg?seed=${item.id}')` }}>
+                                <div className="absolute inset-0 bg-white/50 group-hover:bg-white/30 transition-colors" />
+                                <span className="relative z-10 text-6xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl">{item.emoji || '🍽️'}</span>
                                 <div className={`absolute top-2 left-2 w-4 h-4 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
                                 <div className="absolute top-2 right-2">{renderTag(item.tag)}</div>
                               </div>
@@ -925,7 +930,10 @@ export default function CustomerMenu({ onOpenCart }) {
                       return (
                         <motion.div key={item.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: "easeOut" }} onClick={() => setSelectedItem(item)} className="bg-white border border-slate-200/90 rounded-2xl p-4 flex items-center justify-between gap-4 hover:shadow-md transition-all shadow-2xs cursor-pointer">
                           <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/50 flex items-center justify-center text-3xl shrink-0 shadow-inner">{item.emoji || '🍽️'}</div>
+                            <div className="w-16 h-16 rounded-xl border border-white/40 flex items-center justify-center text-3xl shrink-0 shadow-inner bg-cover bg-center relative overflow-hidden" style={{ backgroundImage: `url('https://api.dicebear.com/8.x/shapes/svg?seed=${item.id}')` }}>
+                              <div className="absolute inset-0 bg-white/50 group-hover:bg-white/30 transition-colors" />
+                              <span className="relative z-10 drop-shadow-md">{item.emoji || '🍽️'}</span>
+                            </div>
                             <div>
                               <div className="flex items-center gap-2">
                                 <div className={`w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-2xs ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
@@ -972,8 +980,9 @@ export default function CustomerMenu({ onOpenCart }) {
                       return (
                         <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: "easeOut" }} whileHover={{ scale: 1.01, y: -4 }} whileTap={{ scale: 0.98, y: 2 }} onClick={() => setSelectedItem(item)} className={`${bentoClass} bg-gradient-to-br ${gradient} border-2 border-b-[6px] border-r-4 border-slate-300/80 rounded-3xl p-4 flex flex-col justify-between hover:shadow-[10px_25px_50px_rgba(0,0,0,0.3),inset_0_2px_5px_rgba(255,255,255,1)] hover:border-b-4 hover:border-r-2 transition-all duration-300 shadow-[8px_12px_24px_rgba(0,0,0,0.25),-4px_-4px_12px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] group relative overflow-hidden cursor-pointer`}>
                           <div className="space-y-3 z-10">
-                            <div className="h-full min-h-[140px] rounded-2xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner flex-1">
-                              <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl">{item.emoji || '🍽️'}</motion.span>
+                            <div className="h-full min-h-[140px] rounded-2xl border border-white flex items-center justify-center relative overflow-hidden group-hover:shadow-inner flex-1 bg-cover bg-center" style={{ backgroundImage: `url('https://api.dicebear.com/8.x/shapes/svg?seed=${item.id}')` }}>
+                              <div className="absolute inset-0 bg-white/50 group-hover:bg-white/30 transition-colors duration-300" />
+                              <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="relative z-10 text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-2xl">{item.emoji || '🍽️'}</motion.span>
                               <div className={`absolute top-3 left-3 w-5 h-5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
                               {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-950 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
                             </div>
