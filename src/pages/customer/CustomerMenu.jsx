@@ -514,6 +514,7 @@ export default function CustomerMenu({ onOpenCart }) {
           {/* Dynamic Category pills — scroll anchors in grouped mode, filters otherwise */}
           {categories.map(cat => {
             const count = inventory.filter(i => i.category_id === cat.id).length;
+            if (count === 0) return null;
             const isActive = activeCategory === cat.id;
             return (
               <button
@@ -692,59 +693,60 @@ export default function CustomerMenu({ onOpenCart }) {
               )}
 
               {/* Popular Today Strip */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center gap-2 px-1">
-                  <span className="text-xl">⭐</span>
-                  <h2 className="text-base font-black text-slate-900 tracking-tight">Popular Today</h2>
-                </div>
-                <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
-                  {inventory
-                    .filter(i => i.is_popular)
-                    .map((item, idx) => {
-                      const qty = getItemCartQty(item.id);
-                      return (() => {
-                        const cardGradients = [
-                          'from-amber-50/80 via-orange-50/40 to-white border-amber-200/60',
-                          'from-emerald-50/80 via-teal-50/40 to-white border-emerald-200/60',
-                          'from-violet-50/80 via-purple-50/40 to-white border-violet-200/60',
-                          'from-sky-50/80 via-blue-50/40 to-white border-sky-200/60',
-                        ];
-                        const gradient = cardGradients[idx % cardGradients.length];
-                        return (
-                          <div
-                            key={`popular-${item.id}`}
-                            onClick={() => setSelectedItem(item)}
-                            className={`snap-start shrink-0 w-64 bg-gradient-to-br ${gradient} border-2 border-amber-300 shadow-md shadow-amber-200/20 hover:border-amber-400 hover:shadow-lg transition-all duration-300 rounded-2xl p-3 flex flex-col justify-between group relative overflow-hidden cursor-pointer`}
-                          >
-                            <div className="space-y-2">
-                              <div className="h-28 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
-                                <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</span>
-                                <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded shadow-sm">Bestseller</span>
-                              </div>
-                              <h3 className="text-sm font-black text-slate-900 line-clamp-1">{item.name}</h3>
-                              {item.description && <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">{item.description}</p>}
-                            </div>
-                            <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
-                              <span className="text-sm font-black text-slate-900">₹{item.price}</span>
-                              {qty > 0 ? (
-                                <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1.5 font-bold shadow-sm">
-                                  <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
-                                  <span className="text-xs font-black px-1">{qty}</span>
-                                  <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
+              {inventory.some(i => i.is_popular) && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2 px-1">
+                    <span className="text-xl">⭐</span>
+                    <h2 className="text-base font-black text-slate-900 tracking-tight">Popular Today</h2>
+                  </div>
+                  <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+                    {inventory
+                      .filter(i => i.is_popular)
+                      .map((item, idx) => {
+                        const qty = getItemCartQty(item.id);
+                        return (() => {
+                          const cardGradients = [
+                            'from-amber-50/80 via-orange-50/40 to-white border-amber-200/60',
+                            'from-emerald-50/80 via-teal-50/40 to-white border-emerald-200/60',
+                            'from-violet-50/80 via-purple-50/40 to-white border-violet-200/60',
+                            'from-sky-50/80 via-blue-50/40 to-white border-sky-200/60',
+                          ];
+                          const gradient = cardGradients[idx % cardGradients.length];
+                          return (
+                            <div
+                              key={`popular-${item.id}`}
+                              onClick={() => setSelectedItem(item)}
+                              className={`snap-start shrink-0 w-64 bg-gradient-to-br ${gradient} border-2 border-amber-300 shadow-md shadow-amber-200/20 hover:border-amber-400 hover:shadow-lg transition-all duration-300 rounded-2xl p-3 flex flex-col justify-between group relative overflow-hidden cursor-pointer`}
+                            >
+                              <div className="space-y-2">
+                                <div className="h-28 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
+                                  <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</span>
+                                  <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded shadow-sm">Bestseller</span>
                                 </div>
-                              ) : (
-                                <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border-2 border-emerald-600 text-emerald-700 bg-emerald-50 font-black text-xs active:scale-95 transition-transform">
-                                  + ADD
-                                </button>
-                              )}
+                                <h3 className="text-sm font-black text-slate-900 line-clamp-1">{item.name}</h3>
+                                {item.description && <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">{item.description}</p>}
+                              </div>
+                              <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                                <span className="text-sm font-black text-slate-900">₹{item.price}</span>
+                                {qty > 0 ? (
+                                  <div className="flex items-center gap-1.5 bg-emerald-600 text-white rounded-lg px-2 py-1.5 font-bold shadow-sm">
+                                    <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5"><Minus className="w-3 h-3" /></button>
+                                    <span className="text-xs font-black px-1">{qty}</span>
+                                    <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
+                                  </div>
+                                ) : (
+                                  <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border-2 border-emerald-600 text-emerald-700 bg-emerald-50 font-black text-xs active:scale-95 transition-transform">
+                                    + ADD
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })();
-                    })}
+                          );
+                        })();
+                      })}
+                  </div>
                 </div>
-              </div>
-
+              )}
 
 
               {/* Category sections */}
