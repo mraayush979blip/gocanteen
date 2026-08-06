@@ -817,13 +817,15 @@ export default function CustomerMenu({ onOpenCart }) {
                         ];
                         const hash = String(item.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                         const gradient = cardGradients[hash % cardGradients.length];
+                        const widthClasses = ['w-56', 'w-64', 'w-72'];
+                        const cardWidth = widthClasses[hash % widthClasses.length];
                         return (
                           <div
                             key={item.id}
                             onClick={() => setSelectedItem(item)}
-                            className={`shrink-0 w-64 snap-start bg-gradient-to-br ${gradient} border border-slate-200/60 rounded-2xl p-3 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 shadow-md group relative cursor-pointer`}
+                            className={`shrink-0 ${cardWidth} snap-start bg-gradient-to-br ${gradient} border border-slate-200/60 rounded-3xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-[0_20px_40px_rgba(0,0,0,0.15),inset_0_2px_5px_rgba(255,255,255,1)] hover:-translate-y-1 transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1),0_3px_6px_rgba(0,0,0,0.05),inset_0_2px_5px_rgba(255,255,255,1),inset_0_-2px_5px_rgba(0,0,0,0.05)] group relative cursor-pointer`}
                           >
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                               <div className="h-28 rounded-xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner">
                                 <span className="text-6xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl">{item.emoji || '🍽️'}</span>
                                 <div className={`absolute top-2 left-2 w-4 h-4 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
@@ -844,7 +846,7 @@ export default function CustomerMenu({ onOpenCart }) {
                                     <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5"><Plus className="w-3 h-3" /></button>
                                   </div>
                                 ) : (
-                                  <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-[11px] active:scale-95 transition-transform shadow-2xs">+ ADD</button>
+                                  <button onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-4 py-1.5 rounded-xl border border-emerald-300 text-emerald-800 bg-gradient-to-b from-emerald-50 to-emerald-200 hover:from-emerald-400 hover:to-emerald-600 hover:text-white hover:border-emerald-500 font-black text-[11px] active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)] active:translate-y-0.5 transition-all shadow-[0_4px_6px_rgba(0,100,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.9)] cursor-pointer tracking-wider">+ ADD</button>
                                 )}
                               </div>
                             </div>
@@ -890,7 +892,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   <button onClick={() => { setSearchQuery(''); setActiveCategory('all'); }} className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-extrabold text-xs shadow-sm hover:bg-emerald-700 transition-colors">Reset All Filters</button>
                 </div>
               ) : (
-                <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5' : 'grid grid-cols-1 gap-3'}>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 grid-flow-dense gap-3 sm:gap-5' : 'grid grid-cols-1 gap-3'}>
                   {filteredInventory.map((item, idx) => {
                     const qty = getItemCartQty(item.id);
                     if (viewMode === 'list') {
@@ -933,11 +935,19 @@ export default function CustomerMenu({ onOpenCart }) {
                       ];
                       const hash = String(item.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                       const gradient = cardGradients[hash % cardGradients.length];
+                      
+                      let bentoClass = 'col-span-1 row-span-1';
+                      if (viewMode === 'grid') {
+                        const mod = hash % 10;
+                        if (mod === 6 || mod === 7) bentoClass = 'col-span-2 row-span-1';
+                        else if (mod === 8 || mod === 9) bentoClass = 'col-span-1 row-span-2';
+                      }
+
                       return (
-                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedItem(item)} className={`bg-gradient-to-br ${gradient} border border-slate-200 rounded-2xl p-4 flex flex-col justify-between hover:shadow-2xl transition-all duration-300 shadow-lg group relative overflow-hidden cursor-pointer`}>
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedItem(item)} className={`${bentoClass} bg-gradient-to-br ${gradient} border border-slate-200 rounded-3xl p-4 flex flex-col justify-between hover:shadow-[0_20px_40px_rgba(0,0,0,0.15),inset_0_2px_5px_rgba(255,255,255,1)] transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1),0_3px_6px_rgba(0,0,0,0.05),inset_0_2px_5px_rgba(255,255,255,1),inset_0_-2px_5px_rgba(0,0,0,0.05)] group relative overflow-hidden cursor-pointer`}>
                           <div className="space-y-3 z-10">
-                            <div className="h-32 sm:h-36 rounded-xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner">
-                              <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</motion.span>
+                            <div className="h-full min-h-[140px] rounded-2xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner flex-1">
+                              <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl">{item.emoji || '🍽️'}</motion.span>
                               <div className={`absolute top-3 left-3 w-5 h-5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
                               {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-950 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
                             </div>
@@ -956,7 +966,7 @@ export default function CustomerMenu({ onOpenCart }) {
                                   <button onClick={(e) => { updateCartQty(item.id, 1); triggerFlyingAnimation(e, item.emoji); }} className="hover:opacity-85 p-0.5 cursor-pointer"><Plus className="w-4 h-4" /></button>
                                 </motion.div>
                               ) : (
-                                <motion.button initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-5 py-2 rounded-xl border-2 border-emerald-600 text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-black text-xs sm:text-sm transition-all shadow-sm shrink-0 cursor-pointer active:scale-95">+ ADD</motion.button>
+                                <motion.button initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={(e) => handleAddToCartWithAnim(e, item)} className="px-5 py-2 rounded-xl border border-emerald-300 text-emerald-800 bg-gradient-to-b from-emerald-50 to-emerald-200 hover:from-emerald-400 hover:to-emerald-600 hover:text-white hover:border-emerald-500 font-black text-xs sm:text-sm active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)] active:translate-y-0.5 transition-all shadow-[0_4px_6px_rgba(0,100,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.9)] cursor-pointer tracking-wider shrink-0">+ ADD</motion.button>
                               )}
                             </motion.div>
                           </div>

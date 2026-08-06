@@ -6,6 +6,7 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  background-color: #f1f5f9; /* bg-slate-100 for skeuomorphic contrast */
 }
 
 /* Keep form input fields, textareas, and search boxes selectable for typing */
