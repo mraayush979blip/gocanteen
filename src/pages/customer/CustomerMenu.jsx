@@ -188,16 +188,8 @@ export default function CustomerMenu({ onOpenCart }) {
     triggerFlyingAnimation(e, item.emoji);
   };
 
-  useEffect(() => {
-    const channel = supabase
-      .channel('customer-menu-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => queryClient.invalidateQueries(['menu']))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => queryClient.invalidateQueries(['menu']))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'offers' }, () => queryClient.invalidateQueries(['menu']))
-      .subscribe();
-
-    return () => supabase.removeChannel(channel);
-  }, [queryClient]);
+  // Removed Supabase Realtime subscription here to protect Supabase Free Tier limits.
+  // The 30-second staleTime background refetching is much safer and scales better for 200+ students.
 
   useEffect(() => {
     const fetchRecentOrders = async () => {
@@ -331,13 +323,28 @@ export default function CustomerMenu({ onOpenCart }) {
   const totalCartPrice = cart.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 1)), 0);
 
   if (loading) {
-
     return (
-      <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between gap-4 p-4 bg-white border border-slate-200 rounded-2xl animate-pulse">
-          <div className="h-10 bg-slate-200 rounded-xl w-full" />
+      <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto px-4 sm:px-0">
+        {/* Flashing Instamart-style Banner */}
+        <div className="h-32 sm:h-40 bg-slate-200/70 rounded-3xl w-full animate-pulse mt-4 shadow-sm" />
+        
+        {/* Flashing Search Bar */}
+        <div className="h-14 bg-slate-200/70 rounded-2xl w-full animate-pulse mt-6 shadow-sm" />
+        
+        {/* Flashing Category Pills */}
+        <div className="flex gap-3 overflow-hidden mt-6 pb-2">
+           <div className="h-11 w-28 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
+           <div className="h-11 w-36 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
+           <div className="h-11 w-24 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
+           <div className="h-11 w-32 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
+           <div className="h-11 w-28 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
         </div>
-        <MenuGridSkeleton count={8} />
+        
+        {/* Flashing Menu Items */}
+        <div className="mt-8 space-y-4">
+           <div className="h-6 w-40 bg-slate-200/80 rounded-md animate-pulse" />
+           <MenuGridSkeleton count={8} />
+        </div>
       </div>
     );
   }
@@ -814,12 +821,12 @@ export default function CustomerMenu({ onOpenCart }) {
                           <div
                             key={item.id}
                             onClick={() => setSelectedItem(item)}
-                            className={`shrink-0 w-64 snap-start bg-gradient-to-br ${gradient} border rounded-2xl p-3 flex flex-col justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-xs group relative cursor-pointer`}
+                            className={`shrink-0 w-64 snap-start bg-gradient-to-br ${gradient} border border-slate-200/60 rounded-2xl p-3 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 shadow-md group relative cursor-pointer`}
                           >
                             <div className="space-y-2">
-                              <div className="h-28 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
-                                <span className="text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</span>
-                                <div className={`absolute top-2 left-2 w-3.5 h-3.5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                              <div className="h-28 rounded-xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner">
+                                <span className="text-6xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl">{item.emoji || '🍽️'}</span>
+                                <div className={`absolute top-2 left-2 w-4 h-4 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
                                 <div className="absolute top-2 right-2">{renderTag(item.tag)}</div>
                               </div>
                               <div>
@@ -927,15 +934,14 @@ export default function CustomerMenu({ onOpenCart }) {
                       const hash = String(item.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                       const gradient = cardGradients[hash % cardGradients.length];
                       return (
-                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedItem(item)} className={`bg-gradient-to-br ${gradient} border rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl transition-all duration-300 shadow-sm group relative overflow-hidden cursor-pointer`}>
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedItem(item)} className={`bg-gradient-to-br ${gradient} border border-slate-200 rounded-2xl p-4 flex flex-col justify-between hover:shadow-2xl transition-all duration-300 shadow-lg group relative overflow-hidden cursor-pointer`}>
                           <div className="space-y-3 z-10">
-                            <div className="h-32 sm:h-40 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:bg-white/80 transition-colors shadow-inner">
+                            <div className="h-32 sm:h-36 rounded-xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner">
                               <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">{item.emoji || '🍽️'}</motion.span>
                               <div className={`absolute top-3 left-3 w-5 h-5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
-                              {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-800 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
+                              {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-950 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
                             </div>
                             <div className="pt-2">
-                              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug line-clamp-1 group-hover:text-emerald-700 transition-colors">{item.name}</h3>
                               {item.categories?.name && <span className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest block mt-1">{item.categories.name}</span>}
                             </div>
                             {item.description && <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>}
