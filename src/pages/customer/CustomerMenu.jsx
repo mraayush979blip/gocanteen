@@ -61,6 +61,32 @@ export default function CustomerMenu({ onOpenCart }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [popupTouchStart, setPopupTouchStart] = useState(null); // Instamart-style item detail popup
 
+  const [visibleCount, setVisibleCount] = useState(12);
+  const observerTarget = useRef(null);
+
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [activeCategory, searchQuery, featuredFilter]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 12);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [observerTarget.current]);
+
   const sectionRefs = useRef({});
 
   useEffect(() => {
@@ -823,7 +849,7 @@ export default function CustomerMenu({ onOpenCart }) {
                           <div
                             key={item.id}
                             onClick={() => setSelectedItem(item)}
-                            className={`shrink-0 ${cardWidth} snap-start bg-gradient-to-br ${gradient} border border-slate-200/60 rounded-3xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-[0_20px_40px_rgba(0,0,0,0.15),inset_0_2px_5px_rgba(255,255,255,1)] hover:-translate-y-1 transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1),0_3px_6px_rgba(0,0,0,0.05),inset_0_2px_5px_rgba(255,255,255,1),inset_0_-2px_5px_rgba(0,0,0,0.05)] group relative cursor-pointer`}
+                            className={`shrink-0 ${cardWidth} snap-start bg-gradient-to-br ${gradient} border-2 border-b-[6px] border-r-4 border-slate-300/80 rounded-3xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-[10px_20px_40px_rgba(0,0,0,0.3),inset_0_2px_5px_rgba(255,255,255,1)] hover:-translate-y-1.5 hover:border-b-4 hover:border-r-2 transition-all duration-300 shadow-[8px_12px_24px_rgba(0,0,0,0.25),-4px_-4px_12px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] group relative cursor-pointer`}
                           >
                             <div className="space-y-3">
                               <div className="h-28 rounded-xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner">
@@ -893,7 +919,7 @@ export default function CustomerMenu({ onOpenCart }) {
                 </div>
               ) : (
                 <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 grid-flow-dense gap-3 sm:gap-5' : 'grid grid-cols-1 gap-3'}>
-                  {filteredInventory.map((item, idx) => {
+                  {filteredInventory.slice(0, visibleCount).map((item, idx) => {
                     const qty = getItemCartQty(item.id);
                     if (viewMode === 'list') {
                       return (
@@ -944,7 +970,7 @@ export default function CustomerMenu({ onOpenCart }) {
                       }
 
                       return (
-                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedItem(item)} className={`${bentoClass} bg-gradient-to-br ${gradient} border border-slate-200 rounded-3xl p-4 flex flex-col justify-between hover:shadow-[0_20px_40px_rgba(0,0,0,0.15),inset_0_2px_5px_rgba(255,255,255,1)] transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1),0_3px_6px_rgba(0,0,0,0.05),inset_0_2px_5px_rgba(255,255,255,1),inset_0_-2px_5px_rgba(0,0,0,0.05)] group relative overflow-hidden cursor-pointer`}>
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.01, y: -4 }} whileTap={{ scale: 0.98, y: 2 }} onClick={() => setSelectedItem(item)} className={`${bentoClass} bg-gradient-to-br ${gradient} border-2 border-b-[6px] border-r-4 border-slate-300/80 rounded-3xl p-4 flex flex-col justify-between hover:shadow-[10px_25px_50px_rgba(0,0,0,0.3),inset_0_2px_5px_rgba(255,255,255,1)] hover:border-b-4 hover:border-r-2 transition-all duration-300 shadow-[8px_12px_24px_rgba(0,0,0,0.25),-4px_-4px_12px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] group relative overflow-hidden cursor-pointer`}>
                           <div className="space-y-3 z-10">
                             <div className="h-full min-h-[140px] rounded-2xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner flex-1">
                               <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl">{item.emoji || '🍽️'}</motion.span>
@@ -974,6 +1000,12 @@ export default function CustomerMenu({ onOpenCart }) {
                       );
                     })();
                   })}
+                </div>
+              )}
+              {viewMode === 'grid' && visibleCount < filteredInventory.length && (
+                <div ref={observerTarget} className="flex flex-col items-center justify-center py-12 mt-4 animate-fade-in">
+                  <div className="w-10 h-10 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin shadow-sm mb-3" />
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-200/50 px-3 py-1 rounded-full shadow-inner">Loading more...</p>
                 </div>
               )}
             </>
