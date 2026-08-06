@@ -352,23 +352,23 @@ export default function CustomerMenu({ onOpenCart }) {
     return (
       <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto px-4 sm:px-0">
         {/* Flashing Instamart-style Banner */}
-        <div className="h-32 sm:h-40 bg-slate-200/70 rounded-3xl w-full animate-pulse mt-4 shadow-sm" />
+        <div className="h-32 sm:h-40 bg-slate-300/60 rounded-3xl w-full animate-pulse mt-4 shadow-sm" />
         
         {/* Flashing Search Bar */}
-        <div className="h-14 bg-slate-200/70 rounded-2xl w-full animate-pulse mt-6 shadow-sm" />
+        <div className="h-14 bg-slate-300/60 rounded-2xl w-full animate-pulse mt-6 shadow-sm" />
         
         {/* Flashing Category Pills */}
         <div className="flex gap-3 overflow-hidden mt-6 pb-2">
-           <div className="h-11 w-28 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
-           <div className="h-11 w-36 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
-           <div className="h-11 w-24 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
-           <div className="h-11 w-32 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
-           <div className="h-11 w-28 bg-slate-200/70 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
+           <div className="h-11 w-28 bg-slate-300/60 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
+           <div className="h-11 w-36 bg-slate-300/60 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
+           <div className="h-11 w-24 bg-slate-300/60 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
+           <div className="h-11 w-32 bg-slate-300/60 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
+           <div className="h-11 w-28 bg-slate-300/60 rounded-full animate-pulse flex-shrink-0 shadow-sm" />
         </div>
         
         {/* Flashing Menu Items */}
         <div className="mt-8 space-y-4">
-           <div className="h-6 w-40 bg-slate-200/80 rounded-md animate-pulse" />
+           <div className="h-6 w-40 bg-slate-300/80 rounded-md animate-pulse" />
            <MenuGridSkeleton count={8} />
         </div>
       </div>
@@ -923,7 +923,7 @@ export default function CustomerMenu({ onOpenCart }) {
                     const qty = getItemCartQty(item.id);
                     if (viewMode === 'list') {
                       return (
-                        <motion.div key={item.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.02, 0.25) }} onClick={() => setSelectedItem(item)} className="bg-white border border-slate-200/90 rounded-2xl p-4 flex items-center justify-between gap-4 hover:shadow-md transition-all shadow-2xs cursor-pointer">
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: "easeOut" }} onClick={() => setSelectedItem(item)} className="bg-white border border-slate-200/90 rounded-2xl p-4 flex items-center justify-between gap-4 hover:shadow-md transition-all shadow-2xs cursor-pointer">
                           <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/50 flex items-center justify-center text-3xl shrink-0 shadow-inner">{item.emoji || '🍽️'}</div>
                             <div>
@@ -970,7 +970,7 @@ export default function CustomerMenu({ onOpenCart }) {
                       }
 
                       return (
-                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.01, y: -4 }} whileTap={{ scale: 0.98, y: 2 }} onClick={() => setSelectedItem(item)} className={`${bentoClass} bg-gradient-to-br ${gradient} border-2 border-b-[6px] border-r-4 border-slate-300/80 rounded-3xl p-4 flex flex-col justify-between hover:shadow-[10px_25px_50px_rgba(0,0,0,0.3),inset_0_2px_5px_rgba(255,255,255,1)] hover:border-b-4 hover:border-r-2 transition-all duration-300 shadow-[8px_12px_24px_rgba(0,0,0,0.25),-4px_-4px_12px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] group relative overflow-hidden cursor-pointer`}>
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: "easeOut" }} whileHover={{ scale: 1.01, y: -4 }} whileTap={{ scale: 0.98, y: 2 }} onClick={() => setSelectedItem(item)} className={`${bentoClass} bg-gradient-to-br ${gradient} border-2 border-b-[6px] border-r-4 border-slate-300/80 rounded-3xl p-4 flex flex-col justify-between hover:shadow-[10px_25px_50px_rgba(0,0,0,0.3),inset_0_2px_5px_rgba(255,255,255,1)] hover:border-b-4 hover:border-r-2 transition-all duration-300 shadow-[8px_12px_24px_rgba(0,0,0,0.25),-4px_-4px_12px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] group relative overflow-hidden cursor-pointer`}>
                           <div className="space-y-3 z-10">
                             <div className="h-full min-h-[140px] rounded-2xl bg-white/70 backdrop-blur-md border border-white flex items-center justify-center relative overflow-hidden group-hover:bg-white/90 transition-colors shadow-inner flex-1">
                               <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl">{item.emoji || '🍽️'}</motion.span>
