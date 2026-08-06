@@ -59,13 +59,13 @@ export default function SplashScreen({ onFinish }) {
               }}
               className="relative"
             >
-              <div className="absolute -inset-4 rounded-full bg-gradient-to-tr from-emerald-300/30 via-teal-200/30 to-amber-200/30 blur-xl pointer-events-none" />
-              <div className="relative w-24 h-24 rounded-full bg-slate-200 border-[3px] border-b-[8px] border-slate-300 shadow-[12px_12px_24px_rgba(0,0,0,0.15),-12px_-12px_24px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] p-2 flex items-center justify-center">
-                <div className="w-full h-full rounded-full overflow-hidden shadow-[inset_4px_4px_8px_rgba(0,0,0,0.2),inset_-2px_-2px_4px_rgba(255,255,255,1)] bg-slate-100 flex items-center justify-center">
+              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-emerald-300/30 via-teal-200/30 to-amber-200/30 blur-xl pointer-events-none" />
+              <div className="relative w-24 h-24 rounded-3xl bg-slate-200 border-[3px] border-b-[8px] border-slate-300 shadow-[12px_12px_24px_rgba(0,0,0,0.15),-12px_-12px_24px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] p-2 flex items-center justify-center">
+                <div className="w-full h-full rounded-2xl overflow-hidden shadow-[inset_4px_4px_8px_rgba(0,0,0,0.2),inset_-2px_-2px_4px_rgba(255,255,255,1)] bg-white flex items-center justify-center">
                   <img
                     src="/app-icon.png"
                     alt="Go Canteen Logo"
-                    className="w-full h-full object-contain p-2"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               </div>
