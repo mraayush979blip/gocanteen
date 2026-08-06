@@ -35,6 +35,10 @@ export default function CustomerMenu({ onOpenCart }) {
         offers: offRes.data || []
       };
     },
+    staleTime: 1000 * 30, // 30 seconds (instantly loads from cache, but fetches fresh data in bg)
+    gcTime: 1000 * 60 * 60, // 1 hour cache
+    refetchOnWindowFocus: false, // Prevents aggressive refetching
+    retry: 2 // Retry a few times if the network is flaky
   });
 
   const categories = menuData?.categories || [];
@@ -566,7 +570,8 @@ export default function CustomerMenu({ onOpenCart }) {
                   'from-violet-50 via-purple-50/20 to-white border-purple-300 shadow-md shadow-purple-200/20 hover:border-purple-400',
                   'from-rose-50 via-pink-50/20 to-white border-pink-300 shadow-md shadow-pink-200/20 hover:border-pink-400',
                 ];
-                const gradient = cardGradients[offers.indexOf(offer) % cardGradients.length];
+                const hash = String(offer.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                const gradient = cardGradients[hash % cardGradients.length];
                 return (
                   <div
                     key={offer.id}
@@ -711,7 +716,8 @@ export default function CustomerMenu({ onOpenCart }) {
                             'from-violet-50/80 via-purple-50/40 to-white border-violet-200/60',
                             'from-sky-50/80 via-blue-50/40 to-white border-sky-200/60',
                           ];
-                          const gradient = cardGradients[idx % cardGradients.length];
+                          const hash = String(item.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                        const gradient = cardGradients[hash % cardGradients.length];
                           return (
                             <div
                               key={`popular-${item.id}`}
@@ -802,7 +808,8 @@ export default function CustomerMenu({ onOpenCart }) {
                           'from-rose-50/80 via-pink-50/50 to-white border-rose-200/70',
                           'from-lime-50/80 via-green-50/50 to-white border-lime-200/70',
                         ];
-                        const gradient = cardGradients[cat.items.indexOf(item) % cardGradients.length];
+                        const hash = String(item.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                        const gradient = cardGradients[hash % cardGradients.length];
                         return (
                           <div
                             key={item.id}
@@ -917,7 +924,8 @@ export default function CustomerMenu({ onOpenCart }) {
                         'from-rose-50/80 via-pink-50/40 to-white border-rose-200/60',
                         'from-lime-50/80 via-green-50/40 to-white border-lime-200/60',
                       ];
-                      const gradient = cardGradients[idx % cardGradients.length];
+                      const hash = String(item.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                      const gradient = cardGradients[hash % cardGradients.length];
                       return (
                         <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.025, 0.3) }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedItem(item)} className={`bg-gradient-to-br ${gradient} border rounded-2xl p-4 flex flex-col justify-between hover:shadow-xl transition-all duration-300 shadow-sm group relative overflow-hidden cursor-pointer`}>
                           <div className="space-y-3 z-10">
