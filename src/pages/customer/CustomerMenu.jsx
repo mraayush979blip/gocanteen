@@ -380,7 +380,7 @@ export default function CustomerMenu({ onOpenCart }) {
     <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto">
 
       {/* 1. Hero Promo Banner Showcase (Blinkit / Swiggy Desktop Header) */}
-      <div className="relative rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 p-6 sm:p-8 text-white shadow-xl overflow-hidden border border-emerald-500/20">
+      <div className="relative rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 p-6 sm:p-8 text-white shadow-[0_15px_30px_rgba(0,0,0,0.3),inset_0_2px_4px_rgba(255,255,255,0.2)] overflow-hidden border-2 border-b-[8px] border-emerald-900">
         <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-emerald-500/10 to-transparent skew-x-12 transform translate-x-10 pointer-events-none" />
         <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
 
@@ -403,15 +403,15 @@ export default function CustomerMenu({ onOpenCart }) {
             </p>
           </div>
 
-          {/* Quick Stats Highlights */}
+          {/* Quick Stats Highlights (Neumorphic Inset) */}
           <div className="grid grid-cols-2 gap-3 w-full md:w-auto shrink-0">
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 p-3.5 rounded-2xl text-center">
-              <span className="text-xl sm:text-2xl font-black text-yellow-400 block">10-15 Min</span>
-              <span className="text-[10px] text-slate-300 uppercase font-extrabold tracking-wider">Avg Prep Time</span>
+            <div className="bg-emerald-950/40 backdrop-blur-md border border-emerald-900 p-3.5 rounded-2xl text-center shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(255,255,255,0.05)]">
+              <span className="text-xl sm:text-2xl font-black text-yellow-400 block drop-shadow-sm">10-15 Min</span>
+              <span className="text-[10px] text-slate-300 uppercase font-extrabold tracking-wider mt-0.5 block">Avg Prep Time</span>
             </div>
-            <div className="bg-white/10 backdrop-blur-md border border-white/10 p-3.5 rounded-2xl text-center">
-              <span className="text-xl sm:text-2xl font-black text-emerald-400 block">100% Fresh</span>
-              <span className="text-[10px] text-slate-300 uppercase font-extrabold tracking-wider">Hygienic Canteen</span>
+            <div className="bg-emerald-950/40 backdrop-blur-md border border-emerald-900 p-3.5 rounded-2xl text-center shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(255,255,255,0.05)]">
+              <span className="text-xl sm:text-2xl font-black text-emerald-400 block drop-shadow-sm">100% Fresh</span>
+              <span className="text-[10px] text-slate-300 uppercase font-extrabold tracking-wider mt-0.5 block">Hygienic Canteen</span>
             </div>
           </div>
         </div>

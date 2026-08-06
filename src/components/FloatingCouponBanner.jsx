@@ -42,7 +42,7 @@ export default function FloatingCouponBanner() {
 
   return (
     <div className="relative z-30 max-w-7xl mx-auto px-3 sm:px-6 pt-3 pb-1">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-700 text-white p-2.5 sm:p-3 shadow-lg shadow-emerald-900/10 border border-emerald-500/30 backdrop-blur-md">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-700 text-white p-2.5 sm:p-3 shadow-[0_12px_24px_rgba(0,0,0,0.25),inset_0_2px_4px_rgba(255,255,255,0.4)] border-2 border-b-[6px] border-emerald-800 backdrop-blur-md">
         
         {/* Ambient Glowing Background Effect */}
         <div className="absolute -top-12 -left-12 w-32 h-32 bg-yellow-400/20 rounded-full blur-2xl pointer-events-none" />
@@ -73,8 +73,8 @@ export default function FloatingCouponBanner() {
                     onClick={() => handleCopy(p)}
                     className={`inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl cursor-pointer transition-all border shrink-0 group ${
                       isCopied
-                        ? 'bg-yellow-400 text-slate-950 border-yellow-300 font-extrabold scale-105 shadow-md'
-                        : 'bg-emerald-950/40 hover:bg-emerald-900/70 border-emerald-400/30 hover:border-emerald-300 text-white shadow-xs'
+                        ? 'bg-yellow-400 text-slate-950 border-yellow-500 border-b-4 font-extrabold scale-105 shadow-md'
+                        : 'bg-emerald-950/40 hover:bg-emerald-900/70 border-emerald-900 border-b-[3px] text-white shadow-[inset_2px_2px_6px_rgba(0,0,0,0.4),inset_-1px_-1px_3px_rgba(255,255,255,0.1)] hover:-translate-y-0.5'
                     }`}
                   >
                     <div className="w-6 h-6 rounded-lg bg-yellow-400/20 group-hover:bg-yellow-400/30 flex items-center justify-center text-yellow-300 shrink-0">
@@ -109,9 +109,9 @@ export default function FloatingCouponBanner() {
               {offers.map((o, idx) => (
                 <div
                   key={`offer-${o.id}-${idx}`}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/40 px-3.5 py-1.5 rounded-xl text-amber-100 shrink-0 text-xs font-bold shadow-xs"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-600 border-b-[3px] px-3.5 py-1.5 rounded-xl text-amber-100 shrink-0 text-xs font-bold shadow-[inset_2px_2px_6px_rgba(0,0,0,0.3)]"
                 >
-                  <div className="w-6 h-6 rounded-lg bg-amber-400/20 flex items-center justify-center text-amber-300 shrink-0">
+                  <div className="w-6 h-6 rounded-lg bg-amber-400/20 flex items-center justify-center text-amber-300 shrink-0 shadow-inner">
                     <Flame className="w-3.5 h-3.5 text-amber-300" />
                   </div>
                   <span><b>{o.name}:</b> Deal at ₹{o.price}</span>
