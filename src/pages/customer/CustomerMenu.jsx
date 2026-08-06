@@ -979,21 +979,22 @@ export default function CustomerMenu({ onOpenCart }) {
 
                       return (
                         <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: "easeOut" }} whileHover={{ scale: 1.01, y: -4 }} whileTap={{ scale: 0.98, y: 2 }} onClick={() => setSelectedItem(item)} className={`${bentoClass} bg-gradient-to-br ${gradient} border-2 border-b-[6px] border-r-4 border-slate-300/80 rounded-3xl p-4 flex flex-col justify-between hover:shadow-[10px_25px_50px_rgba(0,0,0,0.3),inset_0_2px_5px_rgba(255,255,255,1)] hover:border-b-4 hover:border-r-2 transition-all duration-300 shadow-[8px_12px_24px_rgba(0,0,0,0.25),-4px_-4px_12px_rgba(255,255,255,0.9),inset_0_2px_4px_rgba(255,255,255,1)] group relative overflow-hidden cursor-pointer`}>
-                          <div className="space-y-3 z-10">
-                            <div className="h-full min-h-[140px] rounded-2xl border border-white flex items-center justify-center relative overflow-hidden group-hover:shadow-inner flex-1 bg-cover bg-center" style={{ backgroundImage: `url('https://api.dicebear.com/8.x/shapes/svg?seed=${item.id}')` }}>
+                          <div className="flex-1 flex flex-col z-10">
+                            <div className="w-full h-32 sm:h-36 shrink-0 rounded-2xl border border-white flex items-center justify-center relative overflow-hidden group-hover:shadow-inner bg-cover bg-center mb-3" style={{ backgroundImage: `url('https://api.dicebear.com/8.x/shapes/svg?seed=${item.id}')` }}>
                               <div className="absolute inset-0 bg-white/50 group-hover:bg-white/30 transition-colors duration-300" />
                               <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="relative z-10 text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-2xl">{item.emoji || '🍽️'}</motion.span>
-                              <div className={`absolute top-3 left-3 w-5 h-5 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
-                              {item.tag && <span className="absolute top-3 right-3 text-[10px] uppercase font-black text-slate-950 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
+                              <div className={`absolute top-2 left-2 w-4 h-4 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
+                              {item.tag && <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-slate-950 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
                             </div>
-                            <div className="pt-2">
-                              {item.categories?.name && <span className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest block mt-1">{item.categories.name}</span>}
+                            <div className="flex flex-col gap-0.5 flex-1">
+                              {item.categories?.name && <span className="text-[9px] text-emerald-600 font-extrabold uppercase tracking-widest">{item.categories.name}</span>}
+                              <h3 className="text-sm font-black text-slate-900 leading-snug line-clamp-2">{item.name}</h3>
+                              {item.description && <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed mt-0.5">{item.description}</p>}
                             </div>
-                            {item.description && <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>}
                           </div>
-                          <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between gap-2 z-10" onClick={(e) => e.stopPropagation()}>
-                            <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight">₹{item.price}</span>
-                            <motion.div layout className="flex items-center">
+                          <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between gap-1 z-10" onClick={(e) => e.stopPropagation()}>
+                            <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight shrink-0">₹{item.price}</span>
+                            <motion.div layout className="flex items-center shrink-0">
                               {qty > 0 ? (
                                 <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 bg-emerald-600 text-white rounded-xl px-3 py-1.5 font-bold text-sm shadow-md">
                                   <button onClick={() => updateCartQty(item.id, -1)} className="hover:opacity-85 p-0.5 cursor-pointer"><Minus className="w-4 h-4" /></button>
