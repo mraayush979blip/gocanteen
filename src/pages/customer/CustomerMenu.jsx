@@ -540,7 +540,7 @@ export default function CustomerMenu({ onOpenCart }) {
 
 
       {/* 4. Special Combo Offers Section */}
-      {(activeCategory === 'all' || activeCategory === 'offers') && offers.length > 0 && (
+      {(activeCategory === 'all' || activeCategory === 'offers') && !searchQuery.trim() && offers.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -753,7 +753,6 @@ export default function CustomerMenu({ onOpenCart }) {
                   key={cat.id}
                   data-cat-id={cat.id}
                   ref={el => { sectionRefs.current[cat.id] = el; }}
-                  style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 300px' }}
                 >
                   {/* Sticky section header */}
                   <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm py-2 mb-4 border-b border-slate-100 flex items-center justify-between">
