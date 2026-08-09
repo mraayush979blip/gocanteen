@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram, ArrowLeft, ChevronRight, ArrowDownToLine
+  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram, ArrowLeft, ChevronRight, ArrowDownToLine, MapPin
 } from 'lucide-react';
 
 function NavigationItem({ icon, iconBg, title, subtitle, rightElement, onClick }) {
@@ -30,11 +30,13 @@ function NavigationItem({ icon, iconBg, title, subtitle, rightElement, onClick }
   );
 }
 
-export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpenAboutDev }) {
+export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpenAboutDev, onOpenOutletModal }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { session, profile, userRole, activePortal, setActivePortal, cart, logout, showToast, staffLanguage, setStaffLanguage } = useAuth();
+  const { session, profile, userRole, activePortal, setActivePortal, cart, logout, showToast, staffLanguage, setStaffLanguage, selectedOutlet, outlets } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const currentOutletName = outlets?.find(o => o.id === selectedOutlet)?.name || 'Select Canteen';
 
   // Lock background scroll when side drawer is open
   useEffect(() => {
@@ -171,6 +173,19 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                     <option value="hinglish">Hinglish 🇮🇳</option>
                   </select>
                 </div>
+              )}
+
+              {/* Outlet Selector (Customer Only) */}
+              {currentPortal === 'customer' && (
+                <button
+                  onClick={onOpenOutletModal}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 transition-all shadow-2xs shrink-0"
+                >
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <span className="font-bold text-[11px] uppercase tracking-wider truncate max-w-[100px]">
+                    {currentOutletName}
+                  </span>
+                </button>
               )}
 
               {/* Cart Button (Hidden on Mobile View, visible on Tablet/Desktop) */}
@@ -333,6 +348,13 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                       {currentPortal === 'customer' && (
                         <>
                           <NavigationItem 
+                            icon={<MapPin className="w-5 h-5 text-emerald-600" />}
+                            iconBg="bg-emerald-50"
+                            title="Change Canteen"
+                            subtitle={currentOutletName}
+                            onClick={() => { onOpenOutletModal?.(); setMobileMenuOpen(false); }}
+                          />
+                          <NavigationItem 
                             icon={<UtensilsCrossed className="w-5 h-5 text-emerald-600" />}
                             iconBg="bg-emerald-50"
                             title="Explore Menu"
@@ -369,23 +391,30 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                       {currentPortal === 'staff' && (
                         <>
                           <NavigationItem 
+                            icon={<span className="text-lg">💰</span>}
+                            iconBg="bg-blue-50"
+                            title="New Order (POS)"
+                            subtitle="Create a manual order"
+                            onClick={() => { navigate('/staff/pos'); setMobileMenuOpen(false); }}
+                          />
+                          <NavigationItem 
                             icon={<span className="text-lg">👨‍🍳</span>}
                             iconBg="bg-emerald-50"
-                            title="Kitchen KDS Queue"
+                            title="Active Orders"
                             subtitle="Live preparing orders"
                             onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
                             icon={<span className="text-lg">🔔</span>}
                             iconBg="bg-blue-50"
-                            title="Counter Ready Counter"
-                            subtitle="Ready for pickup"
-                            onClick={() => { navigate('/staff/counter'); setMobileMenuOpen(false); }}
+                            title="Item Stock"
+                            subtitle="Manage stock availability"
+                            onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
                             icon={<span className="text-lg">📜</span>}
                             iconBg="bg-purple-50"
-                            title="Shift History"
+                            title="Order History"
                             subtitle="Completed orders log"
                             onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
                           />
@@ -401,6 +430,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                           <NavigationItem icon={<span className="text-lg">🍔</span>} iconBg="bg-purple-50" title="Food Combos" subtitle="Manage combo meals" onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">🎟️</span>} iconBg="bg-purple-50" title="Promo Codes & Coupons" subtitle="Discount codes" onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">📢</span>} iconBg="bg-purple-50" title="Broadcast Announcements" subtitle="Send push campaigns" onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">🏪</span>} iconBg="bg-purple-50" title="Canteen Outlets" subtitle="Manage physical locations" onClick={() => { navigate('/admin/outlets'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">👥</span>} iconBg="bg-purple-50" title="Manage Staff" subtitle="Accounts & Access" onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<KeyRound className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Change Admin Passcode" subtitle="Security settings" onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }} />
                         </>
@@ -416,7 +446,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                     </div>
                     
                     <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
-                      {currentPortal !== 'admin' && (
+                      {currentPortal === 'customer' && (
                         <NavigationItem 
                           icon={<Instagram className="w-5 h-5 text-pink-500" />}
                           iconBg="bg-pink-50"
@@ -433,24 +463,26 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                         subtitle="Add to home screen"
                         onClick={handleManualInstall}
                       />
-                      <NavigationItem 
-                        icon={<Bug className="w-5 h-5 text-amber-600" />}
-                        iconBg="bg-amber-50"
-                        title="Report Bug / Suggestions"
-                        subtitle="Help us improve"
-                        onClick={() => { navigate('/report-bug'); setMobileMenuOpen(false); }}
-                      />
-                      {currentPortal !== 'admin' && (
-                        <NavigationItem 
-                          icon={<Code className="w-5 h-5 text-indigo-600" />}
-                          iconBg="bg-indigo-50"
-                          title="About Developer (Aayush Sharma)"
-                          subtitle="Know more about the developer"
-                          onClick={() => {
-                            navigate(`/${currentPortal}/developer`);
-                            setMobileMenuOpen(false);
-                          }}
-                        />
+                      {currentPortal === 'customer' && (
+                        <>
+                          <NavigationItem 
+                            icon={<Bug className="w-5 h-5 text-amber-600" />}
+                            iconBg="bg-amber-50"
+                            title="Report Bug / Suggestions"
+                            subtitle="Help us improve"
+                            onClick={() => { navigate('/report-bug'); setMobileMenuOpen(false); }}
+                          />
+                          <NavigationItem 
+                            icon={<Code className="w-5 h-5 text-indigo-600" />}
+                            iconBg="bg-indigo-50"
+                            title="About Developer (Aayush Sharma)"
+                            subtitle="Know more about the developer"
+                            onClick={() => {
+                              navigate(`/${currentPortal}/developer`);
+                              setMobileMenuOpen(false);
+                            }}
+                          />
+                        </>
                       )}
                     </div>
                   </div>

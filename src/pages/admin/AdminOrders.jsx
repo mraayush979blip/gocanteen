@@ -8,11 +8,14 @@ import {
 
 import PaymentConfirmModal from '../../components/PaymentConfirmModal';
 import CancelOrderModal from '../../components/CancelOrderModal';
+import AdminOutletSelector from '../../components/AdminOutletSelector';
 import { sendPushNotification } from '../../lib/notificationHelper';
+import { useAdmin } from '../../context/AdminContext';
 import { getOrderFinancials, getOrderPin, getUserSpecialInstructions, getPaymentId, getOrderId, getCancellationReason } from '../../lib/orderUtils';
 
 export default function AdminOrders() {
   const { showToast, profile, session } = useAuth();
+  const { selectedAdminOutlet } = useAdmin();
   const adminIdentifier = profile?.full_name || profile?.email || session?.user?.email || 'Admin';
 
   const [orders, setOrders] = useState([]);
@@ -36,35 +39,70 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
   const [searchQuery, setSearchQuery] = useState('');
 
+  const fetchSingleOrder = async (orderId) => {
+    if (!orderId) return;
+    // Small delay to ensure order_items are inserted
+    setTimeout(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*, order_items(quantity, price_at_time, item_name, inventory(name, emoji)), outlets(name)')
+          .eq('id', orderId)
+          .single();
+          
+        if (data && !error) {
+           setOrders(prev => {
+             if (prev.find(o => o.id === data.id)) {
+               return prev.map(o => o.id === data.id ? data : o);
+             }
+             return [data, ...prev].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+           });
+        }
+      } catch(e) {}
+    }, 1500);
+  };
+
   useEffect(() => {
     fetchOrders();
 
     const channel = supabase
       .channel('admin-orders-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        fetchOrders();
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o));
+        } else if (payload.eventType === 'INSERT') {
+          fetchSingleOrder(payload.new.id);
+        } else if (payload.eventType === 'DELETE') {
+          setOrders(prev => prev.filter(o => o.id !== payload.old.id));
+        }
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => {
-        fetchOrders();
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'order_items' }, (payload) => {
+        fetchSingleOrder(payload.new.order_id);
       })
       .subscribe();
 
-    // � udd04 Backup polling fallback every 25 seconds in case WebSocket drops
+    // Backup polling fallback every 25 seconds in case WebSocket drops
     const pollInterval = setInterval(() => fetchOrders(), 25000);
 
     return () => {
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
     };
-  }, []);
+  }, [selectedAdminOutlet]);
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('orders')
-        .select('*, order_items(quantity, price_at_time, item_name, inventory(name, emoji))')
+        .select('*, order_items(quantity, price_at_time, item_name, inventory(name, emoji)), outlets(name)')
         .order('created_at', { ascending: false });
+
+      if (selectedAdminOutlet !== 'ALL') {
+        query = query.eq('outlet_id', selectedAdminOutlet);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       let activeOrders = data || [];
@@ -144,7 +182,9 @@ export default function AdminOrders() {
       if (error) throw error;
       showToast(`✓ Order status updated to ${newStatus.toUpperCase()}`);
 
-      if (targetOrder.customer_id) {
+      const isPosOrder = targetOrder.handled_by_name?.startsWith('POS');
+
+      if (targetOrder.customer_id && !isPosOrder) {
         let title = '';
         let body = '';
         if (newStatus === 'preparing') {
@@ -204,7 +244,9 @@ export default function AdminOrders() {
 
       showToast(`❌ Order #${order.token_number || order.id.slice(0,4)} CANCELLED: ${cancelReason}`);
 
-      if (order.customer_id) {
+      const isPosOrder = order.handled_by_name?.startsWith('POS');
+
+      if (order.customer_id && !isPosOrder) {
         sendPushNotification(
           order.customer_id,
           order.id,
@@ -239,7 +281,9 @@ export default function AdminOrders() {
       if (error) throw error;
       showToast(`✓ Marked PAID (${method.toUpperCase()}) & Status updated to ${payModalTargetStatus.toUpperCase()}`);
 
-      if (payModalOrder.customer_id) {
+      const isPosOrder = payModalOrder.handled_by_name?.startsWith('POS');
+
+      if (payModalOrder.customer_id && !isPosOrder) {
         let title = '';
         let body = '';
         if (payModalTargetStatus === 'preparing') {
@@ -374,6 +418,10 @@ export default function AdminOrders() {
       return false;
     }
 
+    if (selectedAdminOutlet !== 'ALL' && order.outlet_id !== selectedAdminOutlet) {
+      return false;
+    }
+
     return true;
   });
 
@@ -480,6 +528,7 @@ export default function AdminOrders() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 text-slate-900">
+      <AdminOutletSelector />
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
@@ -761,6 +810,12 @@ export default function AdminOrders() {
                     <span className="text-sm font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-mono">
                       Token #{order.token_number || order.id.slice(0, 4)}
                     </span>
+
+                    {order.outlets?.name && (
+                      <span className="text-[10px] font-black text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-200 uppercase tracking-wider whitespace-nowrap">
+                        🏪 {order.outlets.name}
+                      </span>
+                    )}
 
                     {orderIdStr && (
                       <span className="text-xs font-extrabold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 font-mono">

@@ -50,20 +50,55 @@ export default function KitchenQueue() {
       window.removeEventListener('touchstart', unlockAudio);
     };
   }, []);
+  const fetchSingleOrder = async (orderId) => {
+    if (!orderId) return;
+    // Small delay to ensure order_items are fully inserted by the client
+    setTimeout(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*, order_items(quantity, price_at_time, item_name, inventory(name, emoji))')
+          .eq('id', orderId)
+          .single();
+          
+        if (data && !error) {
+           setOrders(prev => {
+             // Avoid duplicate additions
+             if (prev.find(o => o.id === data.id)) {
+               return prev.map(o => o.id === data.id ? data : o);
+             }
+             // Kitchen queue is usually ordered ascending
+             return [...prev, data].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+           });
+        }
+      } catch (e) {}
+    }, 1500);
+  };
+
   useEffect(() => {
     fetchOrders();
 
     const channel = supabase
       .channel('staff-kitchen-queue')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-        if (payload.eventType === 'INSERT') {
+        if (payload.eventType === 'UPDATE') {
+          setOrders(prev => {
+            const isCompletedOrCancelled = ['completed', 'cancelled'].includes(payload.new.status);
+            if (isCompletedOrCancelled) {
+              return prev.filter(o => o.id !== payload.new.id);
+            }
+            return prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o);
+          });
+        } else if (payload.eventType === 'INSERT') {
           playAlertSound();
           showToast('🔔 New Order Received!');
+          fetchSingleOrder(payload.new.id);
+        } else if (payload.eventType === 'DELETE') {
+          setOrders(prev => prev.filter(o => o.id !== payload.old.id));
         }
-        fetchOrders();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => {
-        fetchOrders();
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'order_items' }, (payload) => {
+        fetchSingleOrder(payload.new.order_id);
       })
       .subscribe();
 
@@ -76,16 +111,22 @@ export default function KitchenQueue() {
       supabase.removeChannel(channel);
       clearInterval(backupPoll);
     };
-  }, []);
+  }, [profile]);
 
   const fetchOrders = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('orders')
         .select('*, order_items(quantity, price_at_time, item_name, inventory(name, emoji))')
         .not('status', 'eq', 'completed')
         .not('status', 'eq', 'cancelled')
         .order('created_at', { ascending: true });
+
+      if (profile?.assigned_outlet_id) {
+        query = query.eq('outlet_id', profile.assigned_outlet_id);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       
@@ -144,7 +185,9 @@ export default function KitchenQueue() {
       if (error) throw error;
       showToast(`✓ Ticket #${order.token_number || order.id.slice(0,4)} updated to ${newStatus.toUpperCase()}`);
 
-      if (order.customer_id) {
+      const isPosOrder = order.handled_by_name?.startsWith('POS');
+
+      if (order.customer_id && !isPosOrder) {
         let title = '';
         let body = '';
         if (newStatus === 'preparing') {
@@ -162,7 +205,7 @@ export default function KitchenQueue() {
         }
       }
 
-      if (newStatus === 'ready') {
+      if (newStatus === 'ready' && !isPosOrder) {
         sendOrderReadyEmail(order).then(res => {
           if (res.success && res.email) {
             showToast(`📧 Pickup Ready Email sent to ${res.email} (Token #${order.token_number || order.id.slice(0,4)}, PIN ${order.pickup_code || ''})!`);
@@ -228,7 +271,9 @@ export default function KitchenQueue() {
         showToast(`❌ Unpaid Order #${order.token_number || order.id.slice(0,4)} CANCELLED: ${cancelReason}`);
       }
 
-      if (order.customer_id) {
+      const isPosOrder = order.handled_by_name?.startsWith('POS');
+
+      if (order.customer_id && !isPosOrder) {
         sendPushNotification(
           order.customer_id,
           order.id,
@@ -263,7 +308,9 @@ export default function KitchenQueue() {
       if (error) throw error;
       showToast(`✓ Marked PAID (${method.toUpperCase()}) & Order updated to ${payModalTargetStatus.toUpperCase()}`);
 
-      if (payModalOrder.customer_id) {
+      const isPosOrder = payModalOrder.handled_by_name?.startsWith('POS');
+
+      if (payModalOrder.customer_id && !isPosOrder) {
         let title = '';
         let body = '';
         if (payModalTargetStatus === 'preparing') {
@@ -281,7 +328,7 @@ export default function KitchenQueue() {
         }
       }
 
-      if (payModalTargetStatus === 'ready') {
+      if (payModalTargetStatus === 'ready' && !isPosOrder) {
         sendOrderReadyEmail(payModalOrder).then(res => {
           if (res.success && res.email) {
             showToast(`📧 Pickup Ready Email sent to ${res.email} (Token #${payModalOrder.token_number || payModalOrder.id.slice(0,4)}, PIN ${payModalOrder.pickup_code || ''})!`);

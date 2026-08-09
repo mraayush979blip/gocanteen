@@ -365,6 +365,16 @@ export default function CustomerOrders({ onOpenAuth }) {
                   orderIsToday ? 'border-slate-300' : 'border-slate-200 opacity-90'
                 }`}
               >
+                {/* UNPAID CASH WARNING */}
+                {isCashOrder && order.payment_status === 'unpaid' && order.status !== 'cancelled' && (
+                  <div className="bg-amber-50 border-b border-amber-200 px-3.5 py-2">
+                    <p className="text-amber-800 text-xs font-bold flex items-center gap-1.5 leading-snug">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+                      Please pay at the counter. Your order will not be prepared until payment is received.
+                    </p>
+                  </div>
+                )}
+
                 {/* COMPACT CARD HEADER */}
                 <div
                   onClick={() => toggleExpand(order.id)}

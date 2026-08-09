@@ -6,19 +6,50 @@ import { getOrderFinancials, getOrderPin } from '../../lib/orderUtils';
 
 export default function StaffHistory() {
 
-  const { staffT } = useAuth();
+  const { staffT, profile } = useAuth();
   const [historyOrders, setHistoryOrders] = useState([]);
   const [filter, setFilter] = useState('all'); // 'all' | 'completed' | 'cancelled'
   const [timeScope, setTimeScope] = useState('all'); // 'today' | 'all'
   const [loading, setLoading] = useState(true);
+
+  const fetchSingleHistoryOrder = async (orderId) => {
+    if (!orderId) return;
+    setTimeout(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*, order_items(quantity, price_at_time, item_name, inventory(name, emoji))')
+          .eq('id', orderId)
+          .single();
+          
+        if (data && !error) {
+           setHistoryOrders(prev => {
+             if (prev.find(o => o.id === data.id)) {
+               return prev.map(o => o.id === data.id ? data : o);
+             }
+             return [data, ...prev].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+           });
+        }
+      } catch(e) {}
+    }, 1500);
+  };
 
   useEffect(() => {
     fetchHistory();
 
     const channel = supabase
       .channel('staff-history-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        fetchHistory();
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setHistoryOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o));
+        } else if (payload.eventType === 'INSERT') {
+          fetchSingleHistoryOrder(payload.new.id);
+        } else if (payload.eventType === 'DELETE') {
+          setHistoryOrders(prev => prev.filter(o => o.id !== payload.old.id));
+        }
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'order_items' }, (payload) => {
+        fetchSingleHistoryOrder(payload.new.order_id);
       })
       .subscribe();
 
@@ -31,15 +62,21 @@ export default function StaffHistory() {
       supabase.removeChannel(channel);
       clearInterval(backupPoll);
     };
-  }, []);
+  }, [profile]);
 
   const fetchHistory = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('orders')
         .select('*, order_items(quantity, price_at_time, item_name, inventory(name, emoji))')
         .order('created_at', { ascending: false })
         .limit(200);
+
+      if (profile?.assigned_outlet_id) {
+        query = query.eq('outlet_id', profile.assigned_outlet_id);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setHistoryOrders(data || []);

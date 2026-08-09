@@ -4,9 +4,12 @@ import { useAuth } from '../../context/AuthContext';
 import { Plus, Edit3, Trash2, Search, X, Loader2, Save, Star, Copy } from 'lucide-react';
 
 import EmojiPickerMenu from '../../components/EmojiPickerMenu';
+import AdminOutletSelector from '../../components/AdminOutletSelector';
+import { useAdmin } from '../../context/AdminContext';
 
 export default function AdminInventory() {
   const { showToast } = useAuth();
+  const { selectedAdminOutlet } = useAdmin();
   const [inventory, setInventory] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +32,7 @@ export default function AdminInventory() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedAdminOutlet]);
 
   const fetchData = async () => {
     try {
@@ -38,7 +41,26 @@ export default function AdminInventory() {
         supabase.from('categories').select('*').eq('is_active', true).order('sort_order')
       ]);
 
-      setInventory(invRes.data || []);
+      let items = invRes.data || [];
+
+      if (selectedAdminOutlet !== 'ALL' && items.length > 0) {
+        // Fetch specific availability for this outlet
+        const { data: availData, error: availErr } = await supabase
+          .from('inventory_availability')
+          .select('item_id, is_available')
+          .eq('outlet_id', selectedAdminOutlet);
+          
+        if (!availErr && availData) {
+          const availMap = {};
+          availData.forEach(a => availMap[a.item_id] = a.is_available);
+          items = items.map(item => ({
+            ...item,
+            is_available: availMap[item.id] !== undefined ? availMap[item.id] : item.is_available
+          }));
+        }
+      }
+
+      setInventory(items);
       setCategories(catRes.data || []);
     } catch (err) {
       console.error('Error fetching inventory:', err);
@@ -174,12 +196,22 @@ export default function AdminInventory() {
         item.id === id ? { ...item, is_available: !currentStatus } : item
       ));
 
-      const { error } = await supabase
-        .from('inventory')
-        .update({ is_available: !currentStatus })
-        .eq('id', id);
-        
-      if (error) throw error;
+      if (selectedAdminOutlet !== 'ALL') {
+        const { error } = await supabase
+          .from('inventory_availability')
+          .upsert(
+            { outlet_id: selectedAdminOutlet, item_id: id, is_available: !currentStatus },
+            { onConflict: 'outlet_id,item_id' }
+          );
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('inventory')
+          .update({ is_available: !currentStatus })
+          .eq('id', id);
+        if (error) throw error;
+      }
+
       showToast(!currentStatus ? '✓ Marked In Stock' : '✕ Marked Out of Stock');
     } catch (err) {
       showToast(err.message, true);
@@ -205,12 +237,29 @@ export default function AdminInventory() {
     }
 
     try {
-      const { error } = await supabase
-        .from('inventory')
-        .update({ is_available: isAvailable })
-        .eq('category_id', categoryId);
+      if (selectedAdminOutlet !== 'ALL') {
+        // Find all items in this category
+        const categoryItems = inventory.filter(i => i.category_id === categoryId);
+        const upsertPayload = categoryItems.map(item => ({
+          outlet_id: selectedAdminOutlet,
+          item_id: item.id,
+          is_available: isAvailable
+        }));
+        
+        if (upsertPayload.length > 0) {
+          const { error } = await supabase
+            .from('inventory_availability')
+            .upsert(upsertPayload, { onConflict: 'outlet_id,item_id' });
+          if (error) throw error;
+        }
+      } else {
+        const { error } = await supabase
+          .from('inventory')
+          .update({ is_available: isAvailable })
+          .eq('category_id', categoryId);
+        if (error) throw error;
+      }
 
-      if (error) throw error;
       showToast(`Category marked ${isAvailable ? 'In Stock' : 'Out of Stock'}`);
       fetchData();
     } catch (err) {
@@ -235,6 +284,7 @@ export default function AdminInventory() {
 
   return (
     <div className="space-y-5 max-w-6xl mx-auto pb-16">
+      <AdminOutletSelector />
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs">

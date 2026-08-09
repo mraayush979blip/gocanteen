@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlaced }) {
-  const { cart, updateCartQty, removeFromCart, clearCart, setCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo } = useAuth();
+  const { cart, updateCartQty, removeFromCart, clearCart, setCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo, selectedOutlet } = useAuth();
 
   const [customerName, setCustomerName] = useState('');
   const [phone, setPhone] = useState('');
@@ -472,7 +472,8 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         payment_id: paymentId || '',
         razorpay_payment_id: paymentId || '',
         is_parcel: isParcel,
-        parcel_charge: parcelCharge
+        parcel_charge: parcelCharge,
+        outlet_id: selectedOutlet || null
       };
 
 
@@ -562,6 +563,24 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       if (error) {
         console.warn('Stock verification query warning:', error.message);
         return { ok: true };
+      }
+
+      if (selectedOutlet) {
+        const { data: availData } = await supabase
+          .from('inventory_availability')
+          .select('item_id, is_available')
+          .eq('outlet_id', selectedOutlet)
+          .in('item_id', inventoryIds);
+        
+        if (availData) {
+          const availMap = {};
+          availData.forEach(a => availMap[a.item_id] = a.is_available);
+          invItems.forEach(item => {
+            if (availMap[item.id] !== undefined) {
+              item.is_available = availMap[item.id];
+            }
+          });
+        }
       }
 
       const outOfStockNames = [];

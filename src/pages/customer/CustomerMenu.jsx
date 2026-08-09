@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export default function CustomerMenu({ onOpenCart }) {
-  const { cart, addToCart, updateCartQty, triggerHaptic, session } = useAuth();
+  const { cart, addToCart, updateCartQty, triggerHaptic, session, selectedOutlet } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlQuery = searchParams.get('q') || '';
@@ -22,16 +22,38 @@ export default function CustomerMenu({ onOpenCart }) {
   const queryClient = useQueryClient();
 
   const { data: menuData, isLoading: loading } = useQuery({
-    queryKey: ['menu'],
+    queryKey: ['menu', selectedOutlet],
     queryFn: async () => {
       const [catRes, invRes, offRes] = await Promise.all([
         supabase.from('categories').select('*').eq('is_active', true).order('sort_order'),
-        supabase.from('inventory').select('*, categories(name)').eq('is_available', true).order('created_at'),
+        supabase.from('inventory').select('*, categories(name)').order('created_at'), // Fetch all, we filter after
         supabase.from('offers').select('*').eq('is_active', true).order('created_at', { ascending: false })
       ]);
+
+      let items = invRes.data || [];
+
+      if (selectedOutlet && items.length > 0) {
+        const { data: availData, error: availErr } = await supabase
+          .from('inventory_availability')
+          .select('item_id, is_available')
+          .eq('outlet_id', selectedOutlet);
+
+        if (!availErr && availData) {
+          const availMap = {};
+          availData.forEach(a => availMap[a.item_id] = a.is_available);
+          items = items.map(item => ({
+            ...item,
+            is_available: availMap[item.id] !== undefined ? availMap[item.id] : item.is_available
+          }));
+        }
+      }
+
+      // Filter to only show available items
+      items = items.filter(item => item.is_available);
+
       return {
         categories: catRes.data || [],
-        inventory: invRes.data || [],
+        inventory: items,
         offers: offRes.data || []
       };
     },
@@ -800,13 +822,13 @@ export default function CustomerMenu({ onOpenCart }) {
                   ref={el => { sectionRefs.current[cat.id] = el; }}
                 >
                   {/* Sticky section header */}
-                  <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm py-2 mb-4 border-b border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{cat.emoji || '🍽️'}</span>
-                      <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">{cat.name}</h2>
+                  <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm py-2 mb-4 border-b border-slate-100 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xl shrink-0">{cat.emoji || '🍽️'}</span>
+                      <h2 className="text-base font-black text-slate-900 uppercase tracking-tight truncate">{cat.name}</h2>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">{cat.items.length} items</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="hidden sm:inline-block text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">{cat.items.length} items</span>
                       <button
                         onClick={() => {
                           setActiveCategory(cat.id);

@@ -6,9 +6,11 @@ import {
 } from 'lucide-react';
 import { getOrderFinancials, getOrderId, getOrderPin } from '../../lib/orderUtils';
 import { playAlertSound, initAudioContext } from '../../lib/audio';
-
+import AdminOutletSelector from '../../components/AdminOutletSelector';
+import { useAdmin } from '../../context/AdminContext';
 
 export default function AdminDashboard() {
+  const { selectedAdminOutlet } = useAdmin();
   const [stats, setStats] = useState({
     revenue: 0,
     grossSales: 0,
@@ -60,18 +62,24 @@ export default function AdminDashboard() {
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
     };
-  }, []);
+  }, [selectedAdminOutlet]);
 
   const fetchDashboard = async () => {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
     try {
-      const { data: ordersData, error } = await supabase
+      let query = supabase
         .from('orders')
         .select('*, order_items(quantity, price_at_time, item_name, inventory(name, emoji))')
         .gte('created_at', startOfDay.toISOString())
         .order('created_at', { ascending: false });
+
+      if (selectedAdminOutlet !== 'ALL') {
+        query = query.eq('outlet_id', selectedAdminOutlet);
+      }
+
+      const { data: ordersData, error } = await query;
 
       if (error) throw error;
       let orders = ordersData || [];
@@ -199,7 +207,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16 text-slate-900 font-['Plus_Jakarta_Sans',sans-serif]">
-      
+      <AdminOutletSelector />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
         <div className="flex items-center gap-3">

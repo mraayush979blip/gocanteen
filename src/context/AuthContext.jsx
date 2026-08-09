@@ -22,6 +22,37 @@ export const AuthProvider = ({ children }) => {
     return localStorage.getItem('cg-active-portal') || 'customer';
   });
 
+  // Outlets State
+  const [outlets, setOutlets] = useState([]);
+  const [selectedOutlet, setSelectedOutletState] = useState(() => {
+    return localStorage.getItem('cg-customer-outlet') || null;
+  });
+
+  const setSelectedOutlet = (outletId) => {
+    localStorage.setItem('cg-customer-outlet', outletId);
+    setSelectedOutletState(outletId);
+  };
+
+  useEffect(() => {
+    // Fetch active outlets on load
+    const fetchOutlets = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('outlets')
+          .select('*')
+          .eq('is_active', true)
+          .order('name');
+        if (!error && data) {
+          setOutlets(data);
+          // If no outlet is selected and we have outlets, don't auto-select. Force them to choose.
+        }
+      } catch (err) {
+        console.error('Error fetching outlets:', err);
+      }
+    };
+    fetchOutlets();
+  }, []);
+
   const setActivePortal = (portal) => {
     localStorage.setItem('cg-active-portal', portal);
     setActivePortalState(portal);
@@ -166,6 +197,19 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('cg-unified-cart', JSON.stringify(cart));
   }, [cart]);
+
+  // Dirty Cart Detection: Clear cart when outlet changes
+  const prevOutletRef = useRef(selectedOutlet);
+  useEffect(() => {
+    if (prevOutletRef.current !== null && prevOutletRef.current !== selectedOutlet) {
+      if (cart.length > 0) {
+        setCart([]);
+        setAppliedPromo(null);
+        showToast('Cart cleared because you switched to a different outlet.', true, 4000);
+      }
+    }
+    prevOutletRef.current = selectedOutlet;
+  }, [selectedOutlet, cart.length]);
 
   useEffect(() => {
     // If this window was opened as a child popup, close popup after login
@@ -330,6 +374,9 @@ export const AuthProvider = ({ children }) => {
         showToast,
         triggerHaptic,
         logout,
+        outlets,
+        selectedOutlet,
+        setSelectedOutlet,
         fetchProfile: () => profile && fetchProfile(profile.id, profile.email)
       }}
     >

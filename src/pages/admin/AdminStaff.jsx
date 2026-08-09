@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { UserCheck, Shield, ChefHat, User, Loader2, Plus, X, Calendar, Clock, Save, Lock, Mail, Edit3, Trash2, Eye, EyeOff, Key, CreditCard } from 'lucide-react';
+import { UserCheck, Shield, ChefHat, User, Loader2, Plus, X, Calendar, Clock, Save, Lock, Mail, Edit3, Trash2, Eye, EyeOff, Key, CreditCard, Store } from 'lucide-react';
+import { useAdmin } from '../../context/AdminContext';
 
 export default function AdminStaff() {
   const { showToast } = useAuth();
+  const { outlets } = useAdmin();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,6 +23,7 @@ export default function AdminStaff() {
   const [isTemporary, setIsTemporary] = useState(false);
   const [validFrom, setValidFrom] = useState('');
   const [validTill, setValidTill] = useState('');
+  const [assignedOutletId, setAssignedOutletId] = useState('');
 
   // Canteen Settings State
   const [openTime, setOpenTime] = useState('08:00');
@@ -106,6 +109,7 @@ export default function AdminStaff() {
     setIsTemporary(false);
     setValidFrom('');
     setValidTill('');
+    setAssignedOutletId('');
     setShowPass(false);
     setModalOpen(true);
   };
@@ -120,6 +124,7 @@ export default function AdminStaff() {
     setIsTemporary(Boolean(staffUser.is_temporary));
     setValidFrom(staffUser.valid_from ? staffUser.valid_from.split('T')[0] : '');
     setValidTill(staffUser.valid_till ? staffUser.valid_till.split('T')[0] : '');
+    setAssignedOutletId(staffUser.assigned_outlet_id || '');
     setShowPass(false);
     setModalOpen(true);
   };
@@ -172,7 +177,8 @@ export default function AdminStaff() {
           role: staffRole,
           is_temporary: isTemporary,
           valid_from: isTemporary && validFrom ? new Date(validFrom).toISOString() : null,
-          valid_till: isTemporary && validTill ? new Date(validTill).toISOString() : null
+          valid_till: isTemporary && validTill ? new Date(validTill).toISOString() : null,
+          assigned_outlet_id: assignedOutletId || null
         };
 
         if (password) {
@@ -226,7 +232,8 @@ export default function AdminStaff() {
           is_temporary: isTemporary,
           valid_from: isTemporary && validFrom ? new Date(validFrom).toISOString() : null,
           valid_till: isTemporary && validTill ? new Date(validTill).toISOString() : null,
-          assigned_password: password
+          assigned_password: password,
+          assigned_outlet_id: assignedOutletId || null
         };
 
         const { error: profErr } = await supabase
@@ -452,6 +459,7 @@ export default function AdminStaff() {
                 <th className="p-4">Staff Name</th>
                 <th className="p-4">Official Email</th>
                 <th className="p-4">Role</th>
+                <th className="p-4">Assigned Outlet</th>
                 <th className="p-4">Access Validity</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
@@ -488,6 +496,9 @@ export default function AdminStaff() {
                         >
                           {user.role}
                         </span>
+                      </td>
+                      <td className="p-4 font-bold text-slate-700">
+                        {outlets.find(o => o.id === user.assigned_outlet_id)?.name || <span className="text-slate-400 font-medium">Any Outlet (Global)</span>}
                       </td>
                       <td className="p-4">
                         {user.is_temporary ? (
@@ -645,6 +656,22 @@ export default function AdminStaff() {
                   <option value="admin">🛡️ Admin Manager</option>
                 </select>
               </div>
+
+              {staffRole === 'staff' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Assigned Outlet</label>
+                  <select
+                    value={assignedOutletId}
+                    onChange={(e) => setAssignedOutletId(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:border-purple-600 font-bold"
+                  >
+                    <option value="">🌐 Any Outlet (Global / Roaming)</option>
+                    {outlets.map(o => (
+                      <option key={o.id} value={o.id}>📍 {o.name} ({o.code})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Temporary Access Toggle */}
               <div className="pt-2 border-t border-slate-100 space-y-3">

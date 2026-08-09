@@ -20,6 +20,7 @@ import CustomerProfile from './pages/customer/CustomerProfile';
 import KitchenQueue from './pages/staff/KitchenQueue';
 import StaffHistory from './pages/staff/StaffHistory';
 import QuickStock from './pages/staff/QuickStock';
+import StaffPOS from './pages/staff/StaffPOS';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -29,6 +30,7 @@ import AdminOffers from './pages/admin/AdminOffers';
 import AdminPromoCodes from './pages/admin/AdminPromoCodes';
 import AdminStaff from './pages/admin/AdminStaff';
 import AdminOrders from './pages/admin/AdminOrders';
+import AdminOutlets from './pages/admin/AdminOutlets';
 
 import Footer from './components/Footer';
 import PolicyPage from './components/PolicyPage';
@@ -37,7 +39,8 @@ import AboutDeveloper from './pages/AboutDeveloper';
 import SEOHead from './components/SEOHead';
 import SplashScreen from './components/SplashScreen';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
-
+import OutletSelectionModal from './components/OutletSelectionModal';
+import { AdminProvider } from './context/AdminContext';
 
 function StaffLayout({ activeSubView, onOpenAuth }) {
 
@@ -46,46 +49,11 @@ function StaffLayout({ activeSubView, onOpenAuth }) {
   return (
     <PortalGuard requiredRole="staff" onOpenAuth={onOpenAuth}>
       <div className="space-y-5">
-        {/* 3-Bar Staff Navigation Header */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-2 shadow-2xs flex items-center gap-2 overflow-x-auto scrollbar-none max-w-7xl mx-auto">
-          <button
-            onClick={() => navigate('/staff/kds')}
-            className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 shrink-0 ${
-              activeSubView === 'kds'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            <span>👨‍🍳 1. Kitchen Queue</span>
-          </button>
-
-          <button
-            onClick={() => navigate('/staff/stock')}
-            className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 shrink-0 ${
-              activeSubView === 'stock'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            <span>📦 2. Stock Availability</span>
-          </button>
-
-          <button
-            onClick={() => navigate('/staff/history')}
-            className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 shrink-0 ${
-              activeSubView === 'history'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-            }`}
-          >
-            <span>📋 3. Order History Log</span>
-          </button>
-        </div>
-
         {/* Active Sub View */}
         {activeSubView === 'history' && <StaffHistory />}
         {activeSubView === 'stock' && <QuickStock />}
         {activeSubView === 'kds' && <KitchenQueue />}
+        {activeSubView === 'pos' && <StaffPOS />}
       </div>
     </PortalGuard>
   );
@@ -94,13 +62,16 @@ function StaffLayout({ activeSubView, onOpenAuth }) {
 function AdminLayout({ activeSubView, onOpenAuth }) {
   return (
     <PortalGuard requiredRole="admin" onOpenAuth={onOpenAuth}>
-      {activeSubView === 'inventory' && <AdminInventory />}
-      {activeSubView === 'categories' && <AdminCategories />}
-      {activeSubView === 'offers' && <AdminOffers />}
-      {activeSubView === 'promos' && <AdminPromoCodes />}
-      {activeSubView === 'staff' && <AdminStaff />}
-      {activeSubView === 'orders' && <AdminOrders />}
-      {activeSubView === 'dashboard' && <AdminDashboard />}
+      <AdminProvider>
+        {activeSubView === 'inventory' && <AdminInventory />}
+        {activeSubView === 'categories' && <AdminCategories />}
+        {activeSubView === 'offers' && <AdminOffers />}
+        {activeSubView === 'promos' && <AdminPromoCodes />}
+        {activeSubView === 'staff' && <AdminStaff />}
+        {activeSubView === 'outlets' && <AdminOutlets />}
+        {activeSubView === 'orders' && <AdminOrders />}
+        {activeSubView === 'dashboard' && <AdminDashboard />}
+      </AdminProvider>
     </PortalGuard>
   );
 }
@@ -108,7 +79,7 @@ function AdminLayout({ activeSubView, onOpenAuth }) {
 function MainContent() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { connectionError, session } = useAuth();
+  const { connectionError, session, selectedOutlet, activePortal } = useAuth();
   
   const [showSplash, setShowSplash] = useState(true);
   
@@ -155,6 +126,14 @@ function MainContent() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalRole, setAuthModalRole] = useState('customer');
   const [cartOpen, setCartOpen] = useState(false);
+  const [outletModalOpen, setOutletModalOpen] = useState(false);
+
+  // Force outlet selection for customers
+  useEffect(() => {
+    if (activePortal === 'customer' && !selectedOutlet && !showSplash) {
+      setOutletModalOpen(true);
+    }
+  }, [activePortal, selectedOutlet, showSplash]);
 
   const handleOpenAuth = (role = 'customer') => {
     setAuthModalRole(role);
@@ -168,7 +147,7 @@ function MainContent() {
   }, [session]);
 
   const p = location.pathname;
-  const activePortal = p.startsWith('/admin') ? 'admin' : p.startsWith('/staff') ? 'staff' : 'customer';
+  const currentPortal = p.startsWith('/admin') ? 'admin' : p.startsWith('/staff') ? 'staff' : 'customer';
   const isLegalPolicyRoute = ['/terms', '/privacy', '/refund', '/shipping', '/contact', '/report-bug'].includes(p);
   const isDeveloperRoute = p.endsWith('/developer');
 
@@ -203,6 +182,7 @@ function MainContent() {
       <Navbar
         onOpenAuth={() => handleOpenAuth('customer')}
         onOpenCart={() => setCartOpen(true)}
+        onOpenOutletModal={() => setOutletModalOpen(true)}
       />
 
       {/* Floating Coupon & Deal Ticker Banner */}
@@ -243,6 +223,7 @@ function MainContent() {
           {/* Staff Routes */}
           <Route path="/staff" element={<Navigate to="/staff/kds" replace />} />
           <Route path="/staff/kds" element={<StaffLayout activeSubView="kds" onOpenAuth={() => handleOpenAuth('staff')} />} />
+          <Route path="/staff/pos" element={<StaffLayout activeSubView="pos" onOpenAuth={() => handleOpenAuth('staff')} />} />
           <Route path="/staff/stock" element={<StaffLayout activeSubView="stock" onOpenAuth={() => handleOpenAuth('staff')} />} />
           <Route path="/staff/history" element={<StaffLayout activeSubView="history" onOpenAuth={() => handleOpenAuth('staff')} />} />
 
@@ -255,6 +236,7 @@ function MainContent() {
           <Route path="/admin/offers" element={<AdminLayout activeSubView="offers" onOpenAuth={() => handleOpenAuth('admin')} />} />
           <Route path="/admin/promos" element={<AdminLayout activeSubView="promos" onOpenAuth={() => handleOpenAuth('admin')} />} />
           <Route path="/admin/staff" element={<AdminLayout activeSubView="staff" onOpenAuth={() => handleOpenAuth('admin')} />} />
+          <Route path="/admin/outlets" element={<AdminLayout activeSubView="outlets" onOpenAuth={() => handleOpenAuth('admin')} />} />
 
           {/* Razorpay Policy Routes */}
           <Route path="/terms" element={<PolicyPage initialPolicy="terms" onBackToMenu={() => navigate('/menu')} />} />
@@ -299,6 +281,11 @@ function MainContent() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialRole={authModalRole}
+      />
+
+      <OutletSelectionModal 
+        isOpen={outletModalOpen} 
+        onClose={() => setOutletModalOpen(false)} 
       />
 
       <NotificationPrompt />
