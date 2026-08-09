@@ -79,13 +79,34 @@ function AdminLayout({ activeSubView, onOpenAuth }) {
 function MainContent() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { connectionError, session, selectedOutlet, activePortal } = useAuth();
+  const { connectionError, session, selectedOutlet, activePortal, showToast } = useAuth();
   
   const [showSplash, setShowSplash] = useState(true);
   
   const handleSplashFinish = useCallback(() => {
     setShowSplash(false);
   }, []);
+
+  // Handle OAuth Errors in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    const errorDescription = params.get('error_description');
+    
+    if (error) {
+      if (error === 'access_denied') {
+        showToast('Sign in was canceled or denied.', true, 5000);
+      } else {
+        // format error description by replacing '+' with space
+        const formattedDesc = errorDescription ? errorDescription.replace(/\+/g, ' ') : error;
+        showToast(`Sign in error: ${formattedDesc}`, true, 5000);
+      }
+      
+      // Clean up the URL to remove the error parameters without reloading the page
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, [showToast]);
 
   // Initialize Lenis Smooth Scrolling on Mount
   useEffect(() => {
