@@ -755,6 +755,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_THo2IUiDVzSCsC';
 
       if (typeof window.Razorpay === 'undefined') {
+        setPlacingOrder(false);
         showToast('Razorpay SDK loading... Please wait a moment.', true);
         return;
       }
@@ -860,12 +861,18 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         }
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function (response) {
+      try {
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+          setPlacingOrder(false);
+          showToast(`Payment Failed: ${response.error.description}`, true);
+        });
+        rzp.open();
+      } catch (e) {
+        console.error('Razorpay Error:', e);
         setPlacingOrder(false);
-        showToast(`Payment Failed: ${response.error.description}`, true);
-      });
-      rzp.open();
+        showToast('Failed to open payment window. Please try again.', true);
+      }
     } else {
       setPlacingOrder(true);
       executeOrderPlacement({
