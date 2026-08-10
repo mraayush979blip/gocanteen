@@ -9,7 +9,7 @@ import { useAdmin } from '../../context/AdminContext';
 
 export default function AdminInventory() {
   const { showToast } = useAuth();
-  const { selectedAdminOutlet } = useAdmin();
+  const { selectedAdminOutlet, outlets } = useAdmin();
   const [inventory, setInventory] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,8 @@ export default function AdminInventory() {
     is_veg: true,
     description: '',
     tag: '',
-    is_available: true
+    is_available: true,
+    availableOutlets: []
   });
 
   useEffect(() => {
@@ -79,13 +80,32 @@ export default function AdminInventory() {
       is_veg: true,
       description: '',
       tag: '',
-      is_available: true
+      is_available: true,
+      availableOutlets: outlets.map(o => o.id)
     });
     setModalOpen(true);
   };
 
-  const handleOpenEdit = (item) => {
+  const handleOpenEdit = async (item) => {
     setEditingItem(item);
+    
+    let availOutlets = outlets.map(o => o.id);
+    
+    try {
+      const { data, error } = await supabase
+        .from('inventory_availability')
+        .select('outlet_id, is_available')
+        .eq('item_id', item.id);
+        
+      if (!error && data) {
+        if (data.length > 0) {
+          availOutlets = data.filter(a => a.is_available).map(a => a.outlet_id);
+        }
+      }
+    } catch (e) {
+      console.warn('Error fetching item availability', e);
+    }
+
     setFormData({
       name: item.name || '',
       price: item.price || '',
@@ -94,7 +114,8 @@ export default function AdminInventory() {
       is_veg: item.is_veg !== false,
       description: item.description || '',
       tag: item.tag || '',
-      is_available: item.is_available !== false
+      is_available: item.is_available !== false,
+      availableOutlets: availOutlets
     });
     setModalOpen(true);
   };
@@ -109,7 +130,8 @@ export default function AdminInventory() {
       is_veg: item.is_veg !== false,
       description: item.description || '',
       tag: item.tag || '',
-      is_available: item.is_available !== false
+      is_available: item.is_available !== false,
+      availableOutlets: outlets.map(o => o.id)
     });
     setModalOpen(true);
   };
@@ -140,15 +162,31 @@ export default function AdminInventory() {
     };
 
     try {
+      let itemId = null;
       if (editingItem) {
-        const { error } = await supabase.from('inventory').update(payload).eq('id', editingItem.id);
+        itemId = editingItem.id;
+        const { error } = await supabase.from('inventory').update(payload).eq('id', itemId);
         if (error) throw error;
         showToast('✓ Item updated successfully!');
       } else {
-        const { error } = await supabase.from('inventory').insert([payload]);
+        const { data, error } = await supabase.from('inventory').insert([payload]).select();
         if (error) throw error;
+        itemId = data[0].id;
         showToast('✓ Item added to menu!');
       }
+
+      if (itemId && outlets.length > 0) {
+        const availabilityPayload = outlets.map(o => ({
+          item_id: itemId,
+          outlet_id: o.id,
+          is_available: formData.availableOutlets.includes(o.id)
+        }));
+        
+        await supabase
+          .from('inventory_availability')
+          .upsert(availabilityPayload, { onConflict: 'outlet_id,item_id' });
+      }
+
       setModalOpen(false);
       fetchData();
     } catch (err) {
@@ -607,17 +645,47 @@ export default function AdminInventory() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="is_available_cb"
-                  checked={formData.is_available}
-                  onChange={(e) => setFormData({ ...formData, is_available: e.target.checked })}
-                  className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500"
-                />
-                <label htmlFor="is_available_cb" className="text-xs font-bold text-slate-700">
-                  Item is Available for Ordering
-                </label>
+              <div className="flex flex-col gap-2 pt-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="is_available_cb"
+                    checked={formData.is_available}
+                    onChange={(e) => setFormData({ ...formData, is_available: e.target.checked })}
+                    className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500"
+                  />
+                  <label htmlFor="is_available_cb" className="text-xs font-bold text-slate-700">
+                    Item is Available for Ordering (Global Master Switch)
+                  </label>
+                </div>
+                
+                {outlets.length > 0 && (
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mt-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-2">Available In Outlets:</label>
+                    <div className="flex flex-col gap-2">
+                      {outlets.map(outlet => (
+                        <div key={outlet.id} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id={`outlet_${outlet.id}`}
+                            checked={formData.availableOutlets.includes(outlet.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData({ ...formData, availableOutlets: [...formData.availableOutlets, outlet.id] });
+                              } else {
+                                setFormData({ ...formData, availableOutlets: formData.availableOutlets.filter(id => id !== outlet.id) });
+                              }
+                            }}
+                            className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500"
+                          />
+                          <label htmlFor={`outlet_${outlet.id}`} className="text-xs font-medium text-slate-700 cursor-pointer">
+                            {outlet.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button
