@@ -438,7 +438,7 @@ export default function CustomerMenu({ onOpenCart }) {
 
 
   return (
-    <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto">
+    <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEndEvent}>
 
       {/* 1. Hero Promo Banner Showcase (Blinkit / Swiggy Desktop Header) */}
       <div className="relative rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 p-6 sm:p-8 text-white shadow-[0_15px_30px_rgba(0,0,0,0.3),inset_0_2px_4px_rgba(255,255,255,0.2)] overflow-hidden border-2 border-b-[8px] border-emerald-900">
