@@ -201,7 +201,7 @@ export default function AdminInventory() {
       setFormData(prev => ({ ...prev, image_url: publicUrlData.publicUrl }));
       
       if (quickEditItemId) {
-        const { error: updateErr } = await supabase.from('menu').update({ image_url: publicUrlData.publicUrl }).eq('id', quickEditItemId);
+        const { error: updateErr } = await supabase.from('inventory').update({ image_url: publicUrlData.publicUrl }).eq('id', quickEditItemId);
         if (updateErr) {
           console.error('Quick update error:', updateErr);
           showToast('Failed to quick-update item image.', true);
