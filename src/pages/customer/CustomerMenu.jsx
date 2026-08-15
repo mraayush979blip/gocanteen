@@ -82,6 +82,7 @@ export default function CustomerMenu({ onOpenCart }) {
   const [featuredFilter, setFeaturedFilter] = useState(''); // 'popular' | 'new' | 'under99' | ''
   const [selectedItem, setSelectedItem] = useState(null);
   const [popupTouchStart, setPopupTouchStart] = useState(null); // Instamart-style item detail popup
+  const [isCartExpanded, setIsCartExpanded] = useState(false); // Floating circular cart state
 
   
   const [touchStart, setTouchStart] = useState(null);
@@ -440,40 +441,15 @@ export default function CustomerMenu({ onOpenCart }) {
   return (
     <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEndEvent}>
 
-      {/* 1. Hero Promo Banner Showcase (Blinkit / Swiggy Desktop Header) */}
-      <div className="relative rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 p-6 sm:p-8 text-white shadow-[0_15px_30px_rgba(0,0,0,0.3),inset_0_2px_4px_rgba(255,255,255,0.2)] overflow-hidden border-2 border-b-[8px] border-emerald-900">
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-emerald-500/10 to-transparent skew-x-12 transform translate-x-10 pointer-events-none" />
-        <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[11px] font-black uppercase tracking-wider backdrop-blur-md">
-              <Zap className="w-3.5 h-3.5 text-yellow-400 animate-bounce" />
-              <span>Campus Counter Pickup • Express 10 Mins</span>
-            </div>
-
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
-              Fresh Canteen Eats, <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-yellow-300 via-emerald-300 to-teal-200 bg-clip-text text-transparent">
-                Zero Waiting in Line.
-              </span>
-            </h1>
-
-            <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-lg leading-relaxed">
-              Order delicious wraps, pizzas, beverages & combos online. Collect directly from counter with your unique token PIN!
-            </p>
+      {/* 1. Minimal Header */}
+      <div className="bg-white rounded-[1.5rem] p-4 sm:p-6 border border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center shrink-0">
+            <Zap className="w-6 h-6 text-emerald-600" />
           </div>
-
-          {/* Quick Stats Highlights (Neumorphic Inset) */}
-          <div className="grid grid-cols-2 gap-3 w-full md:w-auto shrink-0">
-            <div className="bg-emerald-950/40 backdrop-blur-md border border-emerald-900 p-3.5 rounded-2xl text-center shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(255,255,255,0.05)]">
-              <span className="text-xl sm:text-2xl font-black text-yellow-400 block drop-shadow-sm">10-15 Min</span>
-              <span className="text-[10px] text-slate-300 uppercase font-extrabold tracking-wider mt-0.5 block">Avg Prep Time</span>
-            </div>
-            <div className="bg-emerald-950/40 backdrop-blur-md border border-emerald-900 p-3.5 rounded-2xl text-center shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-2px_-2px_4px_rgba(255,255,255,0.05)]">
-              <span className="text-xl sm:text-2xl font-black text-emerald-400 block drop-shadow-sm">100% Fresh</span>
-              <span className="text-[10px] text-slate-300 uppercase font-extrabold tracking-wider mt-0.5 block">Hygienic Canteen</span>
-            </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Welcome to Go Canteen</h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Express campus pickup • Zero wait time.</p>
           </div>
         </div>
       </div>
@@ -1160,39 +1136,74 @@ export default function CustomerMenu({ onOpenCart }) {
 
       </AnimatePresence>
 
-      {/* 6. Mobile Floating Sticky Cart Bar (Swiggy / Blinkit style) */}
+      {/* 6. Mobile Expandable Floating Cart (FAB) */}
       <AnimatePresence>
         {totalCartCount > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 50, scaleY: 0.5, transformOrigin: "bottom center" }}
-            animate={{ opacity: 1, y: 0, scaleY: 1 }}
-            exit={{ opacity: 0, y: 50, scaleY: 0.5 }}
-            transition={{ type: "spring", stiffness: 350, damping: 25 }}
-            className="fixed bottom-4 left-3 right-3 z-40 sm:hidden origin-bottom"
+            className={`fixed z-40 sm:hidden origin-bottom flex flex-col justify-end pointer-events-none ${
+              isCartExpanded ? 'bottom-4 left-3 right-3' : 'bottom-6 right-6'
+            }`}
           >
-            <div
-              onClick={onOpenCart}
-              className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer border border-emerald-500/40 active:scale-[0.99] transition-transform"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-yellow-400 text-slate-950 flex items-center justify-center font-black shadow-xs">
-                  <ShoppingCart className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-xs font-black tracking-wide flex items-center gap-1.5">
-                    <span>{totalCartCount} {totalCartCount === 1 ? 'ITEM' : 'ITEMS'}</span>
-                    <span className="text-emerald-300">•</span>
-                    <span className="text-yellow-300 text-sm font-black">₹{totalCartPrice}</span>
+            {isCartExpanded ? (
+              <motion.div
+                layoutId="cart-shape"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30, scale: 0.95 }}
+                className="bg-emerald-700 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between border border-emerald-500/40 relative pointer-events-auto"
+              >
+                <div 
+                  className="flex items-center gap-3 flex-1 cursor-pointer"
+                  onClick={onOpenCart}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-emerald-800 text-yellow-400 flex items-center justify-center font-black shadow-xs shrink-0">
+                    <ShoppingCart className="w-5 h-5" />
                   </div>
-                  <div className="text-[10px] text-emerald-200 font-medium">Tap to review cart & checkout</div>
+                  <div>
+                    <div className="text-xs font-black tracking-wide flex items-center gap-1.5">
+                      <span>{totalCartCount} {totalCartCount === 1 ? 'ITEM' : 'ITEMS'}</span>
+                      <span className="text-emerald-300">•</span>
+                      <span className="text-yellow-300 text-sm font-black">₹{totalCartPrice}</span>
+                    </div>
+                    <div className="text-[10px] text-emerald-200 font-medium">Tap to review & checkout</div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-1 text-xs font-black bg-yellow-400 text-slate-950 px-3.5 py-1.5 rounded-xl shadow-xs">
-                <span>View Cart</span>
-                <ArrowRight className="w-4 h-4" />
-              </div>
-            </div>
+                <div className="flex items-center gap-2">
+                  <div 
+                    onClick={onOpenCart}
+                    className="flex items-center gap-1 text-[11px] font-black bg-emerald-800 text-emerald-100 px-3 py-2 rounded-xl shadow-xs cursor-pointer active:scale-95"
+                  >
+                    <span>Cart</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setIsCartExpanded(false); }}
+                    className="w-8 h-8 rounded-full bg-emerald-800 flex items-center justify-center text-emerald-300 hover:text-white cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                layoutId="cart-shape"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0 }}
+                onClick={() => setIsCartExpanded(true)}
+                className="w-16 h-16 bg-emerald-600 rounded-full shadow-[0_10px_30px_rgba(5,150,105,0.5)] flex items-center justify-center cursor-pointer relative pointer-events-auto hover:bg-emerald-700 hover:scale-105 active:scale-95 transition-colors"
+              >
+                <ShoppingCart className="w-6 h-6 text-white" />
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute 0 top-0 right-0 bg-yellow-400 text-slate-950 text-[11px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-emerald-600 shadow-sm"
+                >
+                  {totalCartCount}
+                </motion.div>
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
