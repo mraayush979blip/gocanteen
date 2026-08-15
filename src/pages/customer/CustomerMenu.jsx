@@ -439,7 +439,7 @@ export default function CustomerMenu({ onOpenCart }) {
 
 
   return (
-    <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEndEvent}>
+    <div className="space-y-6 pb-24 text-slate-900 max-w-7xl mx-auto">
 
       {/* 1. Minimal Header */}
       <div className="bg-white rounded-[1.5rem] p-4 sm:p-6 border border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">

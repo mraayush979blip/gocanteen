@@ -216,10 +216,10 @@ function MainContent() {
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ type: "spring", stiffness: 280, damping: 25, mass: 1 }}
             className="w-full h-full"
           >
             <Routes location={location}>
