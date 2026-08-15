@@ -1011,15 +1011,8 @@ export default function CustomerMenu({ onOpenCart }) {
                       const hash = String(item.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                       const gradient = cardGradients[hash % cardGradients.length];
                       
-                      let bentoClass = 'col-span-1 row-span-1';
-                      if (viewMode === 'grid') {
-                        const mod = hash % 10;
-                        if (mod === 6 || mod === 7) bentoClass = 'col-span-2 row-span-1';
-                        else if (mod === 8 || mod === 9) bentoClass = 'col-span-1 row-span-2';
-                      }
-
                       return (
-                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: "easeOut" }} onClick={() => setSelectedItem(item)} className={`${bentoClass} bg-white border border-slate-200/90 rounded-[1.25rem] md:rounded-2xl p-3 sm:p-4 flex flex-col justify-between shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-95 transition-all duration-300 cursor-pointer`}>
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: "easeOut" }} onClick={() => setSelectedItem(item)} className="bg-white border border-slate-200/90 rounded-[1.25rem] md:rounded-2xl p-3 sm:p-4 flex flex-col justify-between shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-95 transition-all duration-300 cursor-pointer">
                           <div className="flex-1 flex flex-col z-10">
                             <div className="w-full aspect-square shrink-0 rounded-xl bg-slate-100 flex items-center justify-center relative overflow-hidden mb-3">
                               
