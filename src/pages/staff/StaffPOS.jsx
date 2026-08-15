@@ -295,7 +295,14 @@ export default function StaffPOS() {
             cart.map(item => (
               <div key={item.id} className="bg-white border border-slate-200 rounded-xl p-3 flex justify-between items-center shadow-sm">
                 <div className="flex-1 min-w-0 pr-2">
-                  <div className="font-bold text-slate-900 text-sm truncate">{item.emoji} {item.name}</div>
+                  <div className="font-bold text-slate-900 text-sm truncate flex items-center gap-1.5">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt="" className="w-4 h-4 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <span>{item.emoji}</span>
+                    )}
+                    <span className="truncate">{item.name}</span>
+                  </div>
                   <div className="text-emerald-600 font-black text-xs">₹{item.price * item.qty}</div>
                 </div>
                 <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1 shrink-0 border border-slate-200">

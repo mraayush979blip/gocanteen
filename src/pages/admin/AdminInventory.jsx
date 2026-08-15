@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Edit3, Trash2, Search, X, Loader2, Save, Star, Copy } from 'lucide-react';
+import { Plus, Edit3, Trash2, Search, X, Loader2, Save, Star, Copy, Image as ImageIcon, Upload } from 'lucide-react';
 
 import EmojiPickerMenu from '../../components/EmojiPickerMenu';
 import AdminOutletSelector from '../../components/AdminOutletSelector';
 import { useAdmin } from '../../context/AdminContext';
+import Cropper from 'react-easy-crop';
 
 export default function AdminInventory() {
   const { showToast } = useAuth();
@@ -18,6 +19,10 @@ export default function AdminInventory() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [cropState, setCropState] = useState({ isOpen: false, image: null, crop: { x: 0, y: 0 }, zoom: 1, croppedAreaPixels: null });
+  const [isDragging, setIsDragging] = useState(false);
+  const [quickEditItemId, setQuickEditItemId] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -28,7 +33,8 @@ export default function AdminInventory() {
     description: '',
     tag: '',
     is_available: true,
-    availableOutlets: []
+    availableOutlets: [],
+    image_url: ''
   });
 
   useEffect(() => {
@@ -70,6 +76,139 @@ export default function AdminInventory() {
     }
   };
 
+  
+  const processImageFile = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setCropState(prev => ({ ...prev, isOpen: true, image: reader.result, crop: {x:0, y:0}, zoom: 1 }));
+    };
+  };
+
+  const handleImageSelect = (e) => processImageFile(e.target.files[0]);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    // 1. Try local files first
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      return processImageFile(file);
+    }
+    
+    // 2. Try dragging from another browser tab (HTML/URL)
+    const html = e.dataTransfer.getData('text/html');
+    if (html) {
+      // Extract src from <img src="...">
+      const match = html.match(/src="?([^"\s]+)"?\s*/);
+      if (match && match[1]) {
+        let src = match[1];
+        src = src.replace(/&amp;/g, '&'); // decode HTML entities
+        
+        if (src.startsWith('data:image')) {
+          // It's a base64 image (common for google image thumbnails)
+          setCropState(prev => ({ ...prev, isOpen: true, image: src, crop: {x:0, y:0}, zoom: 1 }));
+          return;
+        } else if (src.startsWith('http')) {
+          // It's a regular URL. We must proxy it to avoid CORS tainted canvas errors
+          try {
+            setUploadingImage(true);
+            const proxiedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(src)}`;
+            const response = await fetch(proxiedUrl);
+            const blob = await response.blob();
+            processImageFile(blob); // now we have a local blob!
+          } catch (err) {
+            // Error handling is tricky without showToast in scope if not defined, but we have showToast!
+            if (typeof showToast === 'function') {
+               showToast("Couldn't import image from website due to security restrictions.", true);
+            }
+          } finally {
+            setUploadingImage(false);
+          }
+          return;
+        }
+      }
+    }
+  };
+
+  
+  const handleQuickAddImage = (item) => {
+    setQuickEditItemId(item.id);
+    document.getElementById('quick-image-upload').click();
+  };
+
+  const handleQuickDrop = async (e, item) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setQuickEditItemId(item.id);
+    await handleDrop(e);
+  };
+
+  const onCropComplete = (croppedArea, croppedAreaPixels) => {
+    setCropState(prev => ({ ...prev, croppedAreaPixels }));
+  };
+
+  const handleConfirmCrop = async () => {
+    if (!cropState.image || !cropState.croppedAreaPixels) return;
+    setUploadingImage(true);
+    setCropState(prev => ({ ...prev, isOpen: false }));
+
+    try {
+      const img = new Image();
+      img.src = cropState.image;
+      await new Promise(resolve => (img.onload = resolve));
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const MAX_SIZE = 600;
+      canvas.width = MAX_SIZE;
+      canvas.height = MAX_SIZE;
+
+      ctx.drawImage(
+        img,
+        cropState.croppedAreaPixels.x,
+        cropState.croppedAreaPixels.y,
+        cropState.croppedAreaPixels.width,
+        cropState.croppedAreaPixels.height,
+        0,
+        0,
+        MAX_SIZE,
+        MAX_SIZE
+      );
+
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.8));
+      const fileName = `item_${Date.now()}.webp`;
+      
+      const { data, error } = await supabase.storage
+        .from('menu_images')
+        .upload(fileName, blob, { contentType: 'image/webp', upsert: false });
+        
+      if (error) throw error;
+      
+      const { data: publicUrlData } = supabase.storage.from('menu_images').getPublicUrl(fileName);
+      setFormData(prev => ({ ...prev, image_url: publicUrlData.publicUrl }));
+      showToast('Image cropped & uploaded successfully!');
+    } catch (err) {
+      console.error('Image crop error:', err);
+      showToast('Failed to process image.', true);
+    } finally {
+      setUploadingImage(false);
+      setCropState(prev => ({ ...prev, image: null }));
+    }
+  };
+
   const handleOpenCreate = () => {
     setEditingItem(null);
     setFormData({
@@ -81,7 +220,8 @@ export default function AdminInventory() {
       description: '',
       tag: '',
       is_available: true,
-      availableOutlets: outlets.map(o => o.id)
+      availableOutlets: outlets.map(o => o.id),
+      image_url: ''
     });
     setModalOpen(true);
   };
@@ -115,7 +255,8 @@ export default function AdminInventory() {
       description: item.description || '',
       tag: item.tag || '',
       is_available: item.is_available !== false,
-      availableOutlets: availOutlets
+      availableOutlets: availOutlets,
+      image_url: item.image_url || ''
     });
     setModalOpen(true);
   };
@@ -131,7 +272,8 @@ export default function AdminInventory() {
       description: item.description || '',
       tag: item.tag || '',
       is_available: item.is_available !== false,
-      availableOutlets: outlets.map(o => o.id)
+      availableOutlets: outlets.map(o => o.id),
+      image_url: item.image_url || ''
     });
     setModalOpen(true);
   };
@@ -158,7 +300,8 @@ export default function AdminInventory() {
       is_veg: formData.is_veg,
       description: formData.description.trim(),
       tag: formData.tag.trim(),
-      is_available: formData.is_available
+      is_available: formData.is_available,
+      image_url: formData.image_url
     };
 
     try {
@@ -399,10 +542,19 @@ export default function AdminInventory() {
 
             <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
               <div className="flex items-center gap-1.5 flex-wrap">
-                {item.is_veg ? (
-                  <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">🌱 Veg</span>
+                {item.image_url ? (
+                  <span className="text-[10px] font-extrabold text-purple-800 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> Image Added
+                  </span>
                 ) : (
-                  <span className="text-[10px] font-extrabold text-red-800 bg-red-50 px-2 py-0.5 rounded border border-red-200">🍗 Non-Veg</span>
+                  <button 
+                    onClick={() => handleQuickAddImage(item)}
+                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onDrop={(e) => handleQuickDrop(e, item)}
+                    className="text-[10px] font-extrabold text-slate-500 bg-slate-100 hover:bg-purple-50 hover:text-purple-700 px-2 py-0.5 rounded border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <Upload className="w-3 h-3" /> Quick Add
+                  </button>
                 )}
                 
                 {item.tag && (
@@ -467,7 +619,7 @@ export default function AdminInventory() {
                 <th className="p-3.5">Item</th>
                 <th className="p-3.5">Category</th>
                 <th className="p-3.5">Price</th>
-                <th className="p-3.5">Diet</th>
+                <th className="p-3.5">Image</th>
                 <th className="p-3.5">Tag</th>
                 <th className="p-3.5">Status</th>
                 <th className="p-3.5 text-right">Actions</th>
@@ -488,10 +640,20 @@ export default function AdminInventory() {
                   <td className="p-3.5 font-bold text-slate-700">{item.categories?.name || 'Uncategorized'}</td>
                   <td className="p-3.5 font-black text-slate-900">₹{item.price}</td>
                   <td className="p-3.5 font-bold">
-                    {item.is_veg ? (
-                      <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Veg</span>
+                    {item.image_url ? (
+                      <span className="text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 text-[10px] font-extrabold uppercase flex items-center gap-1 w-max">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> Added
+                      </span>
                     ) : (
-                      <span className="text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200">Non-Veg</span>
+                      <button 
+                        onClick={() => handleQuickAddImage(item)}
+                        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onDrop={(e) => handleQuickDrop(e, item)}
+                        className="text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 text-[10px] font-extrabold uppercase flex items-center gap-1 w-max transition-colors cursor-pointer"
+                        title="Click to select or drag and drop an image here"
+                      >
+                        <Upload className="w-3 h-3" /> Quick Add
+                      </button>
                     )}
                   </td>
                   <td className="p-3.5">
@@ -551,6 +713,54 @@ export default function AdminInventory() {
         </div>
       </div>
 
+      
+      {/* Crop Modal */}
+      {cropState.isOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-lg p-6 flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <h2 className="font-extrabold text-slate-900">Crop Image (1:1 Square)</h2>
+              <button onClick={() => { setCropState(prev => ({ ...prev, isOpen: false })); setQuickEditItemId(null); }} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="relative w-full h-[400px] bg-slate-100 rounded-xl overflow-hidden">
+              <Cropper
+                image={cropState.image}
+                crop={cropState.crop}
+                zoom={cropState.zoom}
+                aspect={1}
+                onCropChange={(crop) => setCropState(prev => ({ ...prev, crop }))}
+                onCropComplete={onCropComplete}
+                onZoomChange={(zoom) => setCropState(prev => ({ ...prev, zoom }))}
+              />
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <span className="text-xs font-bold text-slate-500">Zoom</span>
+              <input
+                type="range"
+                value={cropState.zoom}
+                min={1}
+                max={3}
+                step={0.1}
+                aria-labelledby="Zoom"
+                onChange={(e) => setCropState(prev => ({ ...prev, zoom: Number(e.target.value) }))}
+                className="w-full accent-purple-600"
+              />
+            </div>
+            
+            <button
+              onClick={handleConfirmCrop}
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-extrabold text-sm"
+            >
+              Confirm Crop & Upload
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Add / Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs text-slate-900">
@@ -570,20 +780,43 @@ export default function AdminInventory() {
                   <EmojiPickerMenu
                     value={formData.emoji}
                     onChange={(emoji) => setFormData({ ...formData, emoji })}
-                    label="Emoji Menu"
+                    label="Emoji (Fallback)"
                   />
                 </div>
                 <div className="col-span-3">
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Item Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Cheese Burst Pizza"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none"
-                  />
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Item Image (WebP Compressed)</label>
+                  <div className="flex items-center gap-2">
+                    {formData.image_url && (
+                      <img src={formData.image_url} alt="Preview" className="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
+                    )}
+                    <label 
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border rounded-xl cursor-pointer transition-colors text-[10px] font-bold h-10 ${
+                        isDragging 
+                          ? 'bg-purple-50 border-purple-400 text-purple-700 border-dashed' 
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 border-solid'
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : <Upload className="w-4 h-4 shrink-0" />}
+                      <span className="truncate">{uploadingImage ? 'Compressing...' : isDragging ? 'Drop Image Here' : 'Upload Image'}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageSelect} disabled={uploadingImage} />
+                    </label>
+                  </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Item Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g. Cheese Burst Pizza"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -700,6 +933,7 @@ export default function AdminInventory() {
           </div>
         </div>
       )}
+      <input type="file" id="quick-image-upload" accept="image/*" className="hidden" onChange={handleImageSelect} disabled={uploadingImage} />
     </div>
   );
 }

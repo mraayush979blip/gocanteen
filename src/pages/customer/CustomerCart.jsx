@@ -987,7 +987,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                   {cart.map(item => (
                     <div key={item.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <span className="text-2xl">{item.emoji || '🍽️'}</span>
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.name} className="w-10 h-10 object-cover rounded-md" loading="lazy" />
+                        ) : (
+                          <span className="text-2xl">{item.emoji || '🍽️'}</span>
+                        )}
                         <div>
                           <h4 className="text-xs font-bold text-slate-900">{item.name}</h4>
                           <span className="text-[11px] text-slate-500 font-semibold">₹{item.price} each</span>

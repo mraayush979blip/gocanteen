@@ -432,6 +432,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                           <NavigationItem icon={<span className="text-lg">📢</span>} iconBg="bg-purple-50" title="Broadcast Announcements" subtitle="Send push campaigns" onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">🏪</span>} iconBg="bg-purple-50" title="Canteen Outlets" subtitle="Manage physical locations" onClick={() => { navigate('/admin/outlets'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<span className="text-lg">👥</span>} iconBg="bg-purple-50" title="Manage Staff" subtitle="Accounts & Access" onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<span className="text-lg">☁️</span>} iconBg="bg-purple-50" title="Storage & Images" subtitle="Clean unused photos" onClick={() => { navigate('/admin/storage'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<KeyRound className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Change Admin Passcode" subtitle="Security settings" onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }} />
                         </>
                       )}

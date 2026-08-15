@@ -31,6 +31,7 @@ import AdminPromoCodes from './pages/admin/AdminPromoCodes';
 import AdminStaff from './pages/admin/AdminStaff';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminOutlets from './pages/admin/AdminOutlets';
+import AdminStorage from './pages/admin/AdminStorage';
 
 import Footer from './components/Footer';
 import PolicyPage from './components/PolicyPage';
@@ -71,6 +72,7 @@ function AdminLayout({ activeSubView, onOpenAuth }) {
         {activeSubView === 'outlets' && <AdminOutlets />}
         {activeSubView === 'orders' && <AdminOrders />}
         {activeSubView === 'dashboard' && <AdminDashboard />}
+        {activeSubView === 'storage' && <AdminStorage />}
       </AdminProvider>
     </PortalGuard>
   );
@@ -258,6 +260,7 @@ function MainContent() {
           <Route path="/admin/promos" element={<AdminLayout activeSubView="promos" onOpenAuth={() => handleOpenAuth('admin')} />} />
           <Route path="/admin/staff" element={<AdminLayout activeSubView="staff" onOpenAuth={() => handleOpenAuth('admin')} />} />
           <Route path="/admin/outlets" element={<AdminLayout activeSubView="outlets" onOpenAuth={() => handleOpenAuth('admin')} />} />
+          <Route path="/admin/storage" element={<AdminLayout activeSubView="storage" onOpenAuth={() => handleOpenAuth('admin')} />} />
 
           {/* Razorpay Policy Routes */}
           <Route path="/terms" element={<PolicyPage initialPolicy="terms" onBackToMenu={() => navigate('/menu')} />} />
