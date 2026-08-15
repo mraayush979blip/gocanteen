@@ -638,7 +638,7 @@ export default function CustomerMenu({ onOpenCart }) {
                     <div className={`shrink-0 w-24 sm:w-36 aspect-square rounded-[1rem] sm:rounded-xl bg-slate-100 flex flex-col items-center justify-center relative shadow-sm gap-2 overflow-hidden`}>
                       
                       {offer.image_url ? (
-                        <img src={offer.image_url} alt={offer.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                        <img src={offer.image_url} alt={offer.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                       ) : (
                         <div className="relative z-10 flex items-center gap-1.5 font-bold text-slate-500">
                           <span className="text-4xl drop-shadow-md group-hover:scale-110 transition-transform duration-300">{parts[0]}</span>
@@ -738,7 +738,7 @@ export default function CustomerMenu({ onOpenCart }) {
                         <div key={`recent-${item.id}`} className="snap-start shrink-0 w-40 bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between shadow-xs relative overflow-hidden">
                           <div className="flex items-center gap-2 mb-2">
                             {item.image_url ? (
-                              <img src={item.image_url} alt={item.name} className="w-10 h-10 rounded-xl object-cover shrink-0" loading="lazy" />
+                              <img src={item.image_url} alt={item.name} className="w-10 h-10 rounded-xl object-cover shrink-0 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                             ) : (
                               <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0">{item.emoji || '🍽️'}</div>
                             )}
@@ -796,7 +796,7 @@ export default function CustomerMenu({ onOpenCart }) {
                                 <div className="aspect-square w-full rounded-xl border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:shadow-inner bg-slate-100">
                                   
                                   {item.image_url ? (
-                                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                                   ) : (
                                     <span className="relative z-10 text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-md">{item.emoji || '🍽️'}</span>
                                   )}
@@ -892,7 +892,7 @@ export default function CustomerMenu({ onOpenCart }) {
                             <div className="space-y-2">
                               <div className="aspect-square w-full rounded-xl bg-slate-100 flex items-center justify-center relative overflow-hidden">
                                 {item.image_url ? (
-                                  <img src={item.image_url} alt={item.name} className="w-full h-full object-cover rounded-xl" loading="lazy" />
+                                  <img src={item.image_url} alt={item.name} className="w-full h-full object-cover rounded-xl opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                                 ) : (
                                   <span className="relative z-10 text-6xl drop-shadow-xl">{item.emoji || '🍽️'}</span>
                                 )}
@@ -970,7 +970,7 @@ export default function CustomerMenu({ onOpenCart }) {
                             <div className="w-16 h-16 rounded-xl border border-white/40 flex items-center justify-center text-3xl shrink-0 shadow-inner bg-slate-100 relative overflow-hidden">
                               
                               {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                               ) : (
                                 <span className="relative z-10 drop-shadow-md text-4xl">{item.emoji || '🍽️'}</span>
                               )}
@@ -1024,7 +1024,7 @@ export default function CustomerMenu({ onOpenCart }) {
                             <div className="w-full aspect-square shrink-0 rounded-xl bg-slate-100 flex items-center justify-center relative overflow-hidden mb-3">
                               
                               {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                               ) : (
                                 <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="relative z-10 text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-2xl">{item.emoji || '🍽️'}</motion.span>
                               )}
