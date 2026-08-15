@@ -199,7 +199,20 @@ export default function AdminInventory() {
       
       const { data: publicUrlData } = supabase.storage.from('menu_images').getPublicUrl(fileName);
       setFormData(prev => ({ ...prev, image_url: publicUrlData.publicUrl }));
-      showToast('Image cropped & uploaded successfully!');
+      
+      if (quickEditItemId) {
+        const { error: updateErr } = await supabase.from('menu').update({ image_url: publicUrlData.publicUrl }).eq('id', quickEditItemId);
+        if (updateErr) {
+          console.error('Quick update error:', updateErr);
+          showToast('Failed to quick-update item image.', true);
+        } else {
+          setInventory(prev => prev.map(item => item.id === quickEditItemId ? { ...item, image_url: publicUrlData.publicUrl } : item));
+          showToast('Image added instantly!');
+        }
+        setQuickEditItemId(null);
+      } else {
+        showToast('Image cropped & uploaded successfully!');
+      }
     } catch (err) {
       console.error('Image crop error:', err);
       showToast('Failed to process image.', true);
