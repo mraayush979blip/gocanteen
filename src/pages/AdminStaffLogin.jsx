@@ -29,10 +29,9 @@ export default function AdminStaffLogin() {
       } else if (userRole === 'staff') {
         setActivePortal('staff');
         navigate('/staff/kds', { replace: true });
-      } else {
-        setActivePortal('customer');
-        navigate('/menu', { replace: true });
       }
+      // If userRole is customer, do NOT redirect to /menu. 
+      // Allow them to stay on the /ad page so they can log into their staff/admin account.
     }
   }, [session, userRole, authLoading, navigate, setActivePortal]);
 
