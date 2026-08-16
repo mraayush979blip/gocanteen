@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlaced }) {
-  const { cart, updateCartQty, removeFromCart, clearCart, setCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo, selectedOutlet, outlets } = useAuth();
+  const { cart, updateCartQty, removeFromCart, clearCart, setCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo, selectedOutlet, outlets, refreshGlobalOutlets } = useAuth();
   const targetOutletId = (profile?.role === 'staff' && profile?.assigned_outlet_id) ? profile.assigned_outlet_id : selectedOutlet;
   const currentOutlet = outlets?.find(o => String(o.id) === String(targetOutletId));
   const currentOutletStatus = currentOutlet?.status || 'open';
@@ -47,6 +47,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   useEffect(() => {
     if (isOpen) {
       fetchCanteenSettings();
+      if (refreshGlobalOutlets) refreshGlobalOutlets();
     }
   }, [isOpen]);
 
