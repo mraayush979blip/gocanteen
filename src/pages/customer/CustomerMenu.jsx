@@ -256,7 +256,7 @@ export default function CustomerMenu({ onOpenCart }) {
     const startY = rect.top + rect.height / 2;
 
     const animId = Date.now() + Math.random();
-    setFlyingItems(prev => [...prev, { id: animId, emoji: emoji || '🍽️', startX, startY }]);
+    setFlyingItems(prev => [...prev, { id: animId, emoji: emoji || '', startX, startY }]);
 
     setTimeout(() => {
       setFlyingItems(prev => prev.filter(f => f.id !== animId));
@@ -269,7 +269,7 @@ export default function CustomerMenu({ onOpenCart }) {
       id: item.id,
       name: item.name,
       price: Number(item.price),
-      emoji: item.emoji || '🍽️',
+      emoji: item.emoji || '',
       image_url: item.image_url,
       has_packaging_charge: cat ? cat.has_packaging_charge : false
     });
@@ -519,8 +519,8 @@ export default function CustomerMenu({ onOpenCart }) {
               onChange={(e) => setSortBy(e.target.value)}
               className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs font-extrabold focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
-              <option value="popular">🔥 Sort: Popular</option>
-              <option value="price-low">💰 Price: Low to High</option>
+              <option value="popular">Sort: Popular</option>
+              <option value="price-low">Price: Low to High</option>
               <option value="price-high">💎 Price: High to Low</option>
             </select>
 
@@ -559,7 +559,7 @@ export default function CustomerMenu({ onOpenCart }) {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
               }`}
           >
-            <span className="relative z-10">🍽️ All Items</span>
+            <span className="relative z-10">All Items</span>
             <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${activeCategory === 'all' ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
               }`}>
               {inventory.length}
@@ -577,7 +577,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-amber-200'
                 }`}
             >
-              <span className="relative z-10 animate-pulse">🔥 Combo Deals</span>
+              <span className="relative z-10 animate-pulse">Combo Deals</span>
               <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${activeCategory === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-100 text-amber-900'
                 }`}>
                 {offers.length}
@@ -601,7 +601,7 @@ export default function CustomerMenu({ onOpenCart }) {
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
                   }`}
               >
-                <span className="relative z-10">{cat.emoji || '🍽️'} {cat.name}</span>
+                <span className="relative z-10">{cat.emoji ? cat.emoji + ' ' : ''}{cat.name}</span>
                 <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${isActive ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-600'
                   }`}>
                   {count}
@@ -713,8 +713,7 @@ export default function CustomerMenu({ onOpenCart }) {
                           </div>
                         ) : (
                           <button
-                            onClick={(e) => { e.stopPropagation(); addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '🔥',
-      image_url: offer.image_url, has_packaging_charge: true, is_offer: true }); }}
+                            onClick={(e) => { e.stopPropagation(); addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '', image_url: offer.image_url, has_packaging_charge: true, is_offer: true }); }}
                             className="px-5 py-2 rounded-xl border border-emerald-300 text-emerald-800 bg-gradient-to-b from-emerald-50 to-emerald-200 hover:from-emerald-400 hover:to-emerald-600 hover:text-white hover:border-emerald-500 font-black text-xs sm:text-sm active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)] active:translate-y-0.5 transition-all shadow-[0_4px_6px_rgba(0,100,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.9)] cursor-pointer tracking-wider shrink-0"
                           >
                             + ADD
@@ -754,7 +753,7 @@ export default function CustomerMenu({ onOpenCart }) {
                             {item.image_url ? (
                               <img src={item.image_url} alt={item.name} className="w-10 h-10 rounded-xl object-cover shrink-0 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                             ) : (
-                              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0">{item.emoji || '🍽️'}</div>
+                              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0">{item.emoji || ''}</div>
                             )}
                             <div className="flex flex-col">
                               <h3 className="text-xs font-black text-slate-900 line-clamp-1">{item.name}</h3>
@@ -812,7 +811,7 @@ export default function CustomerMenu({ onOpenCart }) {
                                   {item.image_url ? (
                                     <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                                   ) : (
-                                    <span className="relative z-10 text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-md">{item.emoji || '🍽️'}</span>
+                                    <span className="relative z-10 text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-md">{item.emoji || ''}</span>
                                   )}
                                   <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-amber-900 bg-amber-300 px-2 py-0.5 rounded shadow-sm">Bestseller</span>
                                 </div>
@@ -852,7 +851,7 @@ export default function CustomerMenu({ onOpenCart }) {
                   {/* Sticky section header */}
                   <div className="sticky top-16 z-10 bg-white/95 backdrop-blur-sm py-2 mb-4 border-b border-slate-100 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-xl shrink-0">{cat.emoji || '🍽️'}</span>
+                      <span className="text-xl shrink-0">{cat.emoji || ''}</span>
                       <h2 className="text-base font-black text-slate-900 uppercase tracking-tight truncate">{cat.name}</h2>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -908,7 +907,7 @@ export default function CustomerMenu({ onOpenCart }) {
                                 {item.image_url ? (
                                   <img src={item.image_url} alt={item.name} className="w-full h-full object-cover rounded-xl opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                                 ) : (
-                                  <span className="relative z-10 text-6xl drop-shadow-xl">{item.emoji || '🍽️'}</span>
+                                  <span className="relative z-10 text-6xl drop-shadow-xl">{item.emoji || ''}</span>
                                 )}
                                 <div className={`absolute top-2 left-2 w-4 h-4 rounded-sm border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
                                 <div className="absolute top-2 right-2">{renderTag(item.tag)}</div>
@@ -968,7 +967,7 @@ export default function CustomerMenu({ onOpenCart }) {
 
               {filteredInventory.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 space-y-3 shadow-2xs">
-                  <span className="text-4xl">🍽️</span>
+                  <span className="text-4xl">📦</span>
                   <h3 className="text-sm font-extrabold text-slate-900">No items match your filter</h3>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">Try searching for a different dish or reset filters.</p>
                   <button onClick={() => { setSearchQuery(''); setActiveCategory('all'); }} className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-extrabold text-xs shadow-sm hover:bg-emerald-700 transition-colors">Reset All Filters</button>
@@ -986,7 +985,7 @@ export default function CustomerMenu({ onOpenCart }) {
                               {item.image_url ? (
                                 <img src={item.image_url} alt={item.name} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                               ) : (
-                                <span className="relative z-10 drop-shadow-md text-4xl">{item.emoji || '🍽️'}</span>
+                                <span className="relative z-10 drop-shadow-md text-4xl">{item.emoji || ''}</span>
                               )}
                             </div>
                             <div>
@@ -1033,7 +1032,7 @@ export default function CustomerMenu({ onOpenCart }) {
                               {item.image_url ? (
                                 <img src={item.image_url} alt={item.name} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                               ) : (
-                                <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="relative z-10 text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-2xl">{item.emoji || '🍽️'}</motion.span>
+                                <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="relative z-10 text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-2xl">{item.emoji || ''}</motion.span>
                               )}
                               <div className={`absolute top-2 left-2 w-4 h-4 rounded-xs border bg-white flex items-center justify-center p-0.5 shadow-sm ${item.is_veg ? 'border-emerald-600' : 'border-red-600'}`}><div className={`w-full h-full rounded-full ${item.is_veg ? 'bg-emerald-600' : 'bg-red-600'}`} /></div>
                               {item.tag && <span className="absolute top-2 right-2 text-[9px] uppercase font-black text-slate-950 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md border border-slate-200/80 shadow-sm">{item.tag}</span>}
@@ -1238,7 +1237,7 @@ export default function CustomerMenu({ onOpenCart }) {
             categoryLabel = "More Special Today ⭐";
           } else {
             categoryItems = inventory;
-            categoryLabel = "More Items 🍽️";
+            categoryLabel = "More Items";
           }
 
           const currentIndex = categoryItems.findIndex(i => i.id === item.id);
@@ -1394,7 +1393,7 @@ export default function CustomerMenu({ onOpenCart }) {
                       <div className="flex items-center gap-2 flex-wrap">
                         {cat && (
                           <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 uppercase tracking-wider">
-                            {cat.emoji || '🍽️'} {cat.name}
+                            {cat.emoji ? cat.emoji + ' ' : ''}{cat.name}
                           </span>
                         )}
                         {item.is_veg === false && (
@@ -1416,7 +1415,7 @@ export default function CustomerMenu({ onOpenCart }) {
 
                       {item.items_included && (
                         <div className="space-y-1 bg-amber-500/10 backdrop-blur-md border border-amber-300/60 rounded-2xl p-4 shadow-2xs">
-                          <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">🍱 Items Included in Combo:</span>
+                          <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">Items Included in Combo:</span>
                           <p className="text-xs text-amber-900 font-bold leading-relaxed">{item.items_included}</p>
                         </div>
                       )}

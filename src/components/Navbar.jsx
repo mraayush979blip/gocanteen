@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram, ArrowLeft, ChevronRight, ArrowDownToLine, MapPin
+  UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram, ArrowLeft, ChevronRight, ArrowDownToLine, MapPin,
+  Package, Banknote, ChefHat, Bell, ScrollText, TrendingUp, Receipt, PackageOpen, FolderOpen, Pizza, Ticket, Megaphone, Store, Users, Cloud
 } from 'lucide-react';
 
 function NavigationItem({ icon, iconBg, title, subtitle, rightElement, onClick }) {
@@ -138,19 +139,11 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 </button>
               )}
               <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-                <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/90 overflow-hidden flex items-center justify-center shadow-md active:scale-95 transition-transform p-0.5 shrink-0">
-                  <img src="/app-icon.png" alt="Go Canteen Logo" className="w-full h-full object-contain rounded-xl" />
+                <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shrink-0">
+                  <img src="/app-icon.png" alt="Go Canteen Logo" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-black text-lg tracking-tight text-slate-900 leading-none">GO CANTEEN</span>
-                    <span className="bg-yellow-400 text-slate-950 font-black text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow-2xs">
-                      FAST
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-slate-500 font-extrabold tracking-wider uppercase mt-0.5">
-                    {currentPortal === 'admin' ? 'Executive Admin' : currentPortal === 'staff' ? 'Kitchen Staff KDS' : 'Customer Portal'}
-                  </span>
+                  <span className="font-black text-xl tracking-tight text-slate-900 leading-none">GO CANTEEN</span>
                 </div>
               </div>
             </div>
@@ -318,8 +311,8 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                   {userRole === 'admin' && currentPortal === 'customer' && (
                     <div className="bg-purple-900 text-white rounded-[20px] p-3.5 shadow-md flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-purple-800 flex items-center justify-center font-bold text-sm">
-                          🛡️
+                        <div className="w-8 h-8 rounded-xl bg-purple-800 flex items-center justify-center text-purple-200">
+                          <Shield className="w-4 h-4" />
                         </div>
                         <div>
                           <p className="text-xs font-black text-white">Admin Account Logged In</p>
@@ -362,7 +355,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                             onClick={() => { navigate('/menu'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
-                            icon={<span className="text-lg">📦</span>}
+                            icon={<Package className="w-5 h-5 text-amber-600" />}
                             iconBg="bg-amber-50"
                             title="My Orders & Live Tokens"
                             subtitle="Track your orders"
@@ -391,28 +384,28 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                       {currentPortal === 'staff' && (
                         <>
                           <NavigationItem 
-                            icon={<span className="text-lg">💰</span>}
+                            icon={<Banknote className="w-5 h-5 text-blue-600" />}
                             iconBg="bg-blue-50"
                             title="New Order (POS)"
                             subtitle="Create a manual order"
                             onClick={() => { navigate('/staff/pos'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
-                            icon={<span className="text-lg">👨‍🍳</span>}
+                            icon={<ChefHat className="w-5 h-5 text-emerald-600" />}
                             iconBg="bg-emerald-50"
                             title="Active Orders"
                             subtitle="Live preparing orders"
                             onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
-                            icon={<span className="text-lg">🔔</span>}
-                            iconBg="bg-blue-50"
+                            icon={<Bell className="w-5 h-5 text-amber-600" />}
+                            iconBg="bg-amber-50"
                             title="Item Stock"
                             subtitle="Manage stock availability"
                             onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
-                            icon={<span className="text-lg">📜</span>}
+                            icon={<ScrollText className="w-5 h-5 text-purple-600" />}
                             iconBg="bg-purple-50"
                             title="Order History"
                             subtitle="Completed orders log"
@@ -423,16 +416,16 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
 
                        {currentPortal === 'admin' && (
                         <>
-                          <NavigationItem icon={<span className="text-lg">📊</span>} iconBg="bg-purple-50" title="Executive Dashboard" subtitle="Sales analytics" onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">💵</span>} iconBg="bg-purple-50" title="Sales Controls & Refunds" subtitle="Manage payments" onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">🍱</span>} iconBg="bg-purple-50" title="Menu Inventory" subtitle="Manage items" onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">📂</span>} iconBg="bg-purple-50" title="Menu Categories" subtitle="Manage categories" onClick={() => { navigate('/admin/categories'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">🍔</span>} iconBg="bg-purple-50" title="Food Combos" subtitle="Manage combo meals" onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">🎟️</span>} iconBg="bg-purple-50" title="Promo Codes & Coupons" subtitle="Discount codes" onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">📢</span>} iconBg="bg-purple-50" title="Broadcast Announcements" subtitle="Send push campaigns" onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">🏪</span>} iconBg="bg-purple-50" title="Canteen Outlets" subtitle="Manage physical locations" onClick={() => { navigate('/admin/outlets'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">👥</span>} iconBg="bg-purple-50" title="Manage Staff" subtitle="Accounts & Access" onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }} />
-                          <NavigationItem icon={<span className="text-lg">☁️</span>} iconBg="bg-purple-50" title="Storage & Images" subtitle="Clean unused photos" onClick={() => { navigate('/admin/storage'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<TrendingUp className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Executive Dashboard" subtitle="Sales analytics" onClick={() => { navigate('/admin/dashboard'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<Receipt className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Sales Controls & Refunds" subtitle="Manage payments" onClick={() => { navigate('/admin/orders'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<PackageOpen className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Menu Inventory" subtitle="Manage items" onClick={() => { navigate('/admin/inventory'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<FolderOpen className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Menu Categories" subtitle="Manage categories" onClick={() => { navigate('/admin/categories'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<Pizza className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Food Combos" subtitle="Manage combo meals" onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<Ticket className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Promo Codes & Coupons" subtitle="Discount codes" onClick={() => { navigate('/admin/promos'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<Megaphone className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Broadcast Announcements" subtitle="Send push campaigns" onClick={() => { navigate('/admin/offers'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<Store className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Canteen Outlets" subtitle="Manage physical locations" onClick={() => { navigate('/admin/outlets'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<Users className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Manage Staff" subtitle="Accounts & Access" onClick={() => { navigate('/admin/staff'); setMobileMenuOpen(false); }} />
+                          <NavigationItem icon={<Cloud className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Storage & Images" subtitle="Clean unused photos" onClick={() => { navigate('/admin/storage'); setMobileMenuOpen(false); }} />
                           <NavigationItem icon={<KeyRound className="w-5 h-5 text-purple-600" />} iconBg="bg-purple-50" title="Change Admin Passcode" subtitle="Security settings" onClick={() => { setShowChangeCodeModal(true); setMobileMenuOpen(false); }} />
                         </>
                       )}
