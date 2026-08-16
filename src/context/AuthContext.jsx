@@ -51,6 +51,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Fetch active outlets on load
     refreshGlobalOutlets();
+
+    // Listen for real-time status changes
+    const outletsChannel = supabase
+      .channel('public:outlets')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'outlets' }, () => {
+        refreshGlobalOutlets();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(outletsChannel);
+    };
   }, []);
 
   const setActivePortal = (portal) => {
