@@ -39,6 +39,9 @@ export default function FloatingCouponBanner() {
         // Seamless loop jump
         if (scrollLeft >= scrollWidth / 2) {
           scrollRef.current.scrollLeft = 0;
+        } else if (scrollWidth > clientWidth && scrollLeft >= scrollWidth - clientWidth - 1) {
+          // Fallback just in case
+          scrollRef.current.scrollLeft = 0;
         }
       }
       animationFrameId = requestAnimationFrame(scroll);
@@ -55,8 +58,8 @@ export default function FloatingCouponBanner() {
     ...offers.map(o => ({ type: 'offer', ...o }))
   ];
 
-  // Duplicate for seamless loop
-  const displayItems = [...dealItems, ...dealItems];
+  // Duplicate 40 times to guarantee the scrollWidth is large enough for a perfect seamless loop on any screen size
+  const displayItems = Array(40).fill(dealItems).flat();
 
   return (
     <div className="relative z-30 max-w-7xl mx-auto px-3 sm:px-6 pt-3 pb-1">
