@@ -1138,72 +1138,85 @@ export default function CustomerMenu({ onOpenCart }) {
       {/* 6. Mobile Expandable Floating Cart (FAB) */}
       <AnimatePresence>
         {totalCartCount > 0 && (
-          <motion.div
-            className={`fixed z-40 sm:hidden origin-bottom flex flex-col justify-end pointer-events-none ${
-              isCartExpanded ? 'bottom-4 left-3 right-3' : 'bottom-6 right-6'
-            }`}
-          >
-            {isCartExpanded ? (
-              <motion.div
-                layoutId="cart-shape"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30, scale: 0.95 }}
-                className="bg-emerald-700 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between border border-emerald-500/40 relative pointer-events-auto"
-              >
-                <div 
-                  className="flex items-center gap-3 flex-1 cursor-pointer"
-                  onClick={onOpenCart}
-                >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-800 text-yellow-400 flex items-center justify-center font-black shadow-xs shrink-0">
-                    <ShoppingCart className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-black tracking-wide flex items-center gap-1.5">
-                      <span>{totalCartCount} {totalCartCount === 1 ? 'ITEM' : 'ITEMS'}</span>
-                      <span className="text-emerald-300">•</span>
-                      <span className="text-yellow-300 text-sm font-black">₹{totalCartPrice}</span>
+          <div className="fixed z-40 sm:hidden bottom-0 left-0 right-0 p-3 pointer-events-none flex flex-col items-end justify-end">
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.9 }}
+              transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+              onClick={() => { if (!isCartExpanded) setIsCartExpanded(true); }}
+              className={`pointer-events-auto shadow-[0_10px_30px_rgba(5,150,105,0.4)] relative overflow-hidden flex items-center ${
+                isCartExpanded 
+                  ? 'w-full rounded-2xl p-3.5 justify-between bg-emerald-700 border border-emerald-500/40 mb-1' 
+                  : 'w-16 h-16 rounded-[32px] justify-center bg-emerald-600 hover:bg-emerald-700 cursor-pointer mb-3 mr-3'
+              }`}
+            >
+              <AnimatePresence mode="wait">
+                {isCartExpanded ? (
+                  <motion.div 
+                    key="expanded"
+                    initial={{ opacity: 0, filter: 'blur(4px)' }}
+                    animate={{ opacity: 1, filter: 'blur(0px)' }}
+                    exit={{ opacity: 0, filter: 'blur(4px)' }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center justify-between w-full"
+                  >
+                    <div 
+                      className="flex items-center gap-3 flex-1 cursor-pointer"
+                      onClick={onOpenCart}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-emerald-800 text-yellow-400 flex items-center justify-center font-black shadow-xs shrink-0">
+                        <ShoppingCart className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black tracking-wide text-white flex items-center gap-1.5">
+                          <span>{totalCartCount} {totalCartCount === 1 ? 'ITEM' : 'ITEMS'}</span>
+                          <span className="text-emerald-300">•</span>
+                          <span className="text-yellow-300 text-sm font-black">₹{totalCartPrice}</span>
+                        </div>
+                        <div className="text-[10px] text-emerald-200 font-medium">Tap to review & checkout</div>
+                      </div>
                     </div>
-                    <div className="text-[10px] text-emerald-200 font-medium">Tap to review & checkout</div>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-2">
-                  <div 
-                    onClick={onOpenCart}
-                    className="flex items-center gap-1 text-[11px] font-black bg-emerald-800 text-emerald-100 px-3 py-2 rounded-xl shadow-xs cursor-pointer active:scale-95"
+                    <div className="flex items-center gap-2">
+                      <div 
+                        onClick={onOpenCart}
+                        className="flex items-center gap-1 text-[11px] font-black bg-emerald-800 text-emerald-100 px-3 py-2 rounded-xl shadow-xs cursor-pointer active:scale-95"
+                      >
+                        <span>Cart</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </div>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setIsCartExpanded(false); }}
+                        className="w-8 h-8 rounded-full bg-emerald-800 flex items-center justify-center text-emerald-300 hover:text-white cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    key="collapsed"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center justify-center w-full h-full relative"
                   >
-                    <span>Cart</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </div>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setIsCartExpanded(false); }}
-                    className="w-8 h-8 rounded-full bg-emerald-800 flex items-center justify-center text-emerald-300 hover:text-white cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                layoutId="cart-shape"
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0 }}
-                onClick={() => setIsCartExpanded(true)}
-                className="w-16 h-16 bg-emerald-600 rounded-full shadow-[0_10px_30px_rgba(5,150,105,0.5)] flex items-center justify-center cursor-pointer relative pointer-events-auto hover:bg-emerald-700 hover:scale-105 active:scale-95 transition-colors"
-              >
-                <ShoppingCart className="w-6 h-6 text-white" />
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute 0 top-0 right-0 bg-yellow-400 text-slate-950 text-[11px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-emerald-600 shadow-sm"
-                >
-                  {totalCartCount}
-                </motion.div>
-              </motion.div>
-            )}
-          </motion.div>
+                    <ShoppingCart className="w-6 h-6 text-white" />
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute top-0 right-0 bg-yellow-400 text-slate-950 text-[11px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-emerald-600 shadow-sm"
+                    >
+                      {totalCartCount}
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
       {/* 7. Instamart-Style Item Detail Popup (Mac Genie Lamp Animation) */}
