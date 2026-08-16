@@ -44,6 +44,18 @@ if (window.location.pathname === '/ad') {
   window.location.replace('/#/ad');
 }
 
+// Dynamically swap PWA manifest for internal portals to allow separate PWA installation
+const updateManifest = () => {
+  const hash = window.location.hash;
+  const isInternal = hash.includes('/ad') || hash.includes('/staff') || hash.includes('/admin');
+  const manifestLink = document.querySelector('link[rel="manifest"]');
+  if (manifestLink) {
+    manifestLink.setAttribute('href', isInternal ? '/manifest-staff.json' : '/manifest.json');
+  }
+};
+updateManifest();
+window.addEventListener('hashchange', updateManifest);
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

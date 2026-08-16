@@ -37,6 +37,7 @@ import Footer from './components/Footer';
 import PolicyPage from './components/PolicyPage';
 import ReportBug from './pages/ReportBug';
 import AboutDeveloper from './pages/AboutDeveloper';
+import AdminStaffLogin from './pages/AdminStaffLogin';
 import SEOHead from './components/SEOHead';
 import SplashScreen from './components/SplashScreen';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
@@ -76,15 +77,6 @@ function AdminLayout({ activeSubView, onOpenAuth }) {
       </AdminProvider>
     </PortalGuard>
   );
-}
-
-function LoginTrigger({ role, onOpenAuth }) {
-  const navigate = useNavigate();
-  useEffect(() => {
-    onOpenAuth(role);
-    navigate('/menu', { replace: true });
-  }, [role, onOpenAuth, navigate]);
-  return null;
 }
 
 function MainContent() {
@@ -156,7 +148,6 @@ function MainContent() {
 
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authModalRole, setAuthModalRole] = useState('customer');
   const [cartOpen, setCartOpen] = useState(false);
   const [outletModalOpen, setOutletModalOpen] = useState(false);
 
@@ -168,8 +159,11 @@ function MainContent() {
   }, [activePortal, selectedOutlet, showSplash]);
 
   const handleOpenAuth = (role = 'customer') => {
-    setAuthModalRole(role);
-    setAuthModalOpen(true);
+    if (role === 'admin' || role === 'staff') {
+      navigate('/ad');
+    } else {
+      setAuthModalOpen(true);
+    }
   };
 
   useEffect(() => {
@@ -287,7 +281,7 @@ function MainContent() {
           <Route path="/about-developer" element={<Navigate to="/customer/developer" replace />} />
 
           {/* Hidden login triggers */}
-          <Route path="/ad" element={<LoginTrigger role="admin" onOpenAuth={handleOpenAuth} />} />
+          <Route path="/ad" element={<AdminStaffLogin />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/menu" replace />} />
@@ -316,7 +310,6 @@ function MainContent() {
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        initialRole={authModalRole}
       />
 
       <OutletSelectionModal 
