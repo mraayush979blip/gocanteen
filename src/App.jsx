@@ -78,6 +78,15 @@ function AdminLayout({ activeSubView, onOpenAuth }) {
   );
 }
 
+function LoginTrigger({ role, onOpenAuth }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    onOpenAuth(role);
+    navigate('/menu', { replace: true });
+  }, [role, onOpenAuth, navigate]);
+  return null;
+}
+
 function MainContent() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -276,6 +285,10 @@ function MainContent() {
           <Route path="/staff/developer" element={<AboutDeveloper />} />
           <Route path="/admin/developer" element={<AboutDeveloper />} />
           <Route path="/about-developer" element={<Navigate to="/customer/developer" replace />} />
+
+          {/* Hidden login triggers */}
+          <Route path="/ad" element={<LoginTrigger role="admin" onOpenAuth={handleOpenAuth} />} />
+          <Route path="/staff-ad" element={<LoginTrigger role="staff" onOpenAuth={handleOpenAuth} />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/menu" replace />} />
