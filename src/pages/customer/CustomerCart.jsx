@@ -7,7 +7,8 @@ import {
 
 export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlaced }) {
   const { cart, updateCartQty, removeFromCart, clearCart, setCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo, selectedOutlet, outlets } = useAuth();
-  const currentOutlet = outlets?.find(o => o.id === selectedOutlet);
+  const targetOutletId = (profile?.role === 'staff' && profile?.assigned_outlet_id) ? profile.assigned_outlet_id : selectedOutlet;
+  const currentOutlet = outlets?.find(o => String(o.id) === String(targetOutletId));
   const currentOutletStatus = currentOutlet?.status || 'open';
 
   const [customerName, setCustomerName] = useState('');
@@ -475,7 +476,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         razorpay_payment_id: paymentId || '',
         is_parcel: isParcel,
         parcel_charge: parcelCharge,
-        outlet_id: selectedOutlet || null
+        outlet_id: targetOutletId || null
       };
 
 
@@ -567,11 +568,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         return { ok: true };
       }
 
-      if (selectedOutlet) {
+      if (targetOutletId) {
         const { data: availData } = await supabase
           .from('inventory_availability')
           .select('item_id, is_available')
-          .eq('outlet_id', selectedOutlet)
+          .eq('outlet_id', targetOutletId)
           .in('item_id', inventoryIds);
         
         if (availData) {
@@ -685,12 +686,12 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
     // Live background check for canteen status to prevent race conditions
     setPlacingOrder(true);
 
-    if (selectedOutlet) {
+    if (targetOutletId) {
       try {
         const { data: outletData, error: outletErr } = await supabase
           .from('outlets')
           .select('status')
-          .eq('id', selectedOutlet)
+          .eq('id', targetOutletId)
           .single();
         if (!outletErr && outletData && outletData.status !== 'open') {
           setPlacingOrder(false);
