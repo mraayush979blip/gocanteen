@@ -26,18 +26,6 @@ export default function FloatingCouponBanner() {
     }
   };
 
-  const handleCopy = (promo) => {
-    try {
-      navigator.clipboard.writeText(promo.code);
-    } catch (e) {
-      // Fallback
-    }
-
-    setCopiedCode(promo.code);
-    showToast(`📋 Code ${promo.code} copied! Paste it in your cart to get ${promo.discount_percent}% OFF.`);
-    setTimeout(() => setCopiedCode(null), 2500);
-  };
-
   if (promos.length === 0 && offers.length === 0) return null;
 
   return (
@@ -60,61 +48,45 @@ export default function FloatingCouponBanner() {
             <span>LIVE CANTEEN OFFERS</span>
           </div>
 
-          {/* Marquee Ticker Container (Pause on Hover) */}
-          <div className="overflow-hidden flex-1 relative py-0.5">
-            <div className="flex items-center gap-4 animate-marquee hover:[animation-play-state:paused] whitespace-nowrap">
+          {/* Horizontally Scrollable Container */}
+          <div className="overflow-x-auto flex-1 relative py-0.5 scrollbar-none overscroll-x-contain">
+            <div className="flex items-center gap-3 whitespace-nowrap min-w-max">
               
               {/* Promo Coupon Cards */}
-              {[...promos, ...promos].map((p, idx) => {
-                const isCopied = copiedCode === p.code;
-                return (
-                  <div
-                    key={`promo-${p.id}-${idx}`}
-                    onClick={() => handleCopy(p)}
-                    className={`inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl cursor-pointer transition-all border shrink-0 group ${
-                      isCopied
-                        ? 'bg-yellow-400 text-slate-950 border-yellow-500 border-b-4 font-extrabold scale-105 shadow-md'
-                        : 'bg-emerald-950/40 hover:bg-emerald-900/70 border-emerald-900 border-b-[3px] text-white shadow-[inset_2px_2px_6px_rgba(0,0,0,0.4),inset_-1px_-1px_3px_rgba(255,255,255,0.1)] hover:-translate-y-0.5'
-                    }`}
-                  >
-                    <div className="w-6 h-6 rounded-lg bg-yellow-400/20 group-hover:bg-yellow-400/30 flex items-center justify-center text-yellow-300 shrink-0">
-                      <Ticket className="w-3.5 h-3.5" />
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-xs font-bold">
-                      <span>Get</span>
-                      <span className="bg-yellow-400 text-slate-950 font-black px-1.5 py-0.5 rounded-md text-[11px] shadow-2xs">
-                        {p.discount_percent}% OFF
-                      </span>
-                      <span>with</span>
-                      <span className="font-black text-yellow-300 uppercase tracking-wider font-mono">
-                        {p.code}
-                      </span>
-                    </div>
-
-                    {isCopied ? (
-                      <span className="text-[10px] bg-slate-950 text-yellow-400 font-black px-2 py-0.5 rounded-lg flex items-center gap-1 animate-bounce">
-                        <Check className="w-3 h-3" /> COPIED!
-                      </span>
-                    ) : (
-                      <span className="text-[10px] bg-emerald-500/20 group-hover:bg-yellow-400 group-hover:text-slate-950 text-emerald-200 font-extrabold px-2 py-0.5 rounded-lg flex items-center gap-1 transition-all">
-                        <Copy className="w-3 h-3" /> Copy
-                      </span>
-                    )}
+              {promos.map((p, idx) => (
+                <div
+                  key={`promo-${p.id}-${idx}`}
+                  className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-900/50 text-white shrink-0 shadow-sm snap-start"
+                >
+                  <div className="w-6 h-6 rounded-lg bg-yellow-400/20 flex items-center justify-center text-yellow-300 shrink-0">
+                    <Ticket className="w-3.5 h-3.5" />
                   </div>
-                );
-              })}
+
+                  <div className="flex items-center gap-1.5 text-xs font-bold">
+                    <span>Use Code</span>
+                    <span className="font-black text-yellow-300 uppercase tracking-wider font-mono">
+                      {p.code}
+                    </span>
+                    <span>for</span>
+                    <span className="bg-yellow-400 text-slate-950 font-black px-1.5 py-0.5 rounded-md text-[11px] shadow-2xs">
+                      {p.discount_percent}% OFF
+                    </span>
+                  </div>
+                </div>
+              ))}
 
               {/* Combo Offers */}
               {offers.map((o, idx) => (
                 <div
                   key={`offer-${o.id}-${idx}`}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-600 border-b-[3px] px-3.5 py-1.5 rounded-xl text-amber-100 shrink-0 text-xs font-bold shadow-[inset_2px_2px_6px_rgba(0,0,0,0.3)]"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-900/50 text-white shrink-0 shadow-sm snap-start"
                 >
-                  <div className="w-6 h-6 rounded-lg bg-amber-400/20 flex items-center justify-center text-amber-300 shrink-0 shadow-inner">
+                  <div className="w-6 h-6 rounded-lg bg-amber-400/20 flex items-center justify-center text-amber-300 shrink-0">
                     <Flame className="w-3.5 h-3.5 text-amber-300" />
                   </div>
-                  <span><b>{o.name}:</b> Deal at ₹{o.price}</span>
+                  <span className="text-xs font-bold">
+                    <b>{o.name}:</b> Deal at ₹{o.price}
+                  </span>
                   {o.original_price && Number(o.original_price) > Number(o.price) && (
                     <span className="text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded-md">
                       SAVE ₹{Number(o.original_price) - Number(o.price)}
@@ -125,13 +97,6 @@ export default function FloatingCouponBanner() {
 
             </div>
           </div>
-
-          {/* Right Action Hint */}
-          <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-black text-emerald-100 bg-emerald-900/60 px-3 py-1.5 rounded-xl border border-emerald-400/30 shrink-0 shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-            <span>Tap coupon to apply</span>
-          </div>
-
         </div>
       </div>
     </div>
