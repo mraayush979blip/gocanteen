@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import {
-  X, Trash2, Plus, Minus, Ticket, Smartphone, DollarSign, ArrowRight, Loader2, Sparkles, CheckCircle2, LogIn, KeyRound, CreditCard, ShieldCheck, Save, Bookmark, Info, Calendar, ChevronRight, AlertCircle, Copy, Tag, Check, Gift, Clock, BellRing
+  X, Trash2, Plus, Minus, Ticket, Smartphone, DollarSign, ArrowRight, Loader2, Sparkles, CheckCircle2, LogIn, KeyRound, CreditCard, ShieldCheck, Save, Bookmark, Info, Calendar, ChevronRight, AlertCircle, Copy, Tag, Check, Gift, Clock, BellRing, Mail, ShoppingCart
 } from 'lucide-react';
 
 export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlaced }) {
@@ -94,7 +94,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   const [availableCoupons, setAvailableCoupons] = useState([]);
   const [loadingCoupons, setLoadingCoupons] = useState(false);
   const [showCouponsModal, setShowCouponsModal] = useState(false);
-
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [confirmedToken, setConfirmedToken] = useState(null);
   const [confirmedCode, setConfirmedCode] = useState(null);
@@ -959,6 +959,13 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
               <p className="text-[11px] text-slate-500 font-medium pt-1">Show this PIN at the counter during pickup</p>
             </div>
 
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-3 rounded-2xl w-full max-w-xs text-left shadow-2xs flex items-start gap-2.5 mx-auto">
+              <Mail className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+              <p className="text-[10px] font-bold leading-tight text-emerald-800">
+                You also got a mail on completion of your order so keep your eye on spam or inbox or on the app!
+              </p>
+            </div>
+
             {paymentMethod === 'cash' && (
               <div className="bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded-2xl w-full max-w-xs text-left shadow-2xs flex items-start gap-2.5 mx-auto">
                 <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
@@ -1357,7 +1364,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                 </div>
 
                 <button
-                  onClick={handlePlaceOrder}
+                  onClick={() => setShowConfirmation(true)}
                   disabled={placingOrder || (session && !isCanteenOpen())}
                   className={`w-full py-4 font-black text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 ${!session
                     ? 'bg-slate-900 hover:bg-slate-800 text-white cursor-pointer active:scale-[0.99]'
@@ -1401,8 +1408,14 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
 
       {/* BLINKIT-STYLE AVAILABLE COUPONS OVERLAY DRAWER */}
       {showCouponsModal && (
-        <div className="absolute inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs animate-fade-in text-slate-900">
-          <div className="bg-slate-50 w-full h-full flex flex-col shadow-2xl relative animate-slide-in-right">
+        <div 
+          className="absolute inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs animate-fade-in text-slate-900"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div 
+            className="bg-slate-50 w-full h-full flex flex-col shadow-2xl relative animate-slide-in-right"
+            onClick={(e) => e.stopPropagation()}
+          >
 
             {/* Header */}
             <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between shadow-xs">
@@ -1576,6 +1589,110 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                   );
                 })
               )}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ORDER CONFIRMATION MODAL */}
+      {showConfirmation && (
+        <div 
+          className="absolute inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in text-slate-900"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl relative space-y-4">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <ShoppingCart className="w-4 h-4" />
+                </div>
+                <h3 className="font-black text-lg">Confirm Order</h3>
+              </div>
+              <button 
+                onClick={() => setShowConfirmation(false)}
+                className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Order Details */}
+            <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              
+              {/* Outlet */}
+              <div className="flex justify-between items-start">
+                <span className="text-xs font-bold text-slate-500">Outlet</span>
+                <span className="text-xs font-black text-slate-900 text-right">{outlets?.find(o => o.id === selectedOutlet)?.name || 'Selected Outlet'}</span>
+              </div>
+
+              {/* Contact */}
+              <div className="flex justify-between items-start">
+                <span className="text-xs font-bold text-slate-500">Contact</span>
+                <span className="text-xs font-black text-slate-900 text-right">{customerName}<br/>{phone}</span>
+              </div>
+
+              {/* Payment Method */}
+              <div className="flex justify-between items-start">
+                <span className="text-xs font-bold text-slate-500">Payment</span>
+                <span className="text-xs font-black text-slate-900 bg-slate-200 px-2 py-0.5 rounded uppercase">
+                  {paymentMethod === 'cash' ? 'Cash at Counter' : 'Online (UPI/Card)'}
+                </span>
+              </div>
+
+              <div className="w-full h-px bg-slate-200 my-2"></div>
+
+              {/* Items Summarized */}
+              <div>
+                <span className="text-xs font-bold text-slate-500 block mb-1">Items ({cart.length})</span>
+                <div className="max-h-24 overflow-y-auto space-y-1 scrollbar-none">
+                  {cart.map(item => (
+                    <div key={item.id} className="flex justify-between text-[11px] font-semibold text-slate-700">
+                      <span className="truncate pr-2">{item.qty}x {item.name}</span>
+                      <span className="shrink-0">₹{item.price * item.qty}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-200">
+                  <span className="text-xs font-black text-slate-900">Total Payable</span>
+                  <span className="text-sm font-black text-emerald-600">₹{finalPayableAmount}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Warnings */}
+            <div className="space-y-2">
+              {paymentMethod === 'cash' && (
+                <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-xl flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="text-[10px] font-bold text-amber-900 leading-snug">
+                    You need to pay the cash at the counter first to start preparing your order.
+                  </p>
+                </div>
+              )}
+              <div className="bg-red-50 border border-red-200 p-2.5 rounded-xl flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <p className="text-[10px] font-bold text-red-900 leading-snug">
+                  Wrong orders are your responsibility. Please verify all details above before placing the order.
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-2">
+              <button
+                onClick={() => {
+                  setShowConfirmation(false);
+                  handlePlaceOrder();
+                }}
+                disabled={placingOrder}
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {placingOrder ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+                {paymentMethod === 'razorpay' ? 'CONFIRM & PAY' : 'CONFIRM & PLACE ORDER'}
+              </button>
             </div>
 
           </div>
