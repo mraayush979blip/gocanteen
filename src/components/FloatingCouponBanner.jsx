@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Ticket, Flame, Sparkles, Copy, Check, Zap } from 'lucide-react';
@@ -7,7 +7,8 @@ export default function FloatingCouponBanner() {
   const { showToast } = useAuth();
   const [promos, setPromos] = useState([]);
   const [offers, setOffers] = useState([]);
-  const [copiedCode, setCopiedCode] = useState(null);
+  const scrollRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     fetchDeals();
@@ -26,7 +27,36 @@ export default function FloatingCouponBanner() {
     }
   };
 
+  useEffect(() => {
+    let animationFrameId;
+    
+    const scroll = () => {
+      if (!isPaused && scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        
+        scrollRef.current.scrollLeft += 0.5;
+
+        // Seamless loop jump
+        if (scrollLeft >= scrollWidth / 2) {
+          scrollRef.current.scrollLeft = 0;
+        }
+      }
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    animationFrameId = requestAnimationFrame(scroll);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isPaused, promos, offers]);
+
   if (promos.length === 0 && offers.length === 0) return null;
+
+  const dealItems = [
+    ...promos.map(p => ({ type: 'promo', ...p })),
+    ...offers.map(o => ({ type: 'offer', ...o }))
+  ];
+
+  // Duplicate for seamless loop
+  const displayItems = [...dealItems, ...dealItems];
 
   return (
     <div className="relative z-30 max-w-7xl mx-auto px-3 sm:px-6 pt-3 pb-1">
@@ -49,51 +79,61 @@ export default function FloatingCouponBanner() {
           </div>
 
           {/* Horizontally Scrollable Container */}
-          <div className="overflow-x-auto flex-1 relative py-0.5 scrollbar-none overscroll-x-contain">
+          <div 
+            ref={scrollRef}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+            className="overflow-x-auto flex-1 relative py-0.5 scrollbar-none overscroll-x-contain"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
             <div className="flex items-center gap-3 whitespace-nowrap min-w-max">
               
-              {/* Promo Coupon Cards */}
-              {promos.map((p, idx) => (
-                <div
-                  key={`promo-${p.id}-${idx}`}
-                  className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-900/50 text-white shrink-0 shadow-sm snap-start"
-                >
-                  <div className="w-6 h-6 rounded-lg bg-yellow-400/20 flex items-center justify-center text-yellow-300 shrink-0">
-                    <Ticket className="w-3.5 h-3.5" />
-                  </div>
+              {displayItems.map((item, idx) => {
+                if (item.type === 'promo') {
+                  return (
+                    <div
+                      key={`promo-${item.id}-${idx}`}
+                      className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-900/50 text-white shrink-0 shadow-sm snap-start"
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-yellow-400/20 flex items-center justify-center text-yellow-300 shrink-0">
+                        <Ticket className="w-3.5 h-3.5" />
+                      </div>
 
-                  <div className="flex items-center gap-1.5 text-xs font-bold">
-                    <span>Use Code</span>
-                    <span className="font-black text-yellow-300 uppercase tracking-wider font-mono">
-                      {p.code}
-                    </span>
-                    <span>for</span>
-                    <span className="bg-yellow-400 text-slate-950 font-black px-1.5 py-0.5 rounded-md text-[11px] shadow-2xs">
-                      {p.discount_percent}% OFF
-                    </span>
-                  </div>
-                </div>
-              ))}
-
-              {/* Combo Offers */}
-              {offers.map((o, idx) => (
-                <div
-                  key={`offer-${o.id}-${idx}`}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-900/50 text-white shrink-0 shadow-sm snap-start"
-                >
-                  <div className="w-6 h-6 rounded-lg bg-amber-400/20 flex items-center justify-center text-amber-300 shrink-0">
-                    <Flame className="w-3.5 h-3.5 text-amber-300" />
-                  </div>
-                  <span className="text-xs font-bold">
-                    <b>{o.name}:</b> Deal at ₹{o.price}
-                  </span>
-                  {o.original_price && Number(o.original_price) > Number(o.price) && (
-                    <span className="text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded-md">
-                      SAVE ₹{Number(o.original_price) - Number(o.price)}
-                    </span>
-                  )}
-                </div>
-              ))}
+                      <div className="flex items-center gap-1.5 text-xs font-bold">
+                        <span>Use Code</span>
+                        <span className="font-black text-yellow-300 uppercase tracking-wider font-mono">
+                          {item.code}
+                        </span>
+                        <span>for</span>
+                        <span className="bg-yellow-400 text-slate-950 font-black px-1.5 py-0.5 rounded-md text-[11px] shadow-2xs">
+                          {item.discount_percent}% OFF
+                        </span>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div
+                      key={`offer-${item.id}-${idx}`}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-900/50 text-white shrink-0 shadow-sm snap-start"
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-amber-400/20 flex items-center justify-center text-amber-300 shrink-0">
+                        <Flame className="w-3.5 h-3.5 text-amber-300" />
+                      </div>
+                      <span className="text-xs font-bold">
+                        <b>{item.name}:</b> Deal at ₹{item.price}
+                      </span>
+                      {item.original_price && Number(item.original_price) > Number(item.price) && (
+                        <span className="text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded-md">
+                          SAVE ₹{Number(item.original_price) - Number(item.price)}
+                        </span>
+                      )}
+                    </div>
+                  );
+                }
+              })}
 
             </div>
           </div>
