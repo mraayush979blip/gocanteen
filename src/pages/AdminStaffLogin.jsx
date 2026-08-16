@@ -203,6 +203,9 @@ export default function AdminStaffLogin() {
                   <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
                     type="password"
+                    id="adminPasscode"
+                    name="adminPasscode"
+                    autoComplete="one-time-code"
                     required
                     value={adminPasscodeInput}
                     onChange={(e) => setAdminPasscodeInput(e.target.value)}
@@ -233,6 +236,9 @@ export default function AdminStaffLogin() {
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
                     type="email"
+                    id="email"
+                    name="email"
+                    autoComplete="username"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -248,6 +254,9 @@ export default function AdminStaffLogin() {
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    autoComplete="current-password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
