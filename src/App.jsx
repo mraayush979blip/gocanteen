@@ -176,6 +176,7 @@ function MainContent() {
   const currentPortal = p.startsWith('/admin') ? 'admin' : p.startsWith('/staff') ? 'staff' : 'customer';
   const isLegalPolicyRoute = ['/terms', '/privacy', '/refund', '/shipping', '/contact', '/report-bug'].includes(p);
   const isDeveloperRoute = p.endsWith('/developer');
+  const isAuthPageRoute = p === '/ad';
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-['Plus_Jakarta_Sans',sans-serif] w-full max-w-full overflow-x-hidden">
@@ -205,11 +206,13 @@ function MainContent() {
       )}
 
       {/* Top Navbar */}
-      <Navbar
-        onOpenAuth={() => handleOpenAuth('customer')}
-        onOpenCart={() => setCartOpen(true)}
-        onOpenOutletModal={() => setOutletModalOpen(true)}
-      />
+      {!isAuthPageRoute && (
+        <Navbar
+          onOpenAuth={() => handleOpenAuth('customer')}
+          onOpenCart={() => setCartOpen(true)}
+          onOpenOutletModal={() => setOutletModalOpen(true)}
+        />
+      )}
 
       {/* Floating Coupon & Deal Ticker Banner */}
       {activePortal === 'customer' && location.pathname === '/menu' && <FloatingCouponBanner />}
@@ -291,7 +294,7 @@ function MainContent() {
       </main>
 
       {/* Footer */}
-      {!isDeveloperRoute && (
+      {!isDeveloperRoute && !isAuthPageRoute && (
         <Footer
           onOpenAdminAuth={() => handleOpenAuth('admin')}
           onOpenStaffAuth={() => handleOpenAuth('staff')}
