@@ -7,10 +7,9 @@ import { X, Mail, Lock, Eye, EyeOff, Shield, ChefHat, UtensilsCrossed, ArrowRigh
 export default function AuthModal({ isOpen, onClose }) {
   const navigate = useNavigate();
   const { session, showToast } = useAuth();
+  const [loading, setLoading] = useState(false);
   
   if (!isOpen) return null;
-
-  const [loading, setLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
     if (loading) return;
