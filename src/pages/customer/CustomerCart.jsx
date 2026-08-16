@@ -98,6 +98,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   const [placingOrder, setPlacingOrder] = useState(false);
   const [confirmedToken, setConfirmedToken] = useState(null);
   const [confirmedCode, setConfirmedCode] = useState(null);
+  const [notifStatus, setNotifStatus] = useState('default');
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
 
   const [showCartNotifPrompt, setShowCartNotifPrompt] = useState(false);
@@ -142,6 +143,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         await supabase.from('profiles').update({ fcm_token: token }).eq('id', session.user.id);
         showToast('Notifications enabled!', false);
       }
+      if ('Notification' in window) setNotifStatus(Notification.permission);
     } catch (e) {
       console.warn('Failed to get notification permission:', e);
     }
@@ -170,6 +172,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
         }
       };
       fetchPendingCount();
+      if ('Notification' in window) setNotifStatus(Notification.permission);
     } else if (!isOpen) {
       setPendingOrdersCount(0);
     }
@@ -965,6 +968,23 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                 You also got a mail on completion of your order so keep your eye on spam or inbox or on the app!
               </p>
             </div>
+
+            {notifStatus !== 'granted' && (
+              <div className="bg-blue-50 border border-blue-200 text-blue-900 p-3 rounded-2xl w-full max-w-xs text-left shadow-2xs flex items-center justify-between gap-2.5 mx-auto animate-fade-in">
+                <div className="flex items-start gap-2">
+                  <BellRing className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                  <p className="text-[10px] font-bold leading-tight">
+                    Get Live Order Updates! Allow notifications to know when your food is ready.
+                  </p>
+                </div>
+                <button 
+                  onClick={handleAllowCartNotif}
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] rounded-lg shadow shrink-0 active:scale-95 transition-all cursor-pointer"
+                >
+                  ALLOW
+                </button>
+              </div>
+            )}
 
             {paymentMethod === 'cash' && (
               <div className="bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded-2xl w-full max-w-xs text-left shadow-2xs flex items-start gap-2.5 mx-auto">
