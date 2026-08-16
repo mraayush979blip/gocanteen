@@ -21,6 +21,7 @@ export default function StaffPOS() {
   
   // Checkout Modal State
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' | 'upi'
   const [paymentStatus, setPaymentStatus] = useState('paid'); // 'paid' | 'unpaid'
@@ -190,9 +191,9 @@ export default function StaffPOS() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 p-2 sm:p-4">
+    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 p-2 sm:p-4 pb-24 lg:pb-4 h-[calc(100vh-80px)] lg:h-[calc(100vh-140px)]">
       {/* Left Menu Section */}
-      <div className="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[60vh] lg:h-[80vh]">
+      <div className="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
         {/* Header & Search */}
         <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-50">
           <div className="flex items-center gap-2">
@@ -265,9 +266,24 @@ export default function StaffPOS() {
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
                     <span className="font-black text-emerald-600">₹{item.price}</span>
-                    <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                      <Plus className="w-3.5 h-3.5" />
-                    </div>
+                    {cart.find(i => i.id === item.id) ? (
+                      <div 
+                        className="flex items-center gap-1.5 bg-blue-100 rounded-lg p-0.5 border border-blue-200 shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm text-blue-600 active:scale-90 transition-transform">
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="w-4 text-center font-black text-xs text-blue-900">{cart.find(i => i.id === item.id).qty}</span>
+                        <button onClick={() => updateQty(item.id, 1)} className="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm text-blue-600 active:scale-90 transition-transform">
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <Plus className="w-4 h-4" />
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -276,13 +292,41 @@ export default function StaffPOS() {
         </div>
       </div>
 
+      {/* Mobile Floating Cart Button */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.1)] z-40">
+        <button 
+          onClick={() => setIsMobileCartOpen(true)}
+          className="w-full bg-slate-900 text-white rounded-xl py-3.5 font-bold flex justify-between items-center px-4 active:scale-95 transition-transform"
+        >
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5" />
+            <span>{cart.reduce((s,i) => s + i.qty, 0)} Items</span>
+          </div>
+          <span>View Cart (₹{subtotal})</span>
+        </button>
+      </div>
+
       {/* Right Cart Section */}
-      <div className="w-full lg:w-96 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[50vh] lg:h-[80vh] shrink-0">
-        <div className="p-4 border-b border-slate-100 bg-slate-900 text-white">
-          <h2 className="font-black text-lg flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5" /> Current Order
-          </h2>
-          <p className="text-xs text-slate-400 font-medium">{cart.reduce((sum, i) => sum + i.qty, 0)} items in cart</p>
+      <div className={`
+        fixed inset-0 z-50 lg:static lg:z-auto
+        w-full lg:w-96 bg-white lg:rounded-3xl shadow-sm lg:border border-slate-200 
+        overflow-hidden flex flex-col h-[100dvh] lg:h-full shrink-0
+        transition-transform duration-300
+        ${isMobileCartOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
+      `}>
+        <div className="p-4 border-b border-slate-100 bg-slate-900 text-white flex justify-between items-center shrink-0">
+          <div>
+            <h2 className="font-black text-lg flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5" /> Current Order
+            </h2>
+            <p className="text-xs text-slate-400 font-medium">{cart.reduce((sum, i) => sum + i.qty, 0)} items in cart</p>
+          </div>
+          <button 
+            className="lg:hidden p-2 bg-slate-800 rounded-full text-white active:scale-90 transition-transform" 
+            onClick={() => setIsMobileCartOpen(false)}
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
