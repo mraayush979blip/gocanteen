@@ -39,6 +39,11 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// Handle path-based redirects for HashRouter
+if (window.location.pathname === '/ad') {
+  window.location.replace('/#/ad');
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
