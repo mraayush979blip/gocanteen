@@ -617,12 +617,12 @@ export default function CustomerMenu({ onOpenCart }) {
       {/* 4. Special Combo Offers Section */}
       {(activeCategory === 'all' || activeCategory === 'offers') && !searchQuery.trim() && offers.length > 0 && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Flame className="w-5 h-5 text-amber-500 fill-amber-500" />
-              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">SPECIAL COMBO DEALS</h2>
+          <div className="flex items-center justify-between gap-3 overflow-x-auto scrollbar-none pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:pb-0">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Flame className="w-5 h-5 text-amber-500 fill-amber-500 shrink-0" />
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight whitespace-nowrap">SPECIAL COMBO DEALS</h2>
             </div>
-            <span className="text-xs font-extrabold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+            <span className="text-[10px] sm:text-xs font-extrabold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 whitespace-nowrap shrink-0">
               Limited Period Canteen Offers
             </span>
           </div>
