@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -6,7 +6,7 @@ import { Mail, Lock, Eye, EyeOff, Shield, ChefHat, KeyRound } from 'lucide-react
 
 export default function AdminStaffLogin() {
   const navigate = useNavigate();
-  const { session, userRole, setActivePortal, showToast } = useAuth();
+  const { session, userRole, loading: authLoading, setActivePortal, showToast } = useAuth();
   
   const [selectedRole, setSelectedRole] = useState('admin');
   const [email, setEmail] = useState('');
@@ -20,6 +20,21 @@ export default function AdminStaffLogin() {
 
   // If they are already logged in and try to access this page, redirect them appropriately or let them switch
   // But for simplicity, we just handle login here
+  
+  useEffect(() => {
+    if (!authLoading && session?.user) {
+      if (userRole === 'admin') {
+        setActivePortal('admin');
+        navigate('/admin/dashboard', { replace: true });
+      } else if (userRole === 'staff') {
+        setActivePortal('staff');
+        navigate('/staff/kds', { replace: true });
+      } else {
+        setActivePortal('customer');
+        navigate('/menu', { replace: true });
+      }
+    }
+  }, [session, userRole, authLoading, navigate, setActivePortal]);
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
