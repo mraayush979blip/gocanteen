@@ -138,13 +138,8 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                   <ArrowLeft className="w-5 h-5 text-slate-800 font-bold" />
                 </button>
               )}
-              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-                <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shrink-0">
-                  <img src="/app-icon.png" alt="Go Canteen Logo" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-black text-xl tracking-tight text-slate-900 leading-none">GO CANTEEN</span>
-                </div>
+              <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+                <img src="/header.webp" alt="Header" className="h-10 object-contain drop-shadow-sm" />
               </div>
             </div>
 
