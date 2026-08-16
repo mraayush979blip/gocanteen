@@ -139,7 +139,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                 </button>
               )}
               <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
-                <img src="/header.webp?v=2" alt="Header" className="h-14 sm:h-16 object-contain drop-shadow-sm" />
+                <img src="/header.webp?v=3" alt="Header" className="h-14 sm:h-16 object-contain drop-shadow-sm" />
               </div>
             </div>
 
