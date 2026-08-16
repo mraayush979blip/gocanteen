@@ -288,7 +288,6 @@ function MainContent() {
 
           {/* Hidden login triggers */}
           <Route path="/ad" element={<LoginTrigger role="admin" onOpenAuth={handleOpenAuth} />} />
-          <Route path="/staff-ad" element={<LoginTrigger role="staff" onOpenAuth={handleOpenAuth} />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/menu" replace />} />

@@ -160,7 +160,7 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
     onClose();
   };
 
-  const isAdminOnlyMode = selectedRole === 'admin';
+  const isInternalAccess = initialRole === 'admin' || initialRole === 'staff' || (session && (userRole === 'admin' || userRole === 'staff'));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in text-slate-900">
@@ -216,21 +216,21 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
           </p>
         </div>
 
-        {/* Customer & Kitchen Staff Tabs (Shown for non-admin sign in or portal switching) */}
-        {!isAdminOnlyMode && (
+        {/* Internal Staff/Admin Tabs (Shown only for /ad or staff/admin portal switching) */}
+        {isInternalAccess && !session && (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-2xl border border-slate-200">
               <button
                 type="button"
-                onClick={() => handleRoleSelect('customer')}
+                onClick={() => handleRoleSelect('admin')}
                 className={`py-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all ${
-                  selectedRole === 'customer'
-                    ? 'bg-white text-emerald-700 shadow-xs'
+                  selectedRole === 'admin'
+                    ? 'bg-white text-purple-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <UtensilsCrossed className="w-4 h-4 text-emerald-600" />
-                <span>Customer</span>
+                <Shield className="w-4 h-4 text-purple-600" />
+                <span>Admin</span>
               </button>
 
               <button
@@ -246,17 +246,20 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
                 <span>Kitchen Staff</span>
               </button>
             </div>
-
-            {session && (
-              <button
-                type="button"
-                onClick={handleQuickSwitchPortal}
-                className="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all mt-1"
-              >
-                Switch to {selectedRole.toUpperCase()} Portal View <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            )}
           </div>
+        )}
+
+        {/* Portal Switching Button (If already logged in) */}
+        {session && isInternalAccess && selectedRole !== userRole && (
+           <div className="space-y-2">
+             <button
+               type="button"
+               onClick={handleQuickSwitchPortal}
+               className="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all mt-1"
+             >
+               Switch to {selectedRole.toUpperCase()} Portal View <ArrowRight className="w-3.5 h-3.5" />
+             </button>
+           </div>
         )}
 
         {/* ADMIN UNLOCK CODE GATE: If Admin selected and not yet unlocked */}
@@ -289,14 +292,6 @@ export default function AuthModal({ isOpen, onClose, onAdminLoginSuccess, initia
               className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-md transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
             >
               {loading ? 'Verifying Code...' : 'Unlock Admin Credentials Gate →'}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleRoleSelect('customer')}
-              className="w-full text-center text-xs text-slate-500 hover:text-slate-800 font-bold pt-1 transition-colors"
-            >
-              ← Back to Customer / Staff Login
             </button>
           </form>
         ) : selectedRole === 'customer' ? (
