@@ -42,7 +42,44 @@ export const staffTranslations = {
     yesConfirmPaid: "✅ YES, I CONFIRM PAYMENT RECEIVED",
     goBack: "↩️ Back / Change Method",
     unpaidWarningHeader: "⚠️ WARNING: THIS ORDER IS UNPAID!",
-    unpaidWarningBody: "Payment has NOT been received yet. Collect cash or verify UPI before starting preparation."
+    unpaidWarningBody: "Payment has NOT been received yet. Collect cash or verify UPI before starting preparation.",
+    
+    // Navbar & Status
+    navbarPOS: "Point of Sale (POS)",
+    navbarKDS: "Kitchen Display",
+    navbarStock: "Quick Stock",
+    navbarHistory: "Order History",
+    navbarLogout: "Logout",
+    canteenStatus: "Canteen Status",
+    statusOpen: "Open",
+    statusClosed: "Closed",
+    statusHoliday: "Holiday",
+    
+    // POS
+    searchItems: "Search items...",
+    allItems: "All Items",
+    currentOrder: "Current Order",
+    itemsInCart: "items in cart",
+    cartEmpty: "Cart is empty. Tap items to add.",
+    totalAmount: "Total Amount",
+    checkoutOrder: "Checkout Order",
+    confirmOrder: "Confirm Order",
+    customerNameOpt: "Customer Name (Optional)",
+    paymentMethod: "Payment Method",
+    cash: "Cash",
+    upi: "UPI / QR",
+    paymentStatus: "Payment Status",
+    receivedPaid: "Received Paid",
+    unpaidLater: "Unpaid / Later",
+    createOrder: "Create Order",
+    noItemsFound: "No items found.",
+    
+    // Stock
+    quickStockManage: "Quick Stock Management",
+    toggleAvail: "Toggle availability instantly",
+    inStock: "In Stock",
+    outOfStock: "Out of Stock",
+    exportCSV: "Export CSV"
   },
   hi: {
     kdsTitle: "रसोई डिस्प्ले कतार (KDS)",
@@ -87,7 +124,44 @@ export const staffTranslations = {
     yesConfirmPaid: "✅ हाँ, पेमेंट मिल गया है (कन्फर्म करें)",
     goBack: "↩️ वापस जाएं / तरीका बदलें",
     unpaidWarningHeader: "⚠️ चेतावनी: इस ऑर्डर का भुगतान नहीं हुआ है!",
-    unpaidWarningBody: "भुगतान अभी तक प्राप्त नहीं हुआ है। खाना बनाने से पहले पेमेंट जमा करें।"
+    unpaidWarningBody: "भुगतान अभी तक प्राप्त नहीं हुआ है। खाना बनाने से पहले पेमेंट जमा करें।",
+    
+    // Navbar & Status
+    navbarPOS: "पॉइंट ऑफ़ सेल (POS)",
+    navbarKDS: "रसोई डिस्प्ले (KDS)",
+    navbarStock: "स्टॉक प्रबंधन",
+    navbarHistory: "ऑर्डर इतिहास",
+    navbarLogout: "लॉग आउट",
+    canteenStatus: "कैंटीन की स्थिति",
+    statusOpen: "खुला है (Open)",
+    statusClosed: "बंद है (Closed)",
+    statusHoliday: "छुट्टी (Holiday)",
+    
+    // POS
+    searchItems: "आइटम खोजें...",
+    allItems: "सभी आइटम",
+    currentOrder: "वर्तमान ऑर्डर",
+    itemsInCart: "आइटम कार्ट में हैं",
+    cartEmpty: "कार्ट खाली है। आइटम जोड़ने के लिए टैप करें।",
+    totalAmount: "कुल राशि",
+    checkoutOrder: "चेकआउट करें",
+    confirmOrder: "ऑर्डर पक्का करें",
+    customerNameOpt: "ग्राहक का नाम (वैकल्पिक)",
+    paymentMethod: "भुगतान का तरीका",
+    cash: "नकद (Cash)",
+    upi: "यूपीआई (UPI)",
+    paymentStatus: "पेमेंट की स्थिति",
+    receivedPaid: "भुगतान प्राप्त हुआ",
+    unpaidLater: "बाकी / बाद में",
+    createOrder: "ऑर्डर बनाएं",
+    noItemsFound: "कोई आइटम नहीं मिला।",
+    
+    // Stock
+    quickStockManage: "क्विक स्टॉक प्रबंधन",
+    toggleAvail: "आइटम की उपलब्धता तुरंत बदलें",
+    inStock: "उपलब्ध है",
+    outOfStock: "खत्म हो गया",
+    exportCSV: "CSV डाउनलोड करें"
   },
   hinglish: {
     kdsTitle: "Kitchen Display Queue (KDS)",
@@ -132,6 +206,43 @@ export const staffTranslations = {
     yesConfirmPaid: "✅ HAAN, PAYMENT MIL GAYA HAI (CONFIRM)",
     goBack: "↩️ Wapas Jaayein / Method Badlein",
     unpaidWarningHeader: "⚠️ WARNING: YEH ORDER UNPAID HAI!",
-    unpaidWarningBody: "Is order ka payment abhi tak nahi mila hai. Khana banana shuru karne se pehle cash ya UPI se payment lein."
+    unpaidWarningBody: "Is order ka payment abhi tak nahi mila hai. Khana banana shuru karne se pehle cash ya UPI se payment lein.",
+    
+    // Navbar & Status
+    navbarPOS: "Point of Sale (POS)",
+    navbarKDS: "Kitchen Screen (KDS)",
+    navbarStock: "Stock Update",
+    navbarHistory: "Puraana Order",
+    navbarLogout: "Logout Karo",
+    canteenStatus: "Canteen Status",
+    statusOpen: "Khula Hai (Open)",
+    statusClosed: "Band Hai (Closed)",
+    statusHoliday: "Chhutti (Holiday)",
+    
+    // POS
+    searchItems: "Item search karo...",
+    allItems: "Sabhi Items",
+    currentOrder: "Abhi ka Order",
+    itemsInCart: "items cart mein hain",
+    cartEmpty: "Cart khali hai. Add karne ke liye dabayein.",
+    totalAmount: "Total Amount",
+    checkoutOrder: "Order Final Karo",
+    confirmOrder: "Order Confirm Karo",
+    customerNameOpt: "Customer ka Naam (Optional)",
+    paymentMethod: "Payment Kaise Kiya",
+    cash: "Cash Diya",
+    upi: "UPI / QR",
+    paymentStatus: "Payment Status",
+    receivedPaid: "Payment Mil Gayi",
+    unpaidLater: "Baaki / Baad Mein",
+    createOrder: "Order Banao",
+    noItemsFound: "Koi item nahi mila.",
+    
+    // Stock
+    quickStockManage: "Stock Update Karo",
+    toggleAvail: "Item hai ya nahi, yaha change karo",
+    inStock: "Stock Mein Hai",
+    outOfStock: "Khatam Ho Gaya",
+    exportCSV: "CSV Download Karo"
   }
 };

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Search, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 
 export default function QuickStock() {
-  const { showToast } = useAuth();
+  const { showToast, staffT } = useAuth();
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ export default function QuickStock() {
         .eq('id', id);
 
       if (error) throw error;
-      showToast(`Item set to ${updated ? 'IN STOCK' : 'OUT OF STOCK'}`);
+      showToast(`Item set to ${updated ? staffT.inStock : staffT.outOfStock}`);
       fetchStock();
     } catch (err) {
       showToast('Failed to update availability: ' + err.message, true);
@@ -65,8 +65,8 @@ export default function QuickStock() {
       {/* Header */}
       <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-black text-slate-900">Kitchen Stock Toggle</h1>
-          <p className="text-xs text-slate-500 font-medium">Instantly toggle menu item availability for customer ordering</p>
+          <h1 className="text-xl font-black text-slate-900">{staffT.quickStockManage || 'Quick Stock Management'}</h1>
+          <p className="text-xs text-slate-500 font-medium">{staffT.toggleAvail || 'Instantly toggle availability'}</p>
         </div>
       </div>
 
@@ -77,7 +77,7 @@ export default function QuickStock() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search items to toggle..."
+          placeholder={staffT.searchItems || 'Search items...'}
           className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-slate-900 text-xs shadow-2xs focus:outline-none focus:border-emerald-600 font-medium"
         />
       </div>
@@ -109,11 +109,11 @@ export default function QuickStock() {
             >
               {item.is_available ? (
                 <>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> In Stock
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> {staffT.inStock || 'In Stock'}
                 </>
               ) : (
                 <>
-                  <XCircle className="w-4 h-4 text-red-600" /> Out of Stock
+                  <XCircle className="w-4 h-4 text-red-600" /> {staffT.outOfStock || 'Out of Stock'}
                 </>
               )}
             </button>

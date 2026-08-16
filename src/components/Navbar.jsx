@@ -34,10 +34,17 @@ function NavigationItem({ icon, iconBg, title, subtitle, rightElement, onClick }
 export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpenAboutDev, onOpenOutletModal }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { session, profile, userRole, activePortal, setActivePortal, cart, logout, showToast, staffLanguage, setStaffLanguage, selectedOutlet, outlets } = useAuth();
+  const { session, profile, userRole, activePortal, setActivePortal, cart, logout, showToast, staffLanguage, setStaffLanguage, staffT, selectedOutlet, outlets, refreshGlobalOutlets } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState(false);
 
-  const currentOutletName = outlets?.find(o => o.id === selectedOutlet)?.name || 'Select Canteen';
+  const currentOutlet = outlets?.find(o => o.id === selectedOutlet);
+  const currentOutletName = currentOutlet?.name || 'Select Canteen';
+  const currentOutletStatus = currentOutlet?.status || 'open';
+
+  const staffOutletId = profile?.assigned_outlet_id;
+  const staffOutlet = outlets?.find(o => String(o.id) === String(staffOutletId));
+  const staffOutletStatus = staffOutlet?.status || 'open';
 
   // Lock background scroll when side drawer is open
   useEffect(() => {
@@ -58,6 +65,31 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
   const [showChangeCodeModal, setShowChangeCodeModal] = useState(false);
   const [newUnlockCode, setNewUnlockCode] = useState('');
   const [savingCode, setSavingCode] = useState(false);
+
+  const handleStatusChange = async (newStatus) => {
+    const targetOutletId = userRole === 'staff' ? staffOutletId : selectedOutlet;
+    if (!targetOutletId) {
+      showToast('No assigned canteen to update status.', true);
+      return;
+    }
+    
+    setStatusUpdating(true);
+    try {
+      const { data, error } = await supabase
+        .from('outlets')
+        .update({ status: newStatus })
+        .eq('id', targetOutletId)
+        .select();
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Update blocked by database security (RLS).");
+      await refreshGlobalOutlets();
+      showToast(`Canteen status updated to ${newStatus.toUpperCase()}`);
+    } catch (err) {
+      showToast('Failed to update status: ' + err.message, true);
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
 
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const pathname = location.pathname;
@@ -378,31 +410,61 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
 
                       {currentPortal === 'staff' && (
                         <>
+                          <div className="p-3 bg-white border-b border-slate-100">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-xs font-bold text-slate-500">{staffT.canteenStatus}</p>
+                              {staffOutlet && <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{staffOutlet.name}</span>}
+                            </div>
+                            <div className="flex gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+                              <button 
+                                onClick={() => handleStatusChange('open')}
+                                disabled={statusUpdating || !staffOutletId}
+                                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${staffOutletStatus === 'open' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}
+                              >
+                                {staffT.statusOpen}
+                              </button>
+                              <button 
+                                onClick={() => handleStatusChange('closed')}
+                                disabled={statusUpdating || !staffOutletId}
+                                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${staffOutletStatus === 'closed' ? 'bg-red-500 text-white shadow-sm' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}
+                              >
+                                {staffT.statusClosed}
+                              </button>
+                              <button 
+                                onClick={() => handleStatusChange('holiday')}
+                                disabled={statusUpdating || !staffOutletId}
+                                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${staffOutletStatus === 'holiday' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}
+                              >
+                                {staffT.statusHoliday}
+                              </button>
+                            </div>
+                          </div>
+                          
                           <NavigationItem 
                             icon={<Banknote className="w-5 h-5 text-blue-600" />}
                             iconBg="bg-blue-50"
-                            title="New Order (POS)"
+                            title={staffT.navbarPOS}
                             subtitle="Create a manual order"
                             onClick={() => { navigate('/staff/pos'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
                             icon={<ChefHat className="w-5 h-5 text-emerald-600" />}
                             iconBg="bg-emerald-50"
-                            title="Active Orders"
+                            title={staffT.navbarKDS}
                             subtitle="Live preparing orders"
                             onClick={() => { navigate('/staff/kds'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
                             icon={<Bell className="w-5 h-5 text-amber-600" />}
                             iconBg="bg-amber-50"
-                            title="Item Stock"
+                            title={staffT.navbarStock}
                             subtitle="Manage stock availability"
                             onClick={() => { navigate('/staff/stock'); setMobileMenuOpen(false); }}
                           />
                           <NavigationItem 
                             icon={<ScrollText className="w-5 h-5 text-purple-600" />}
                             iconBg="bg-purple-50"
-                            title="Order History"
+                            title={staffT.navbarHistory}
                             subtitle="Completed orders log"
                             onClick={() => { navigate('/staff/history'); setMobileMenuOpen(false); }}
                           />
@@ -487,7 +549,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
                       <div className="flex items-center gap-3">
                         <LogOut className="w-5 h-5" />
                         <div className="flex flex-col text-left">
-                          <span className="font-extrabold text-[13px] leading-tight mb-0.5">Sign Out</span>
+                          <span className="font-extrabold text-[13px] leading-tight mb-0.5">{currentPortal === 'staff' ? staffT.navbarLogout : 'Sign Out'}</span>
                           <span className="text-[11px] text-red-400 font-medium">Log out from your account</span>
                         </div>
                       </div>

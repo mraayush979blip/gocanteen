@@ -6,7 +6,9 @@ import {
 } from 'lucide-react';
 
 export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlaced }) {
-  const { cart, updateCartQty, removeFromCart, clearCart, setCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo, selectedOutlet } = useAuth();
+  const { cart, updateCartQty, removeFromCart, clearCart, setCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo, selectedOutlet, outlets } = useAuth();
+  const currentOutlet = outlets?.find(o => o.id === selectedOutlet);
+  const currentOutletStatus = currentOutlet?.status || 'open';
 
   const [customerName, setCustomerName] = useState('');
   const [phone, setPhone] = useState('');
@@ -48,7 +50,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
   }, [isOpen]);
 
   const isCanteenOpen = () => {
-    if (canteenSettings.isHoliday) return false;
+    if (canteenSettings.isHoliday || currentOutletStatus !== 'open') return false;
     try {
       const now = new Date();
       const options = { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: 'numeric', hour12: false };
@@ -680,8 +682,27 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       return;
     }
 
-    // Live background stock check before proceeding with payment/checkout (prevents stale local cache orders)
+    // Live background check for canteen status to prevent race conditions
     setPlacingOrder(true);
+
+    if (selectedOutlet) {
+      try {
+        const { data: outletData, error: outletErr } = await supabase
+          .from('outlets')
+          .select('status')
+          .eq('id', selectedOutlet)
+          .single();
+        if (!outletErr && outletData && outletData.status !== 'open') {
+          setPlacingOrder(false);
+          showToast(`❌ Cannot place order. The canteen is currently marked as ${outletData.status.toUpperCase()}.`, true);
+          return;
+        }
+      } catch (err) {
+        console.warn('Error checking outlet status:', err);
+      }
+    }
+
+    // Live background stock check before proceeding with payment/checkout (prevents stale local cache orders)
     const stockCheck = await verifyStockAvailability();
     if (!stockCheck.ok) {
       setPlacingOrder(false);
@@ -1358,7 +1379,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                   ) : !isCanteenOpen() ? (
                     <>
                       <Clock className="w-5 h-5 text-slate-400" />
-                      <span>{canteenSettings.isHoliday ? 'CLOSED FOR HOLIDAY' : `CLOSED (${canteenSettings.openTime} - ${canteenSettings.closeTime})`}</span>
+                      <span>{canteenSettings.isHoliday || currentOutletStatus === 'holiday' ? 'CLOSED FOR HOLIDAY' : currentOutletStatus === 'closed' ? 'CLOSED (STAFF)' : `CLOSED (${canteenSettings.openTime} - ${canteenSettings.closeTime})`}</span>
                     </>
                   ) : pendingOrdersCount >= 3 ? (
                     <span>LIMIT REACHED (3 PENDING ORDERS)</span>

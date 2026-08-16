@@ -9,17 +9,17 @@ export default function AdminOutlets() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
-  const [formData, setFormData] = useState({ name: '', code: '', is_active: true });
+  const [formData, setFormData] = useState({ name: '', code: '', is_active: true, status: 'open' });
   const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
-    setFormData({ name: '', code: '', is_active: true });
+    setFormData({ name: '', code: '', is_active: true, status: 'open' });
     setIsAdding(false);
     setEditingId(null);
   };
 
   const handleEdit = (outlet) => {
-    setFormData({ name: outlet.name, code: outlet.code, is_active: outlet.is_active });
+    setFormData({ name: outlet.name, code: outlet.code, is_active: outlet.is_active, status: outlet.status || 'open' });
     setEditingId(outlet.id);
     setIsAdding(true);
   };
@@ -99,6 +99,18 @@ export default function AdminOutlets() {
                   placeholder="e.g. SOUTH"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Operating Status</label>
+                <select
+                  value={formData.status}
+                  onChange={e => setFormData({...formData, status: e.target.value})}
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:border-purple-500 outline-none font-medium"
+                >
+                  <option value="open">Open (Running)</option>
+                  <option value="closed">Closed</option>
+                  <option value="holiday">Holiday</option>
+                </select>
+              </div>
               <div className="flex items-center gap-3 mt-4">
                 <input
                   type="checkbox"
@@ -107,7 +119,7 @@ export default function AdminOutlets() {
                   onChange={e => setFormData({...formData, is_active: e.target.checked})}
                   className="w-5 h-5 rounded text-purple-600"
                 />
-                <label htmlFor="isActive" className="font-bold text-slate-700 cursor-pointer">Active / Visible to Customers</label>
+                <label htmlFor="isActive" className="font-bold text-slate-700 cursor-pointer">Active in System</label>
               </div>
             </div>
             
@@ -155,10 +167,16 @@ export default function AdminOutlets() {
             </div>
             
             <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between relative z-10">
-              <span className="text-xs font-bold text-slate-500">Status</span>
+              <span className="text-xs font-bold text-slate-500">System Status</span>
               <span className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${outlet.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                 {outlet.is_active ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
                 {outlet.is_active ? 'Active' : 'Disabled'}
+              </span>
+            </div>
+            <div className="mt-2 flex items-center justify-between relative z-10">
+              <span className="text-xs font-bold text-slate-500">Operation</span>
+              <span className={`px-2 py-1 rounded-full text-xs font-bold ${outlet.status === 'open' ? 'bg-blue-100 text-blue-700' : outlet.status === 'holiday' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                {outlet.status === 'open' ? '🟢 Open' : outlet.status === 'holiday' ? '🏖️ Holiday' : '🔴 Closed'}
               </span>
             </div>
           </div>

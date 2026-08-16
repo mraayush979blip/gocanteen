@@ -33,24 +33,24 @@ export const AuthProvider = ({ children }) => {
     setSelectedOutletState(outletId);
   };
 
+  const refreshGlobalOutlets = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('outlets')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+      if (!error && data) {
+        setOutlets(data);
+      }
+    } catch (err) {
+      console.error('Error fetching outlets:', err);
+    }
+  };
+
   useEffect(() => {
     // Fetch active outlets on load
-    const fetchOutlets = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('outlets')
-          .select('*')
-          .eq('is_active', true)
-          .order('name');
-        if (!error && data) {
-          setOutlets(data);
-          // If no outlet is selected and we have outlets, don't auto-select. Force them to choose.
-        }
-      } catch (err) {
-        console.error('Error fetching outlets:', err);
-      }
-    };
-    fetchOutlets();
+    refreshGlobalOutlets();
   }, []);
 
   const setActivePortal = (portal) => {
@@ -377,6 +377,7 @@ export const AuthProvider = ({ children }) => {
         outlets,
         selectedOutlet,
         setSelectedOutlet,
+        refreshGlobalOutlets,
         fetchProfile: () => profile && fetchProfile(profile.id, profile.email)
       }}
     >

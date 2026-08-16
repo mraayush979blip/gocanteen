@@ -13,7 +13,10 @@ import {
 } from 'lucide-react';
 
 export default function CustomerMenu({ onOpenCart }) {
-  const { cart, addToCart, updateCartQty, triggerHaptic, session, selectedOutlet } = useAuth();
+  const { cart, addToCart, updateCartQty, triggerHaptic, session, selectedOutlet, outlets } = useAuth();
+  const currentOutlet = outlets?.find(o => o.id === selectedOutlet);
+  const isOutletOpen = currentOutlet?.status === 'open' || !currentOutlet?.status; // default to open if undefined
+  const outletStatus = currentOutlet?.status;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const urlQuery = searchParams.get('q') || '';
@@ -264,6 +267,7 @@ export default function CustomerMenu({ onOpenCart }) {
   };
 
   const handleAddToCartWithAnim = (e, item) => {
+    if (!isOutletOpen) return;
     const cat = categories.find(c => c.id === item.category_id);
     addToCart({
       id: item.id,
@@ -454,6 +458,25 @@ export default function CustomerMenu({ onOpenCart }) {
         </div>
       </div>
 
+      {/* Outlet Status Banner */}
+      {!isOutletOpen && (
+        <div className={`p-4 rounded-2xl flex items-center gap-3 shadow-sm border ${
+          currentOutlet?.status === 'holiday' 
+            ? 'bg-amber-50 border-amber-200 text-amber-800' 
+            : 'bg-red-50 border-red-200 text-red-800'
+        }`}>
+          <span className="text-2xl">{currentOutlet?.status === 'holiday' ? '🏖️' : '🔒'}</span>
+          <div>
+            <h3 className="font-black text-lg leading-tight">
+              {currentOutlet?.status === 'holiday' ? 'Canteen is on Holiday' : 'Canteen is Closed'}
+            </h3>
+            <p className="text-sm font-medium opacity-90">
+              You cannot place orders at this time.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Google Search Engine Schema.org ItemList JSON-LD */}
       <script
         type="application/ld+json"
@@ -580,7 +603,7 @@ export default function CustomerMenu({ onOpenCart }) {
               <span className="relative z-10 animate-pulse">Combo Deals</span>
               <span className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-black ${activeCategory === 'offers' ? 'bg-amber-200 text-amber-950' : 'bg-amber-100 text-amber-900'
                 }`}>
-                {offers.length}
+              {offers.length}
               </span>
             </button>
           )}
@@ -713,8 +736,9 @@ export default function CustomerMenu({ onOpenCart }) {
                           </div>
                         ) : (
                           <button
-                            onClick={(e) => { e.stopPropagation(); addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '', image_url: offer.image_url, has_packaging_charge: true, is_offer: true }); }}
-                            className="px-5 py-2 rounded-xl border border-emerald-300 text-emerald-800 bg-gradient-to-b from-emerald-50 to-emerald-200 hover:from-emerald-400 hover:to-emerald-600 hover:text-white hover:border-emerald-500 font-black text-xs sm:text-sm active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)] active:translate-y-0.5 transition-all shadow-[0_4px_6px_rgba(0,100,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.9)] cursor-pointer tracking-wider shrink-0"
+                            onClick={(e) => { e.stopPropagation(); if (isOutletOpen) addToCart({ id: offer.id, name: offer.name, price: Number(offer.price), emoji: offer.emoji || '', image_url: offer.image_url, has_packaging_charge: true, is_offer: true }); }}
+                            disabled={!isOutletOpen}
+                            className={`px-5 py-2 rounded-xl border text-xs sm:text-sm font-black transition-all cursor-pointer tracking-wider shrink-0 ${isOutletOpen ? 'border-emerald-300 text-emerald-800 bg-gradient-to-b from-emerald-50 to-emerald-200 hover:from-emerald-400 hover:to-emerald-600 hover:text-white hover:border-emerald-500 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)] active:translate-y-0.5 shadow-[0_4px_6px_rgba(0,100,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.9)]' : 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed'}`}
                           >
                             + ADD
                           </button>

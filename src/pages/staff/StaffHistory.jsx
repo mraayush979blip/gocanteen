@@ -132,7 +132,7 @@ export default function StaffHistory() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs">
         <div>
-          <h1 className="text-xl font-black text-slate-900">{staffT.orderHistory}</h1>
+          <h1 className="text-xl font-black text-slate-900">{staffT.orderHistory || 'Order History Log'}</h1>
           <p className="text-xs text-slate-500 font-medium">Full audit trail of completed and cancelled tickets with staff attribution</p>
         </div>
 
@@ -142,7 +142,7 @@ export default function StaffHistory() {
             className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
             title="Refresh History Log"
           >
-            <RefreshCw className="w-4 h-4 text-emerald-600" /> {staffT.refresh}
+            <RefreshCw className="w-4 h-4 text-emerald-600" /> {staffT.refresh || 'Refresh'}
           </button>
 
           {totalDiscountsGiven > 0 && (
@@ -153,7 +153,7 @@ export default function StaffHistory() {
           )}
 
           <div className="bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl text-right">
-            <span className="text-[11px] text-slate-500 block font-semibold">{staffT.revenue} ({timeScope === 'today' ? "Today" : "All Time"})</span>
+            <span className="text-[11px] text-slate-500 block font-semibold">{staffT.revenue || 'Revenue'} ({timeScope === 'today' ? "Today" : "All Time"})</span>
             <span className="text-lg font-black text-emerald-700">₹{totalCompletedRevenue}</span>
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function StaffHistory() {
               timeScope === 'today' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            {staffT.todayOnly}
+            {staffT.todayOnly || '📅 Today Only'}
           </button>
           <button
             onClick={() => setTimeScope('all')}
@@ -206,7 +206,7 @@ export default function StaffHistory() {
               timeScope === 'all' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            {staffT.allTime}
+            {staffT.allTime || '📋 All Time History'}
           </button>
         </div>
       </div>
@@ -342,7 +342,7 @@ export default function StaffHistory() {
                     <th className="p-3.5">Discount</th>
                     <th className="p-3.5">Payment</th>
                     <th className="p-3.5">Status</th>
-                    <th className="p-3.5">{staffT.processedBy}</th>
+                    <th className="p-3.5">{staffT.processedBy || 'Processed By'}</th>
                     <th className="p-3.5">Time</th>
                   </tr>
                 </thead>

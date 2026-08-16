@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 export default function StaffPOS() {
-  const { selectedOutlet, session, profile, showToast, triggerHaptic } = useAuth();
+  const { selectedOutlet, session, profile, showToast, triggerHaptic, staffT } = useAuth();
   const navigate = useNavigate();
   
   const [inventory, setInventory] = useState([]);
@@ -201,7 +201,7 @@ export default function StaffPOS() {
               💰
             </div>
             <div>
-              <h2 className="font-black text-slate-900 leading-tight">Point of Sale</h2>
+              <h2 className="font-black text-slate-900 leading-tight">{staffT.navbarPOS || 'Point of Sale'}</h2>
               <p className="text-xs text-slate-500 font-medium">Quick order entry</p>
             </div>
           </div>
@@ -209,7 +209,7 @@ export default function StaffPOS() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search items..."
+              placeholder={staffT.searchItems}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
@@ -227,7 +227,7 @@ export default function StaffPOS() {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            All Items
+            {staffT.allItems}
           </button>
           {categories.map(cat => (
             <button
@@ -249,7 +249,7 @@ export default function StaffPOS() {
           {loading ? (
             <div className="flex justify-center py-10"><span className="animate-spin text-2xl">⏳</span></div>
           ) : filteredItems.length === 0 ? (
-            <div className="text-center py-10 text-slate-500 text-sm font-medium">No items found.</div>
+            <div className="text-center py-10 text-slate-500 text-sm font-medium">{staffT.noItemsFound}</div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {filteredItems.map(item => (
@@ -300,7 +300,7 @@ export default function StaffPOS() {
         >
           <div className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5" />
-            <span>{cart.reduce((s,i) => s + i.qty, 0)} Items</span>
+            <span>{cart.reduce((s,i) => s + i.qty, 0)} {staffT.itemsInCart ? staffT.itemsInCart.split(' ')[0] : 'Items'}</span>
           </div>
           <span>View Cart (₹{subtotal})</span>
         </button>
@@ -317,9 +317,9 @@ export default function StaffPOS() {
         <div className="p-4 border-b border-slate-100 bg-slate-900 text-white flex justify-between items-center shrink-0">
           <div>
             <h2 className="font-black text-lg flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5" /> Current Order
+              <ShoppingCart className="w-5 h-5" /> {staffT.currentOrder}
             </h2>
-            <p className="text-xs text-slate-400 font-medium">{cart.reduce((sum, i) => sum + i.qty, 0)} items in cart</p>
+            <p className="text-xs text-slate-400 font-medium">{cart.reduce((sum, i) => sum + i.qty, 0)} {staffT.itemsInCart}</p>
           </div>
           <button 
             className="lg:hidden p-2 bg-slate-800 rounded-full text-white active:scale-90 transition-transform" 
@@ -333,7 +333,7 @@ export default function StaffPOS() {
           {cart.length === 0 ? (
             <div className="text-center py-10 text-slate-400 text-sm flex flex-col items-center">
               <Receipt className="w-10 h-10 mb-2 opacity-50" />
-              Cart is empty.<br/>Tap items to add.
+              {staffT.cartEmpty}
             </div>
           ) : (
             cart.map(item => (
@@ -365,7 +365,7 @@ export default function StaffPOS() {
 
         <div className="p-4 border-t border-slate-100 bg-white">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-slate-500 font-bold">Total Amount</span>
+            <span className="text-slate-500 font-bold">{staffT.totalAmount}</span>
             <span className="text-2xl font-black text-slate-900">₹{subtotal}</span>
           </div>
           <button
@@ -373,7 +373,7 @@ export default function StaffPOS() {
             disabled={cart.length === 0}
             className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl font-black shadow-md active:scale-95 transition-all text-lg flex items-center justify-center gap-2"
           >
-            Checkout Order <ChevronRight className="w-5 h-5" />
+            {staffT.checkoutOrder} <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -385,8 +385,8 @@ export default function StaffPOS() {
           <div className="relative bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
               <div>
-                <h3 className="font-black text-xl text-slate-900">Confirm Order</h3>
-                <p className="text-xs text-slate-500 font-medium">₹{subtotal} • {cart.length} items</p>
+                <h3 className="font-black text-xl text-slate-900">{staffT.confirmOrder}</h3>
+                <p className="text-xs text-slate-500 font-medium">₹{subtotal} • {cart.length} {staffT.itemsInCart ? staffT.itemsInCart.split(' ')[0] : 'items'}</p>
               </div>
               <button 
                 onClick={() => setIsCheckoutModalOpen(false)}
@@ -400,7 +400,7 @@ export default function StaffPOS() {
               
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
-                  <User className="w-3.5 h-3.5" /> Customer Name (Optional)
+                  <User className="w-3.5 h-3.5" /> {staffT.customerNameOpt}
                 </label>
                 <input
                   type="text"
@@ -413,7 +413,7 @@ export default function StaffPOS() {
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
-                  <Banknote className="w-3.5 h-3.5" /> Payment Method
+                  <Banknote className="w-3.5 h-3.5" /> {staffT.paymentMethod}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -423,7 +423,7 @@ export default function StaffPOS() {
                       paymentMethod === 'cash' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
                     }`}
                   >
-                    <Banknote className="w-4 h-4" /> Cash
+                    <Banknote className="w-4 h-4" /> {staffT.cash}
                   </button>
                   <button
                     type="button"
@@ -432,14 +432,14 @@ export default function StaffPOS() {
                       paymentMethod === 'upi' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
                     }`}
                   >
-                    <CreditCard className="w-4 h-4" /> UPI / QR
+                    <CreditCard className="w-4 h-4" /> {staffT.upi}
                   </button>
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Payment Status
+                  <CheckCircle2 className="w-3.5 h-3.5" /> {staffT.paymentStatus}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -449,7 +449,7 @@ export default function StaffPOS() {
                       paymentStatus === 'paid' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
                     }`}
                   >
-                    ✅ Received Paid
+                    ✅ {staffT.receivedPaid}
                   </button>
                   <button
                     type="button"
@@ -458,7 +458,7 @@ export default function StaffPOS() {
                       paymentStatus === 'unpaid' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
                     }`}
                   >
-                    ⏳ Unpaid / Later
+                    ⏳ {staffT.unpaidLater}
                   </button>
                 </div>
               </div>
@@ -471,7 +471,7 @@ export default function StaffPOS() {
                 {isSubmitting ? (
                   <span className="animate-spin text-xl">⏳</span>
                 ) : (
-                  <>Create Order (₹{subtotal})</>
+                  <>{staffT.createOrder} (₹{subtotal})</>
                 )}
               </button>
             </form>
