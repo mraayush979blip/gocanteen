@@ -23,16 +23,14 @@ export default function ErrorFallback({ error, resetError }) {
             We are deeply sorry, but an unexpected error occurred. Our engineering team has been automatically notified and is looking into it.
           </p>
 
-          <div className="bg-slate-50 w-full p-4 rounded-2xl border border-slate-100 mb-8 text-left">
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider block mb-1">Error Details</span>
-            <p className="text-xs text-rose-600 font-mono break-words line-clamp-3">
-              {error?.message || "Unknown Application Error"}
-            </p>
-          </div>
+          {/* Error Details Removed for cleaner customer experience */}
 
           <div className="flex w-full gap-3 flex-col sm:flex-row">
             <button
-              onClick={() => window.location.href = '/#/menu'}
+              onClick={() => {
+                window.location.replace('/#/menu');
+                window.location.reload();
+              }}
               className="flex-1 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-sm py-4 rounded-xl transition-all flex items-center justify-center gap-2"
             >
               <Home className="w-4 h-4" />
