@@ -4,7 +4,21 @@ import { HashRouter } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
+import * as Sentry from '@sentry/react';
+import ErrorFallback from './components/ErrorFallback';
 import './index.css';
+
+// Initialize Sentry
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN || '',
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration(),
+  ],
+  tracesSampleRate: 1.0, 
+  replaysSessionSampleRate: 0.1, 
+  replaysOnErrorSampleRate: 1.0, 
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,10 +73,12 @@ window.addEventListener('hashchange', updateManifest);
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <HashRouter>
-        <App />
-        <Analytics />
-      </HashRouter>
+      <Sentry.ErrorBoundary fallback={({ error, resetError }) => <ErrorFallback error={error} resetError={resetError} />}>
+        <HashRouter>
+          <App />
+          <Analytics />
+        </HashRouter>
+      </Sentry.ErrorBoundary>
     </QueryClientProvider>
   </React.StrictMode>
 );
