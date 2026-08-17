@@ -44,10 +44,6 @@ import PwaInstallPrompt from './components/PwaInstallPrompt';
 import OutletSelectionModal from './components/OutletSelectionModal';
 import { AdminProvider } from './context/AdminContext';
 
-const CrashPreview = () => {
-  throw new Error("This is a deliberate test crash to preview the Sentry Error Boundary.");
-};
-
 function StaffLayout({ activeSubView, onOpenAuth }) {
 
   const navigate = useNavigate();
@@ -286,9 +282,6 @@ function MainContent() {
           <Route path="/staff/developer" element={<AboutDeveloper />} />
           <Route path="/admin/developer" element={<AboutDeveloper />} />
           <Route path="/about-developer" element={<Navigate to="/customer/developer" replace />} />
-
-          {/* Test Crash Route */}
-          <Route path="/crash" element={<CrashPreview />} />
 
           {/* Hidden login triggers */}
           <Route path="/ad" element={<AdminStaffLogin />} />
