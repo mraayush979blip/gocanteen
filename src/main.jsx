@@ -2,7 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import App from './App';
 import * as Sentry from '@sentry/react';
 import ErrorFallback from './components/ErrorFallback';
@@ -24,10 +26,15 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes cache
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours garbage collection to ensure it persists
       refetchOnWindowFocus: true,
       retry: 1,
     },
   },
+});
+
+const persister = createSyncStoragePersister({
+  storage: window.localStorage,
 });
 
 // PWA and Service Worker registration
@@ -72,13 +79,13 @@ window.addEventListener('hashchange', updateManifest);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <Sentry.ErrorBoundary fallback={({ error, resetError }) => <ErrorFallback error={error} resetError={resetError} />}>
         <HashRouter>
           <App />
           <Analytics />
         </HashRouter>
       </Sentry.ErrorBoundary>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </React.StrictMode>
 );

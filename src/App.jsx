@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -7,31 +7,29 @@ import FloatingCouponBanner from './components/FloatingCouponBanner';
 import Toast from './components/Toast';
 import AuthModal from './pages/AuthModal';
 import PortalGuard from './components/PortalGuard';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
 import NotificationPrompt from './components/NotificationPrompt';
 
-// Customer Pages
-import CustomerMenu from './pages/customer/CustomerMenu';
-import CustomerCart from './pages/customer/CustomerCart';
-import CustomerOrders from './pages/customer/CustomerOrders';
-import CustomerProfile from './pages/customer/CustomerProfile';
+// Lazy loaded pages to reduce initial bundle size for slow networks
+const CustomerMenu = lazy(() => import('./pages/customer/CustomerMenu'));
+const CustomerCart = lazy(() => import('./pages/customer/CustomerCart'));
+const CustomerOrders = lazy(() => import('./pages/customer/CustomerOrders'));
+const CustomerProfile = lazy(() => import('./pages/customer/CustomerProfile'));
 
-// Staff Pages
-import KitchenQueue from './pages/staff/KitchenQueue';
-import StaffHistory from './pages/staff/StaffHistory';
-import QuickStock from './pages/staff/QuickStock';
-import StaffPOS from './pages/staff/StaffPOS';
+const KitchenQueue = lazy(() => import('./pages/staff/KitchenQueue'));
+const StaffHistory = lazy(() => import('./pages/staff/StaffHistory'));
+const QuickStock = lazy(() => import('./pages/staff/QuickStock'));
+const StaffPOS = lazy(() => import('./pages/staff/StaffPOS'));
 
-// Admin Pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminInventory from './pages/admin/AdminInventory';
-import AdminCategories from './pages/admin/AdminCategories';
-import AdminOffers from './pages/admin/AdminOffers';
-import AdminPromoCodes from './pages/admin/AdminPromoCodes';
-import AdminStaff from './pages/admin/AdminStaff';
-import AdminOrders from './pages/admin/AdminOrders';
-import AdminOutlets from './pages/admin/AdminOutlets';
-import AdminStorage from './pages/admin/AdminStorage';
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminInventory = lazy(() => import('./pages/admin/AdminInventory'));
+const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'));
+const AdminOffers = lazy(() => import('./pages/admin/AdminOffers'));
+const AdminPromoCodes = lazy(() => import('./pages/admin/AdminPromoCodes'));
+const AdminStaff = lazy(() => import('./pages/admin/AdminStaff'));
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
+const AdminOutlets = lazy(() => import('./pages/admin/AdminOutlets'));
+const AdminStorage = lazy(() => import('./pages/admin/AdminStorage'));
 
 import Footer from './components/Footer';
 import PolicyPage from './components/PolicyPage';
@@ -228,8 +226,14 @@ function MainContent() {
             transition={{ type: "spring", stiffness: 280, damping: 25, mass: 1 }}
             className="w-full h-full"
           >
-            <Routes location={location}>
-              {/* Default Redirect from Plain Root / */}
+            <Suspense fallback={
+              <div className="h-[60vh] w-full flex flex-col items-center justify-center gap-4">
+                <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+                <p className="text-slate-500 font-medium animate-pulse">Loading experience...</p>
+              </div>
+            }>
+              <Routes location={location}>
+                {/* Default Redirect from Plain Root / */}
           <Route path="/" element={<Navigate to="/menu" replace />} />
 
           {/* Customer Routes protected strictly for customers */}
@@ -289,6 +293,7 @@ function MainContent() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/menu" replace />} />
         </Routes>
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </main>

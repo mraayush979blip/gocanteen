@@ -43,6 +43,10 @@ export default function PortalGuard({ requiredRole, children, onOpenAuth }) {
     if (userRole === 'admin') {
       return <Navigate to="/admin/dashboard" replace />;
     }
+    // If they are not admin/staff but trying to access those routes, send them to login
+    if (requiredRole === 'admin' || requiredRole === 'staff') {
+      return <Navigate to="/ad" replace />;
+    }
     return <Navigate to="/menu" replace />;
   }
 
