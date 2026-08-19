@@ -5,12 +5,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { MenuGridSkeleton } from '../../components/SkeletonLoader';
-
-import {
-  Search, Flame, Plus, Minus, Loader2, ShoppingCart,
-  ArrowRight, Sparkles, Filter, Check, LayoutGrid, List,
-  Clock, ShieldCheck, Zap, UtensilsCrossed, Award, ChevronRight, ChevronUp, ChevronLeft, X
-} from 'lucide-react';
+import { ShoppingBag, ChevronRight, Search, Clock, Zap, Star, ShieldCheck, Flame, Leaf, ArrowRight, Navigation, Sparkles, Receipt, BellRing, Utensils, X, Info } from 'lucide-react';
+import { optimizeImage } from '../../lib/imageOptimizer';
 
 export default function CustomerMenu({ onOpenCart }) {
   const { cart, addToCart, updateCartQty, triggerHaptic, session, selectedOutlet, outlets } = useAuth();
@@ -675,7 +671,7 @@ export default function CustomerMenu({ onOpenCart }) {
                     <div className={`shrink-0 w-24 sm:w-36 aspect-square rounded-[1rem] sm:rounded-xl bg-slate-100 flex flex-col items-center justify-center relative shadow-sm gap-2 overflow-hidden`}>
                       
                       {offer.image_url ? (
-                        <img src={offer.image_url} alt={offer.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
+                        <img src={optimizeImage(offer.image_url)} alt={offer.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                       ) : (
                         <div className="relative z-10 flex items-center gap-1.5 font-bold text-slate-500">
                           <span className="text-4xl drop-shadow-md group-hover:scale-110 transition-transform duration-300">{parts[0]}</span>
@@ -775,7 +771,7 @@ export default function CustomerMenu({ onOpenCart }) {
                         <div key={`recent-${item.id}`} className="snap-start shrink-0 w-40 bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between shadow-xs relative overflow-hidden">
                           <div className="flex items-center gap-2 mb-2">
                             {item.image_url ? (
-                              <img src={item.image_url} alt={item.name} className="w-10 h-10 rounded-xl object-cover shrink-0 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
+                              <img src={optimizeImage(item.image_url)} alt={item.name} className="w-10 h-10 rounded-xl object-cover shrink-0 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                             ) : (
                               <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0">{item.emoji || ''}</div>
                             )}
@@ -833,7 +829,7 @@ export default function CustomerMenu({ onOpenCart }) {
                                 <div className="aspect-square w-full rounded-xl border border-white/80 flex items-center justify-center relative overflow-hidden group-hover:shadow-inner bg-slate-100">
                                   
                                   {item.image_url ? (
-                                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
+                                    <img src={optimizeImage(item.image_url)} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                                   ) : (
                                     <span className="relative z-10 text-5xl group-hover:scale-110 transition-transform duration-300 drop-shadow-md">{item.emoji || ''}</span>
                                   )}
@@ -929,7 +925,7 @@ export default function CustomerMenu({ onOpenCart }) {
                             <div className="space-y-2">
                               <div className="aspect-square w-full rounded-xl bg-slate-100 flex items-center justify-center relative overflow-hidden">
                                 {item.image_url ? (
-                                  <img src={item.image_url} alt={item.name} className="w-full h-full object-cover rounded-xl opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
+                                  <img src={optimizeImage(item.image_url)} alt={item.name} className="w-full h-full object-cover rounded-xl opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                                 ) : (
                                   <span className="relative z-10 text-6xl drop-shadow-xl">{item.emoji || ''}</span>
                                 )}
@@ -1007,7 +1003,7 @@ export default function CustomerMenu({ onOpenCart }) {
                             <div className="w-16 h-16 rounded-xl border border-white/40 flex items-center justify-center text-3xl shrink-0 shadow-inner bg-slate-100 relative overflow-hidden">
                               
                               {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
+                                <img src={optimizeImage(item.image_url)} alt={item.name} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                               ) : (
                                 <span className="relative z-10 drop-shadow-md text-4xl">{item.emoji || ''}</span>
                               )}
@@ -1054,7 +1050,7 @@ export default function CustomerMenu({ onOpenCart }) {
                             <div className="w-full aspect-square shrink-0 rounded-xl bg-slate-100 flex items-center justify-center relative overflow-hidden mb-3">
                               
                               {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
+                                <img src={optimizeImage(item.image_url)} alt={item.name} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => e.target.classList.remove('opacity-0')} loading="lazy" decoding="async" />
                               ) : (
                                 <motion.span animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="relative z-10 text-6xl sm:text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-2xl">{item.emoji || ''}</motion.span>
                               )}
@@ -1374,7 +1370,7 @@ export default function CustomerMenu({ onOpenCart }) {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                        src={item.image_url} 
+                        src={optimizeImage(item.image_url, 800, 90)} 
                         alt={item.name}
                         className="w-40 h-40 sm:w-48 sm:h-48 rounded-[32px] object-cover shadow-2xl relative z-10 border-4 border-white/80"
                       />

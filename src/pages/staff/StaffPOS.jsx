@@ -6,6 +6,7 @@ import {
   Search, Plus, Minus, ShoppingCart, CheckCircle2, 
   Banknote, CreditCard, User, AlertCircle, X, ChevronRight, Hash, Receipt
 } from 'lucide-react';
+import { optimizeImage } from '../../lib/imageOptimizer';
 
 export default function StaffPOS() {
   const { selectedOutlet, session, profile, showToast, triggerHaptic, staffT } = useAuth();
@@ -341,7 +342,7 @@ export default function StaffPOS() {
                 <div className="flex-1 min-w-0 pr-2">
                   <div className="font-bold text-slate-900 text-sm truncate flex items-center gap-1.5">
                     {item.image_url ? (
-                      <img src={item.image_url} alt="" className="w-4 h-4 rounded-full object-cover shrink-0" />
+                      <img src={optimizeImage(item.image_url, 50, 60)} alt="" className="w-4 h-4 rounded-full object-cover shrink-0" />
                     ) : (
                       <span>{item.emoji}</span>
                     )}

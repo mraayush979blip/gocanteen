@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   X, Trash2, Plus, Minus, Ticket, Smartphone, DollarSign, ArrowRight, Loader2, Sparkles, CheckCircle2, LogIn, KeyRound, CreditCard, ShieldCheck, Save, Bookmark, Info, Calendar, ChevronRight, AlertCircle, Copy, Tag, Check, Gift, Clock, BellRing, Mail, ShoppingCart
 } from 'lucide-react';
+import { optimizeImage } from '../../lib/imageOptimizer';
 
 export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlaced }) {
   const { cart, updateCartQty, removeFromCart, clearCart, setCart, session, profile, fetchProfile, showToast, appliedPromo, setAppliedPromo, selectedOutlet, outlets, refreshGlobalOutlets } = useAuth();
@@ -1038,7 +1039,7 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
                     <div key={item.id} className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
                         {item.image_url ? (
-                          <img src={item.image_url} alt={item.name} className="w-10 h-10 object-cover rounded-md" loading="lazy" />
+                          <img src={optimizeImage(item.image_url, 150, 70)} alt={item.name} className="w-10 h-10 object-cover rounded-md" loading="lazy" />
                         ) : (
                           <span className="text-2xl">{item.emoji || '🍽️'}</span>
                         )}
