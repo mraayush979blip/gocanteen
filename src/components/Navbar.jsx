@@ -156,7 +156,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+      <header className="fixed w-full top-0 left-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-18">
             
@@ -268,6 +268,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
           </div>
         </div>
       </header>
+      <div className="h-16 sm:h-18 w-full shrink-0"></div>
 
       {/* Mobile Side Drawer (Navigation) */}
       {/* Backdrop overlay to close menu on outside click */}
