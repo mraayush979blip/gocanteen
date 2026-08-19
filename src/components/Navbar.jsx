@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   UtensilsCrossed, LogOut, LogIn, ShoppingCart, UserCheck, Menu as MenuIcon, X, KeyRound, Shield, Globe, Maximize, Minimize, Bug, Lightbulb, Code, Sparkles, Instagram, ArrowLeft, ChevronRight, ArrowDownToLine, MapPin,
   Package, Banknote, ChefHat, Bell, ScrollText, TrendingUp, Receipt, PackageOpen, FolderOpen, Pizza, Ticket, Megaphone, Store, Users, Cloud
@@ -38,17 +38,6 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
   const { session, profile, userRole, activePortal, setActivePortal, cart, logout, showToast, staffLanguage, setStaffLanguage, staffT, selectedOutlet, outlets, refreshGlobalOutlets } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
-  const [hidden, setHidden] = useState(false);
-  const { scrollY } = useScroll();
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious();
-    if (latest > previous && latest > 150) {
-      setHidden(true);
-    } else {
-      setHidden(false);
-    }
-  });
 
   const currentOutlet = outlets?.find(o => o.id === selectedOutlet);
   const currentOutletName = currentOutlet?.name || 'Select Canteen';
@@ -167,12 +156,7 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
 
   return (
     <>
-      <motion.header 
-        variants={{ visible: { y: 0 }, hidden: { y: "-100%" } }}
-        animate={hidden ? "hidden" : "visible"}
-        transition={{ duration: 0.35, ease: "easeInOut" }}
-        className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs"
-      >
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-18">
             
@@ -283,10 +267,9 @@ export default function Navbar({ onOpenAuth, onOpenCart, onOpenReportBug, onOpen
 
           </div>
         </div>
+      </header>
 
-      </motion.header>
-
-      {/* Mobile / Side Drawer Menu */}
+      {/* Mobile Side Drawer (Navigation) */}
       {/* Backdrop overlay to close menu on outside click */}
       <AnimatePresence>
         {mobileMenuOpen && (
