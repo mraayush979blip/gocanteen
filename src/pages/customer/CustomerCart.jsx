@@ -644,6 +644,11 @@ export default function CustomerCart({ isOpen, onClose, onOpenAuth, onOrderPlace
       return;
     }
 
+    if (!targetOutletId) {
+      showToast('⚠️ Please select a canteen outlet before placing an order!', true);
+      return;
+    }
+
     // Force login before placing order
     if (!session?.user) {
       showToast('🔑 Please sign in to place your order!', true);

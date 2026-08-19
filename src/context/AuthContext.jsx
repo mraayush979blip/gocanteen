@@ -29,6 +29,11 @@ export const AuthProvider = ({ children }) => {
   });
 
   const setSelectedOutlet = (outletId) => {
+    if (outletId !== selectedOutletState) {
+      setCart([]);
+      setAppliedPromo(null);
+      localStorage.removeItem('cg-unified-cart');
+    }
     localStorage.setItem('cg-customer-outlet', outletId);
     setSelectedOutletState(outletId);
   };
