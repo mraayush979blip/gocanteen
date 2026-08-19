@@ -5,7 +5,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { MenuGridSkeleton } from '../../components/SkeletonLoader';
-import { ShoppingBag, ChevronRight, Search, Clock, Zap, Star, ShieldCheck, Flame, Leaf, ArrowRight, Navigation, Sparkles, Receipt, BellRing, Utensils, X, Info } from 'lucide-react';
+import {
+  Search, Flame, Plus, Minus, Loader2, ShoppingCart,
+  ArrowRight, Sparkles, Filter, Check, LayoutGrid, List,
+  Clock, ShieldCheck, Zap, UtensilsCrossed, Award, ChevronRight, ChevronUp, ChevronLeft, X
+} from 'lucide-react';
 import { optimizeImage } from '../../lib/imageOptimizer';
 
 export default function CustomerMenu({ onOpenCart }) {
