@@ -23,6 +23,9 @@ export default function StaffHistory() {
           .single();
           
         if (data && !error) {
+           if (profile?.assigned_outlet_id && data.outlet_id !== profile.assigned_outlet_id) {
+             return; // Ignore orders from other canteens
+           }
            setHistoryOrders(prev => {
              if (prev.find(o => o.id === data.id)) {
                return prev.map(o => o.id === data.id ? data : o);
@@ -37,9 +40,14 @@ export default function StaffHistory() {
   useEffect(() => {
     fetchHistory();
 
+    const orderChangesConfig = { event: '*', schema: 'public', table: 'orders' };
+    if (profile?.assigned_outlet_id) {
+      orderChangesConfig.filter = `outlet_id=eq.${profile.assigned_outlet_id}`;
+    }
+
     const channel = supabase
       .channel('staff-history-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+      .on('postgres_changes', orderChangesConfig, (payload) => {
         if (payload.eventType === 'UPDATE') {
           setHistoryOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o));
         } else if (payload.eventType === 'INSERT') {

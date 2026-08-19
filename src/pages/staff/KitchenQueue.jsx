@@ -62,6 +62,9 @@ export default function KitchenQueue() {
           .single();
           
         if (data && !error) {
+           if (profile?.assigned_outlet_id && data.outlet_id !== profile.assigned_outlet_id) {
+             return; // Ignore orders from other canteens
+           }
            setOrders(prev => {
              // Avoid duplicate additions
              if (prev.find(o => o.id === data.id)) {
@@ -78,9 +81,14 @@ export default function KitchenQueue() {
   useEffect(() => {
     fetchOrders();
 
+    const orderChangesConfig = { event: '*', schema: 'public', table: 'orders' };
+    if (profile?.assigned_outlet_id) {
+      orderChangesConfig.filter = `outlet_id=eq.${profile.assigned_outlet_id}`;
+    }
+
     const channel = supabase
       .channel('staff-kitchen-queue')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+      .on('postgres_changes', orderChangesConfig, (payload) => {
         if (payload.eventType === 'UPDATE') {
           setOrders(prev => {
             const isCompletedOrCancelled = ['completed', 'cancelled'].includes(payload.new.status);
