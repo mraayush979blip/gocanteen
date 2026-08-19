@@ -10,26 +10,48 @@ import PortalGuard from './components/PortalGuard';
 import { AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
 import NotificationPrompt from './components/NotificationPrompt';
 
+// Custom lazy wrapper to handle chunk loading errors after new deployments
+const lazyRetry = (componentImport) =>
+  lazy(async () => {
+    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
+      window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+
+    try {
+      const component = await componentImport();
+      window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+      return component;
+    } catch (error) {
+      if (!pageHasAlreadyBeenForceRefreshed) {
+        // Assume that the error was caused by out-of-date chunk maps
+        window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+        window.location.reload();
+        return new Promise(() => {}); // Wait for reload
+      }
+      throw error; // If it still fails after reload, throw to ErrorBoundary
+    }
+  });
+
 // Lazy loaded pages to reduce initial bundle size for slow networks
-const CustomerMenu = lazy(() => import('./pages/customer/CustomerMenu'));
-const CustomerCart = lazy(() => import('./pages/customer/CustomerCart'));
-const CustomerOrders = lazy(() => import('./pages/customer/CustomerOrders'));
-const CustomerProfile = lazy(() => import('./pages/customer/CustomerProfile'));
+const CustomerMenu = lazyRetry(() => import('./pages/customer/CustomerMenu'));
+const CustomerCart = lazyRetry(() => import('./pages/customer/CustomerCart'));
+const CustomerOrders = lazyRetry(() => import('./pages/customer/CustomerOrders'));
+const CustomerProfile = lazyRetry(() => import('./pages/customer/CustomerProfile'));
 
-const KitchenQueue = lazy(() => import('./pages/staff/KitchenQueue'));
-const StaffHistory = lazy(() => import('./pages/staff/StaffHistory'));
-const QuickStock = lazy(() => import('./pages/staff/QuickStock'));
-const StaffPOS = lazy(() => import('./pages/staff/StaffPOS'));
+const KitchenQueue = lazyRetry(() => import('./pages/staff/KitchenQueue'));
+const StaffHistory = lazyRetry(() => import('./pages/staff/StaffHistory'));
+const QuickStock = lazyRetry(() => import('./pages/staff/QuickStock'));
+const StaffPOS = lazyRetry(() => import('./pages/staff/StaffPOS'));
 
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const AdminInventory = lazy(() => import('./pages/admin/AdminInventory'));
-const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'));
-const AdminOffers = lazy(() => import('./pages/admin/AdminOffers'));
-const AdminPromoCodes = lazy(() => import('./pages/admin/AdminPromoCodes'));
-const AdminStaff = lazy(() => import('./pages/admin/AdminStaff'));
-const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
-const AdminOutlets = lazy(() => import('./pages/admin/AdminOutlets'));
-const AdminStorage = lazy(() => import('./pages/admin/AdminStorage'));
+const AdminDashboard = lazyRetry(() => import('./pages/admin/AdminDashboard'));
+const AdminInventory = lazyRetry(() => import('./pages/admin/AdminInventory'));
+const AdminCategories = lazyRetry(() => import('./pages/admin/AdminCategories'));
+const AdminOffers = lazyRetry(() => import('./pages/admin/AdminOffers'));
+const AdminPromoCodes = lazyRetry(() => import('./pages/admin/AdminPromoCodes'));
+const AdminStaff = lazyRetry(() => import('./pages/admin/AdminStaff'));
+const AdminOrders = lazyRetry(() => import('./pages/admin/AdminOrders'));
+const AdminOutlets = lazyRetry(() => import('./pages/admin/AdminOutlets'));
+const AdminStorage = lazyRetry(() => import('./pages/admin/AdminStorage'));
 
 import Footer from './components/Footer';
 import PolicyPage from './components/PolicyPage';
